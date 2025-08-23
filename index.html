@@ -506,7 +506,6 @@
                 width: 200px;
             }
         }
-
         /* Tag line style */
         .tagline {
             color: #C0C0C0;
@@ -514,9 +513,33 @@
             font-weight: 300;
             margin-bottom: 1rem;
             font-style: italic;
+             }
+
+        @media (max-width: 480px) {
+            .logo-image {
+                margin-left: 0;
+                margin-bottom: 1rem;
+                margin-top: 0;
+                max-width: 80%;
+                height: auto;
+                align-self: center;
+            }
+
+            .logo-container {
+                align-items: center !important;
+            }
+
+            .headshot-container {
+                transform: none !important;
+                margin: 0 auto;
+            }
+
+            .headshot-container:hover {
+                transform: none;
+            }
         }
     </style>
-</head>
+  </head>
 <body>
     <div class="floating-elements">
         <div class="floating-element" style="left: 10%; animation-delay: 0s;"></div>
