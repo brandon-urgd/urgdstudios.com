@@ -518,8 +518,8 @@
         @media (max-width: 480px) {
             .logo-image {
                 margin-left: 0;
-                margin-bottom: 1rem;
-                margin-top: 0;
+                margin-bottom: 0;
+                margin-top: 1rem;
                 max-width: 80%;
                 height: auto;
                 align-self: center;
@@ -532,10 +532,18 @@
             .headshot-container {
                 transform: none !important;
                 margin: 0 auto;
+                width: 220px;
+                height: auto;
+                padding: 16px;
             }
 
             .headshot-container:hover {
                 transform: none;
+            }
+
+            .headshot {
+                height: auto;
+                max-height: 300px;
             }
         }
     </style>
