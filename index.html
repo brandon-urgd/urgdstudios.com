@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            background: #000000;
             color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
@@ -44,24 +44,24 @@
 
         .headshot-container {
             position: relative;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ffd700, #ff8c42, #4ecdc4, #45b7d1, #ffb347);
-            padding: 4px;
-            animation: rotate 20s linear infinite;
+            width: 280px;
+            height: 350px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: rotate(-2deg);
+            transition: transform 0.3s ease;
         }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .headshot-container:hover {
+            transform: rotate(0deg) scale(1.05);
         }
 
         .headshot {
             width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #2a2a2a;
+            height: 280px;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -69,13 +69,23 @@
             color: #888;
             position: relative;
             overflow: hidden;
+            border-radius: 8px;
         }
 
         .headshot img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 50%;
+            border-radius: 8px;
+        }
+
+        .polaroid-caption {
+            margin-top: 15px;
+            text-align: center;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: 400;
         }
 
         .content-section {
@@ -85,12 +95,13 @@
         .logo {
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background: linear-gradient(45deg, #0080FF, #8000FF, #FFFF00, #00FF80, #FF0080);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1rem;
             letter-spacing: -0.02em;
+            text-shadow: 0 0 30px rgba(0, 128, 255, 0.5);
         }
 
         .brief-note {
@@ -106,7 +117,7 @@
         .brief-note h2 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            color: #4ecdc4;
+            color: #00FF80;
         }
 
         .brief-note p {
@@ -470,7 +481,9 @@
                 <div class="headshot-section">
                     <div class="headshot-container">
                         <div class="headshot">
-                            <img src="headshot.jpg" alt="Brandon Hill-Rogers">                      
+                            📸
+                            <!-- Replace the emoji with your actual headshot: -->
+                            <!-- <img src="your-headshot.jpg" alt="Your Name"> -->
                         </div>
                     </div>
                 </div>
