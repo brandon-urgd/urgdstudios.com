@@ -36,7 +36,7 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           INVALIDATION_ID=$(aws cloudfront create-invalidation \
-            --distribution-id D2SY19WAJQR2EX \
+            --distribution-id E7TMQTQJURH86 \
             --paths "/*" \
             --query 'Invalidation.Id' \
             --output text)
@@ -45,7 +45,7 @@ jobs:
           
           # Optional: Wait for invalidation to complete (can take 10-15 minutes)
           # aws cloudfront wait invalidation-completed \
-          #   --distribution-id D2SY19WAJQR2EX \
+          #   --distribution-id E7TMQTQJURH86 \
           #   --id $INVALIDATION_ID
           
           echo "Deployment completed successfully!"
