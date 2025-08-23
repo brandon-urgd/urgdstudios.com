@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ur/gd studios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 4rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .headshot-section {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .headshot-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ff8c42, #4ecdc4, #45b7d1, #ffb347);
+            padding: 4px;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .headshot {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #888;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .headshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .content-section {
+            space-y: 2rem;
+        }
+
+        .logo {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .brief-note {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .brief-note h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+        }
+
+        .brief-note p {
+            line-height: 1.6;
+            color: #e0e0e0;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            text-decoration: none;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .headshot-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headshot-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            .brief-note {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Page System Styles */
+        .page {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: flex;
+            align-items: center;
+        }
+
+        .page-content {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-nav {
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-5px);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .coming-soon-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 3rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .coming-soon-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .coming-soon-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+        }
+
+        .coming-soon-container p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        .feature-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-content {
+                padding: 1rem;
+            }
+
+            .coming-soon-container {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Error Page Styles */
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .error-code {
+            font-size: clamp(6rem, 15vw, 12rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 0.8;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        .error-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .error-btn {
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-family: inherit;
+        }
+
+        .error-btn.primary {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            color: #ffffff;
+        }
+
+        .error-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .error-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .error-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .error-btn {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="floating-element" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="floating-element" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="floating-element" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="floating-element" style="left: 60%; animation-delay: 10s;"></div>
+        <div class="floating-element" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="floating-element" style="left: 80%; animation-delay: 14s;"></div>
+        <div class="floating-element" style="left: 90%; animation-delay: 16s;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="main-content">
+                <div class="headshot-section">
+                    <div class="headshot-container">
+                        <div class="headshot">
+                            📸
+                            <!-- Replace the emoji with your actual headshot: -->
+                            <!-- <img src="your-headshot.jpg" alt="Your Name"> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h1 class="logo">ur/gd studios</h1>
+                    
+                    <div class="brief-note">
+                        <h2>Hey there! 👋</h2>
+                        <p>Welcome to the temporary home of ur/gd studios. We're currently crafting something amazing behind the scenes. This space serves as our digital placeholder while we build our main experience. Thanks for stopping by – exciting things are coming soon!</p>
+                    </div>
+
+                    <div class="nav-links">
+                        <button onclick="showPage('contact')" class="nav-link">Contact Us</button>
+                        <button onclick="showPage('privacy')" class="nav-link">Privacy Policy</button>
+                        <button onclick="showPage('terms')" class="nav-link">Terms of Use</button>
+                        <button onclick="showPage('readme')" class="nav-link">README</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div class="page" id="contact">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="page-header">
+                    <h1 class="page-title">Contact Us</h1>
+                </div>
+
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">📬</div>
+                    <h2>Coming Soon</h2>
+                    <p>We're building an awesome contact form that will connect to our API Gateway → Lambda → DynamoDB → SNS notification system. Stay tuned!</p>
+                    
+                    <div class="feature-preview">
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <span>Real-time form validation</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔒</span>
+                            <span>Secure API integration</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📱</span>
+                            <span>Instant notifications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Page -->
+        <div class="page" id="privacy">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="page-header">
+                    <h1 class="page-title">Privacy Policy</h1>
+                </div>
+
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">🔐</div>
+                    <h2>Coming Soon</h2>
+                    <p>We're crafting a comprehensive privacy policy that puts your data protection first. Transparency and trust are at the core of everything we do.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms of Use Page -->
+        <div class="page" id="terms">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="page-header">
+                    <h1 class="page-title">Terms of Use</h1>
+                </div>
+
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">📋</div>
+                    <h2>Coming Soon</h2>
+                    <p>Clear, fair terms that protect both you and ur/gd studios. We believe in straightforward agreements that everyone can understand.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- README Page -->
+        <div class="page" id="readme">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="page-header">
+                    <h1 class="page-title">README</h1>
+                </div>
+
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">📚</div>
+                    <h2>Coming Soon</h2>
+                    <p>Documentation, guides, and everything you need to know about working with ur/gd studios. Knowledge sharing is what drives innovation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 404 Error Page -->
+        <div class="page" id="404">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="error-container">
+                    <div class="error-code">404</div>
+                    <div class="error-icon">🌌</div>
+                    <h1 class="error-title">Lost in Space</h1>
+                    <p class="error-message">Oops! The page you're looking for has drifted into the digital void. Let's get you back to familiar territory.</p>
+                    
+                    <div class="error-actions">
+                        <button onclick="showPage('home')" class="error-btn primary">Take Me Home</button>
+                        <button onclick="showPage('contact')" class="error-btn secondary">Contact Support</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 403 Forbidden Page -->
+        <div class="page" id="403">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="error-container">
+                    <div class="error-code">403</div>
+                    <div class="error-icon">🔒</div>
+                    <h1 class="error-title">Access Restricted</h1>
+                    <p class="error-message">This area is off-limits right now. You don't have permission to access this resource, but there's plenty more to explore!</p>
+                    
+                    <div class="error-actions">
+                        <button onclick="showPage('home')" class="error-btn primary">Return Home</button>
+                        <button onclick="showPage('contact')" class="error-btn secondary">Request Access</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Page navigation system
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Add some interactive sparkle to the headshot on hover
+        const headshot = document.querySelector('.headshot-container');
+        
+        if (headshot) {
+            headshot.addEventListener('mouseenter', () => {
+                headshot.style.animationDuration = '2s';
+            });
+            
+            headshot.addEventListener('mouseleave', () => {
+                headshot.style.animationDuration = '20s';
+            });
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function(e) {
+            if (e.state && e.state.page) {
+                showPage(e.state.page);
+            } else {
+                showPage('home');
+            }
+        });
+
+        // Update URL when navigating (optional, for better UX)
+        const originalShowPage = showPage;
+        showPage = function(pageId) {
+            originalShowPage(pageId);
+            if (pageId !== 'home') {
+                history.pushState({page: pageId}, '', '#' + pageId);
+            } else {
+                history.pushState({page: pageId}, '', '/');
+            }
+        };
+
+        // Initialize page based on URL hash
+        window.addEventListener('load', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash && ['contact', 'privacy', 'terms', 'readme', '404', '403'].includes(hash)) {
+                showPage(hash);
+            } else {
+                showPage('home');
+            }
+        });
+
+        // Test error pages (you can remove this in production)
+        // Uncomment these lines to test the error pages:
+        // showPage('404'); // Test 404 page
+        // showPage('403'); // Test 403 page
+    </script>
+</body>
+</html>
