@@ -8,13 +8,13 @@
 
     <!-- Social Sharing Preview Tags -->
     <meta property="og:title" content="ur/gd studios" />
-    <meta property="og:description" content="Your data. Your privacy. Your experience. You’re... good." />
+    <meta property="og:description" content="Your data. Your privacy. Your experience. Youâ€™re... good." />
     <meta property="og:image" content="https://urgdstudios.com/urgd_blackbackground.PNG" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://urgdstudios.com/" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ur/gd studios">
-    <meta name="twitter:description" content="Your data. Your privacy. Your experience. You’re... good.">
+    <meta name="twitter:description" content="Your data. Your privacy. Your experience. Youâ€™re... good.">
     <meta name="twitter:image" content="https://urgdstudios.com/urgd_blackbackground.PNG">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,12 +133,15 @@
 
         .studios {
             display: block;
-            font-size: 1.25em;
+            font-size: 1.5rem;
             color: #C0C0C0;
-            font-weight: 300;
-            margin-top: 0.5rem;
-            letter-spacing: 0.1em;
+            font-weight: 600;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
+            font-family: 'Rubik', sans-serif;
+            text-align: left;
+            margin-bottom: 1rem;
+            margin-top: 2.0rem;
         }
 
         .brief-note {
@@ -262,13 +265,18 @@
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 2rem;
+                gap: 1rem; /* Reduced from 2rem */
                 text-align: center;
             }
 
             .headshot-container {
                 width: 250px;
                 height: 250px;
+                margin-bottom: 1rem; /* Reduced bottom margin */
+            }
+
+            .logo {
+                margin-bottom: 0.5rem; /* Reduced from 1.5rem */
             }
 
             .container {
@@ -281,16 +289,62 @@
         }
 
         @media (max-width: 480px) {
+            .main-content {
+                gap: -0.0rem; /* Even smaller gap on mobile */
+            }
+
             .headshot-container {
-                width: 200px;
-                height: 200px;
+                transform: none !important;
+                margin: 0 auto -2.3rem auto; /* Reduced bottom margin */
+                width: 220px;
+                height: auto;
+                padding: 16px;
+            }
+
+            .headshot-container:hover {
+                transform: none;
+            }
+
+            .headshot {
+                height: auto;
+                max-height: 300px;
+            }
+
+            .logo {
+                margin-bottom: 0; /* Remove bottom margin completely */
+            }
+
+            .logo-image {
+                margin-left: 0;
+                margin-bottom: -2rem; /* Negative margin to pull content up */
+                margin-top: 0; /* Remove top margin */
+                max-width: 80%;
+                height: 15rem;
+                align-self: center;
+            }
+
+            .logo-container {
+                align-items: center !important;
+                margin-bottom: 0; /* Remove margin */
+            }
+
+            .studios {
+                text-align: center; /* Center on mobile */
+                margin-bottom: 0.5rem;
+                margin-top: -2.0rem;
+            }
+
+            .tagline {
+                margin-top: 2.0rem; /* Remove negative margin since studios is now separate */
+                margin-bottom: 0.5rem;
             }
 
             .brief-note {
                 padding: 1.5rem;
+                margin-top: 1rem; /* Reduce top margin */
             }
         }
-
+        
         /* Page System Styles */
         .page {
             display: none;
@@ -518,6 +572,7 @@
                 width: 200px;
             }
         }
+        
         /* Tag line style */
         .tagline {
             color: #C0C0C0;
@@ -525,38 +580,6 @@
             font-weight: 300;
             margin-bottom: 1rem;
             font-style: italic;
-             }
-
-        @media (max-width: 480px) {
-            .logo-image {
-                margin-left: 0;
-                margin-bottom: 0;
-                margin-top: 1rem;
-                max-width: 80%;
-                height: 15rem;
-                align-self: center;
-            }
-
-            .logo-container {
-                align-items: center !important;
-            }
-
-            .headshot-container {
-                transform: none !important;
-                margin: 0 auto;
-                width: 220px;
-                height: auto;
-                padding: 16px;
-            }
-
-            .headshot-container:hover {
-                transform: none;
-            }
-
-            .headshot {
-                height: auto;
-                max-height: 300px;
-            }
         }
     </style>
   </head>
@@ -591,6 +614,8 @@
                             <img src="urgd_nobackground.PNG" alt="ur/gd" class="logo-image">
                         </div>
                     </div>
+                    
+                    <div class="studios">STUDIOS</div>
                     
                     <div class="tagline">Your data. Your privacy. Your experience. You're...good.</div>
                     
