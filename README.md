@@ -1,10 +1,10 @@
-# ur/gd studios
+# ur/gd Studios
 
 > A modern, temporary digital presence while we craft something extraordinary.
 
 ## 🌟 About
 
-Welcome to the temporary home of **ur/gd studios**. This repository houses our sleek, Gen Z-inspired placeholder website featuring modern dark aesthetics, glassmorphism effects, and smooth animations.
+Welcome to the temporary home of **ur/gd Studios**. This repository houses our sleek, modern placeholder website featuring dark aesthetics, glassmorphism effects, and smooth animations. We're currently crafting something amazing behind the scenes while this space serves as our digital placeholder.
 
 ## 🚀 Live Site
 
@@ -15,10 +15,13 @@ Welcome to the temporary home of **ur/gd studios**. This repository houses our s
 
 ```
 urgdstudios.com/
-├── index.html          # Main website with navigation
+├── index.html          # Main website with navigation and charter
 ├── 404.html           # Custom 404 error page
 ├── 403.html           # Custom 403 forbidden page
-├── headshot.jpg       # Professional headshot
+├── assets/            # Brand assets and images
+│   ├── urgd_nobackground.PNG
+│   └── urgd_blackbackground.PNG
+├── .github/workflows/ # CI/CD deployment workflows
 └── README.md          # This file
 ```
 
@@ -57,7 +60,9 @@ urgdstudios.com/
 
 | Page | Purpose | Status |
 |------|---------|---------|
-| **Home** | Main landing with headshot and brief intro | ✅ Live |
+| **Home** | Main landing with logo, tagline, and navigation | ✅ Live |
+| **ur/gd Studios Charter** | Company philosophy, values, and studio divisions | ✅ Live |
+| **ur/gd Apps** | Showcase of web-based applications | 🚧 Coming Soon |
 | **Contact Us** | Contact form (API integration planned) | 🚧 Coming Soon |
 | **Privacy Policy** | Data protection and privacy terms | 🚧 Coming Soon |
 | **Terms of Use** | Legal disclaimers and usage terms | 🚧 Coming Soon |
@@ -67,20 +72,24 @@ urgdstudios.com/
 
 ## 🎯 Current Features
 
-- ✅ Responsive navigation system
-- ✅ Professional headshot display with animated border
-- ✅ Modern error pages (404/403)
-- ✅ Mobile-optimized design
-- ✅ CloudFront CDN integration
-- ✅ Custom domain setup
+- ✅ Responsive navigation system with single-page app functionality
+- ✅ ur/gd Studios Charter page with company philosophy and values
+- ✅ Modern logo display with animated effects
+- ✅ Mobile-optimized design with responsive typography
+- ✅ Modern error pages (404/403) with custom messaging
+- ✅ CloudFront CDN integration for global performance
+- ✅ Custom domain setup with SSL/TLS certificates
+- ✅ Social media meta tags for sharing
 
 ## 🔮 Roadmap
 
 ### Phase 1: Foundation *(Current)*
 - [x] Temporary website deployment
+- [x] ur/gd Studios Charter page
 - [x] Custom error pages
 - [x] CloudFront integration
 - [x] Mobile responsiveness
+- [x] Brand consistency updates
 
 ### Phase 2: Functionality *(Q4 2025)*
 - [ ] Contact form with API Gateway
@@ -146,18 +155,19 @@ open index.html
 
 ## 🤝 Contributing
 
-This is currently a private project for ur/gd studios. Future collaboration opportunities will be announced.
+This is currently a private project for ur/gd Studios. Future collaboration opportunities will be announced.
 
 ## 📞 Contact
 
-**ur/gd studios**  
+**ur/gd Studios**  
 Website: [urgdstudios.com](https://urgdstudios.com)  
+Email: [brandon@urgdstudios.com](mailto:brandon@urgdstudios.com)  
 Repository: [github.com/yourusername/urgdstudios.com](https://github.com/yourusername/urgdstudios.com)
 
 ---
 
 <div align="center">
-  <strong>ur/gd studios</strong><br>
-  <em>Crafting something extraordinary</em><br><br>
+  <strong>ur/gd Studios</strong><br>
+  <em>Your data. Your privacy. Your experience. You're good.</em><br><br>
   <sub>Built with ❤️ and modern web technologies</sub>
 </div>
