@@ -45,9 +45,8 @@
         }
 
         .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 4rem;
+            display: flex;
+            justify-content: center;
             width: 100%;
             align-items: center;
         }
@@ -106,6 +105,8 @@
 
         .content-section {
             space-y: 2rem;
+            max-width: 600px;
+            text-align: center;
         }
 
         .logo {
@@ -120,14 +121,13 @@
         .logo-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .logo-image {
             height: clamp(15rem, 28.125vw, 22.5rem);
             width: auto;
-            margin-bottom: -7.5rem;
-            margin-left: -5.2em;
+            margin-bottom: 0;
             margin-top: 2.5rem;
         }
 
@@ -139,9 +139,9 @@
             letter-spacing: 0.15em;
             text-transform: uppercase;
             font-family: 'Rubik', sans-serif;
-            text-align: left;
+            text-align: center;
             margin-bottom: 1rem;
-            margin-top: 2.0rem;
+            margin-top: -6rem;
         }
 
         .brief-note {
@@ -264,19 +264,11 @@
 
         @media (max-width: 768px) {
             .main-content {
-                grid-template-columns: 1fr;
-                gap: 1rem; /* Reduced from 2rem */
                 text-align: center;
             }
 
-            .headshot-container {
-                width: 250px;
-                height: 250px;
-                margin-bottom: 1rem; /* Reduced bottom margin */
-            }
-
             .logo {
-                margin-bottom: 0.5rem; /* Reduced from 1.5rem */
+                margin-bottom: 1.5rem;
             }
 
             .container {
@@ -289,35 +281,11 @@
         }
 
         @media (max-width: 480px) {
-            .main-content {
-                gap: -0.0rem; /* Even smaller gap on mobile */
-            }
-
-            .headshot-container {
-                transform: none !important;
-                margin: 0 auto -2.3rem auto; /* Reduced bottom margin */
-                width: 220px;
-                height: auto;
-                padding: 16px;
-                position: relative;
-                left: 0px; /* tiny negative offset to compensate */
-            }
-
-            .headshot-container:hover {
-                transform: none;
-            }
-
-            .headshot {
-                height: auto;
-                max-height: 300px;
-            }
-
             .logo {
                 margin-bottom: 0; /* Remove bottom margin completely */
             }
 
             .logo-image {
-                margin-left: 0;
                 margin-bottom: -2rem; /* Negative margin to pull content up */
                 margin-top: 0; /* Remove top margin */
                 max-width: 80%;
@@ -601,16 +569,8 @@
     <div class="container">
         <!-- Home Page -->
         <div class="page active" id="home">
-            <div class="main-content">
-                <div class="headshot-section">
-                    <div class="headshot-container">
-                        <div class="headshot">
-                            <img src="assets/headshot.jpg" alt="Brandon-Headshot">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-section">
+        <div class="main-content">
+            <div class="content-section">
                     <div class="logo">
                         <div class="logo-container">
                             <img src="assets/urgd_nobackground.PNG" alt="ur/gd" class="logo-image">
@@ -619,7 +579,7 @@
                     
                     <div class="studios">STUDIOS</div>
                     
-                    <div class="tagline">Your data. Your privacy. Your experience. You're...good.</div>
+                    <div class="tagline">Your data. Your privacy. Your experience. You're good.</div>
                     
                     <div class="brief-note">
                         <h2>Hey there! 👋</h2>
@@ -627,10 +587,182 @@
                     </div>
 
                     <div class="nav-links">
+                        <button onclick="showPage('charter')" class="nav-link">ur/gd Studios Charter</button>
+                        <button onclick="showPage('applications')" class="nav-link">ur/gd Apps</button>
                         <button onclick="showPage('contact')" class="nav-link">Contact Us</button>
                         <button onclick="showPage('privacy')" class="nav-link">Privacy Policy</button>
                         <button onclick="showPage('terms')" class="nav-link">Terms of Use</button>
                         <button onclick="showPage('readme')" class="nav-link">README</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charter Page -->
+        <div class="page" id="charter">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: -3rem;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <img src="assets/urgd_nobackground.PNG" alt="ur/gd" style="height: clamp(15rem, 28.125vw, 22.5rem); width: auto; margin-top: -5rem; margin-bottom: 0;">
+                    </div>
+                    <div style="display: block; font-size: 1.5rem; color: #C0C0C0; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Rubik', sans-serif; text-align: center; margin-bottom: 5rem; margin-top: -5rem;">STUDIOS Charter</div>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; padding: 3rem 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Rubik', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem;">🪐 About ur/gd</h2>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 1.5rem;">ur/gd (short for <strong>"you're good"</strong>) is a creative technology studio and development brand.</p>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 1.5rem;">We build experiences that are quietly powerful — designed to bring calm to complexity, restore clarity in noise, and protect what matters most.</p>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 1.5rem;">Our name reflects a simple belief: that every interaction, every tool, every line of code should leave you in a better place.</p>
+                    <p style="line-height: 1.6; color: #00FF80; font-size: 1.2rem; font-weight: 600; margin-bottom: 0;"><strong>Your data. Your privacy. Your experience. You're good.</strong></p>
+                </div>
+
+                <div style="background: linear-gradient(135deg, rgba(0, 255, 128, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%); border: 1px solid rgba(0, 255, 128, 0.3); border-radius: 25px; padding: 3rem 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Rubik', sans-serif; font-size: 2rem; font-weight: 700; color: #00FF80; margin-bottom: 1rem;">🌟 North Star</h2>
+                    <div style="font-size: 1.3rem; color: #ffffff; margin-bottom: 1.5rem; font-weight: 500;">We build the tools we wish we had.</div>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 1rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #00FF80; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Effortless</strong> – intuitive and uncluttered by design.
+                        </li>
+                        <li style="margin-bottom: 1rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #00FF80; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Respectful</strong> – protecting time, privacy, and attention.
+                        </li>
+                        <li style="margin-bottom: 1rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #00FF80; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Quietly powerful</strong> – deliberate, dependable, and understated.
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; padding: 3rem 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Rubik', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem;">🧭 Guiding Principles</h2>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 1.5rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #0080FF; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Your data. Your privacy. Your experience. You're good.</strong><br>
+                            <span style="color: #e0e0e0;">Privacy and trust are non-negotiable foundations.</span>
+                        </li>
+                        <li style="margin-bottom: 1.5rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #0080FF; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">If it doesn't leave you better, it's not done.</strong><br>
+                            <span style="color: #e0e0e0;">Every tool should carry weight for people in overwhelming, complex, or chaotic situations.</span>
+                        </li>
+                        <li style="margin-bottom: 1.5rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #0080FF; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Design for stability and compassion.</strong><br>
+                            <span style="color: #e0e0e0;">Reliability and empathy are equal parts of good design.</span>
+                        </li>
+                        <li style="margin-bottom: 1.5rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #0080FF; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Connection and clarity over noise.</strong><br>
+                            <span style="color: #e0e0e0;">Build things that help people feel grounded, supported, and seen.</span>
+                        </li>
+                        <li style="margin-bottom: 1.5rem; padding-left: 20px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #0080FF; font-weight: bold;">→</span>
+                            <strong style="color: #ffffff;">Growth through care and iteration.</strong><br>
+                            <span style="color: #e0e0e0;">A system that evolves with intention will always remain quietly powerful.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; padding: 3rem 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Rubik', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem;">🏗 Our Studios</h2>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 1.5rem;">At ur/gd studios, our ethos takes form through three divisions — each serving a distinct purpose but united by one language of clarity, craft, and care.</p>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 2rem;">Together, they create a quietly powerful ecosystem of design, development, and purpose.</p>
+
+                    <div style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.6rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">🔐 Vault</h3>
+                            <div style="color: #C0C0C0; font-size: 1rem; font-weight: 500; margin-bottom: 1rem;">Where tools are made.</div>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">Vault is where our systems are forged — the internal workshop where ideas become tools, and tools become standards.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">It's home to frameworks, templates, converters, and patterns: everything that keeps ur/gd running beneath the surface.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0;">Quietly powerful by design, Vault builds the backbone that supports everything else we do.</p>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.6rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">🛰 Station</h3>
+                            <div style="color: #C0C0C0; font-size: 1rem; font-weight: 500; margin-bottom: 1rem;">Where collaboration takes flight.</div>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">Station is where client work happens — where we meet, plan, and build together.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">It's mission control for collaboration, guided by focus, trust, and precision.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0;">Each project that leaves Station carries the ur/gd philosophy with it: purposeful, reliable, and quietly powerful.</p>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.6rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">🌠 Orbit</h3>
+                            <div style="color: #C0C0C0; font-size: 1rem; font-weight: 500; margin-bottom: 1rem;">Where our creations live.</div>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">Orbit is where our own ideas take shape — the constellation of apps built not for clients, but for people.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0; margin-bottom: 1rem;">It's home to experiences like memento, relay, and away — each designed to be personal, calm, and human.</p>
+                            <p style="line-height: 1.6; color: #e0e0e0;">Every creation in Orbit reflects the same promise that defines ur/gd studios: quietly powerful tools built to make life a little better.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, rgba(0, 255, 128, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%); border: 1px solid rgba(0, 255, 128, 0.3); border-radius: 25px; padding: 3rem 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 2rem; text-align: center;">
+                    <h2 style="font-family: 'Rubik', sans-serif; font-size: 2rem; font-weight: 700; color: #ffffff; margin-bottom: 2rem;">🌌 In Essence</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                        <div style="text-align: center;">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">Vault</h3>
+                            <p style="color: #e0e0e0; font-size: 0.95rem;">builds the tools</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">Station</h3>
+                            <p style="color: #e0e0e0; font-size: 0.95rem;">puts them to work</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="font-family: 'Rubik', sans-serif; font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">Orbit</h3>
+                            <p style="color: #e0e0e0; font-size: 0.95rem;">gives them life</p>
+                        </div>
+                    </div>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 1rem;">Each studio expresses the ur/gd ethos in its own way — Vault through precision, Station through trust, and Orbit through humanity — all guided by the same North Star.</p>
+                    <p style="line-height: 1.6; color: #e0e0e0; font-size: 1.1rem; margin-bottom: 0;">Together, they embody ur/gd studios — a quietly powerful ecosystem of craft, care, and intention.</p>
+                </div>
+
+
+                <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid rgba(255, 255, 255, 0.1);">
+                    <div style="color: #ffffff; font-size: 1.3rem; font-weight: 500; margin-bottom: 1rem;">Your data. Your privacy. Your experience. You're good.</div>
+                    <div style="font-family: 'Rubik', sans-serif; font-size: 1.1rem; color: #C0C0C0; font-style: italic;">— ur/gd Studios</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Page -->
+        <div class="page" id="applications">
+            <div class="page-content">
+                <div class="back-nav">
+                    <button onclick="showPage('home')" class="back-btn">← Back to Home</button>
+                </div>
+                
+                <div class="page-header">
+                    <h1 class="page-title">ur/gd Apps</h1>
+                </div>
+
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">🚀</div>
+                    <h2>Coming Soon</h2>
+                    <p>Our collection of web-based applications will be showcased here. Each app embodies the ur/gd philosophy of being quietly powerful, respectful of your privacy, and designed to leave you in a better place.</p>
+                    
+                    <div class="feature-preview">
+                        <div class="feature-item">
+                            <span class="feature-icon">🔒</span>
+                            <span>Privacy-first design</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <span>Lightning fast performance</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🎨</span>
+                            <span>Beautiful, intuitive interfaces</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🌱</span>
+                            <span>Built with sustainability in mind</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -651,6 +783,7 @@
                     <div class="coming-soon-icon">📬</div>
                     <h2>Coming Soon</h2>
                     <p>We're building an awesome contact form that will connect to our API Gateway → Lambda → DynamoDB → SNS notification system. Stay tuned!</p>
+                    <p style="margin-top: 1rem; color: #0080FF; font-weight: 500;">For immediate assistance, contact us at <a href="mailto:brandon@urgdstudios.com" style="color: #00FF80; text-decoration: none;">brandon@urgdstudios.com</a></p>
                     
                     <div class="feature-preview">
                         <div class="feature-item">
@@ -685,6 +818,7 @@
                     <div class="coming-soon-icon">📋</div>
                     <h2>Coming Soon</h2>
                     <p>We're crafting a comprehensive privacy policy that puts your data protection first. Transparency and trust are at the core of everything we do.</p>
+                    <p style="margin-top: 1rem; color: #0080FF; font-weight: 500;">For privacy questions, contact us at <a href="mailto:privacy@urgdstudios.com" style="color: #00FF80; text-decoration: none;">privacy@urgdstudios.com</a></p>
                 </div>
             </div>
         </div>
@@ -821,7 +955,7 @@
         // Initialize page based on URL hash
         window.addEventListener('load', function() {
             const hash = window.location.hash.substring(1);
-            if (hash && ['contact', 'privacy', 'terms', 'readme', '404', '403'].includes(hash)) {
+            if (hash && ['charter', 'applications', 'contact', 'privacy', 'terms', 'readme', '404', '403'].includes(hash)) {
                 showPage(hash);
             } else {
                 showPage('home');

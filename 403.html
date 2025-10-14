@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>403 - Access Forbidden | ur/gd studios</title>
+
+    <!-- Social Sharing Preview Tags -->
+    <meta property="og:title" content="403 - Access Forbidden | ur/gd studios" />
+    <meta property="og:description" content="This area is off-limits right now. You don't have permission to access this resource, but there's plenty more to explore!" />
+    <meta property="og:image" content="https://urgdstudios.com/assets/urgd_blackbackground.PNG" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://urgdstudios.com/403.html" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="403 - Access Forbidden | ur/gd studios">
+    <meta name="twitter:description" content="This area is off-limits right now. You don't have permission to access this resource, but there's plenty more to explore!">
+    <meta name="twitter:image" content="https://urgdstudios.com/assets/urgd_blackbackground.PNG">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,8 +27,8 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1A1A1A;
             color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
@@ -39,13 +54,14 @@
         .error-code {
             font-size: clamp(6rem, 15vw, 12rem);
             font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background: linear-gradient(45deg, #FF0080, #0080FF, #00FF80);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             line-height: 0.8;
             margin-bottom: 1rem;
             opacity: 0.8;
+            font-family: 'Rubik', sans-serif;
         }
 
         .error-icon {
@@ -71,6 +87,7 @@
             font-weight: 700;
             color: #ffffff;
             margin-bottom: 1rem;
+            font-family: 'Rubik', sans-serif;
         }
 
         .error-message {
@@ -81,34 +98,37 @@
             max-width: 500px;
             margin-left: auto;
             margin-right: auto;
+            font-weight: 400;
         }
 
         .error-actions {
             display: flex;
             justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .error-btn {
             padding: 1rem 2rem;
             border-radius: 15px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
-            font-family: inherit;
+            font-family: 'Rubik', sans-serif;
             text-decoration: none;
             display: inline-block;
         }
 
         .error-btn.primary {
-            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            background: linear-gradient(45deg, #00FF80, #0080FF);
             color: #ffffff;
         }
 
         .error-btn.primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 255, 128, 0.4);
         }
 
         .error-btn.secondary {
@@ -134,9 +154,20 @@
             position: absolute;
             width: 20px;
             height: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 255, 128, 0.3);
             border-radius: 50%;
             animation: float 15s infinite linear;
+            box-shadow: 0 0 10px rgba(0, 255, 128, 0.5);
+        }
+
+        .floating-element:nth-child(2n) {
+            background: rgba(0, 128, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
+        }
+
+        .floating-element:nth-child(3n) {
+            background: rgba(255, 255, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
         }
 
         @keyframes float {
@@ -194,6 +225,7 @@
             
             <div class="error-actions">
                 <a href="index.html" class="error-btn primary">Return Home</a>
+                <a href="mailto:brandon@urgdstudios.com" class="error-btn secondary">Request Access</a>
             </div>
         </div>
     </div>
