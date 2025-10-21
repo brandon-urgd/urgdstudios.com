@@ -6,11 +6,73 @@ on:
       - main   # runs when you push to main
 
 jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Checkov Security Scan
+        run: |
+          echo "🔍 Running Checkov security scan..."
+          echo "Checking repository for security issues..."
+          
+          # Run Checkov with approved exceptions and capture both stdout and stderr
+          checkov --directory . --output cli --output-file-path /tmp/checkov-results.txt --skip-check CKV2_GHA_1 2>&1 | tee /tmp/checkov-output.txt
+          CHECKOV_EXIT_CODE=${PIPESTATUS[0]}
+          
+          echo "Checkov exit code: $CHECKOV_EXIT_CODE"
+          
+          # Check if there are any failures in the results
+          if [ -f /tmp/checkov-results.txt ]; then
+            if grep -q "FAILED" /tmp/checkov-results.txt; then
+              echo "❌ Checkov security scan found issues"
+              echo "🔍 Checkov results:"
+              cat /tmp/checkov-results.txt
+              echo ""
+              echo "🔍 Checkov output:"
+              cat /tmp/checkov-output.txt
+              exit 1
+            else
+              echo "✅ Checkov security scan passed"
+            fi
+          else
+            echo "✅ Checkov security scan passed (no results file generated)"
+          fi
+
+      - name: Run Semgrep Security Scan
+        run: |
+          echo "🔍 Running Semgrep security scan..."
+          semgrep --config=auto --json --output=/tmp/semgrep-results.json .
+          
+          # Check if there are any findings
+          if [ -s /tmp/semgrep-results.json ]; then
+            findings=$(jq '.results | length' /tmp/semgrep-results.json)
+            if [ "$findings" -gt 0 ]; then
+              echo "❌ Semgrep found $findings security issues"
+              echo "🔍 Semgrep results:"
+              cat /tmp/semgrep-results.json
+              exit 1
+            else
+              echo "✅ Semgrep security scan passed"
+            fi
+          else
+            echo "✅ Semgrep security scan passed"
+          fi
+
   deploy:
     runs-on: ubuntu-latest
+    needs: security-checks
     
     permissions:
       contents: read
+      id-token: write
     
     steps:
       - name: Checkout repo
@@ -32,6 +94,72 @@ jobs:
             --exclude "*.md" \
             --cache-control "public, max-age=31536000" \
             --metadata-directive REPLACE
+
+      - name: Configure AWS credentials (us-east-1)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Associate WAF with CloudFront
+        id: waf
+        run: |
+          CLOUDFRONT_ID="E7TMQTQJURH86"
+          
+          echo "🔗 Associating consolidated WAF with CloudFront..."
+          
+          WAF_SSM_PARAM="/urgd/waf/web_acl_arn"
+          
+          WAF_ARN=$(aws ssm get-parameter \
+            --name "$WAF_SSM_PARAM" \
+            --query 'Parameter.Value' \
+            --output text \
+            --region us-east-1)
+          
+          if [ "$WAF_ARN" = "None" ] || [ -z "$WAF_ARN" ]; then
+            echo "❌ WAF ARN not found in SSM parameter: $WAF_SSM_PARAM"
+            exit 1
+          fi
+          
+          echo "✅ WAF ARN: $WAF_ARN"
+          echo "WAF_ARN=$WAF_ARN" >> $GITHUB_OUTPUT
+          echo "✅ CloudFront Distribution ID: $CLOUDFRONT_ID"
+          
+          # Get AWS Account ID
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --region us-east-1)
+          echo "✅ AWS Account ID: $AWS_ACCOUNT_ID"
+          
+          # Build the CloudFront ARN
+          CLOUDFRONT_ARN="arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CLOUDFRONT_ID}"
+          echo "🔍 CloudFront ARN: $CLOUDFRONT_ARN"
+          
+          # Get current CloudFront distribution configuration
+          echo "🔍 Getting CloudFront distribution configuration..."
+          aws cloudfront get-distribution-config \
+            --id "$CLOUDFRONT_ID" \
+            --output json > /tmp/distribution-response.json
+          
+          # Extract ETag for the update
+          ETAG=$(jq -r '.ETag' /tmp/distribution-response.json)
+          echo "✅ ETag: $ETAG"
+          
+          # Extract just the DistributionConfig part
+          echo "🔧 Extracting DistributionConfig..."
+          jq '.DistributionConfig' /tmp/distribution-response.json > /tmp/distribution-config.json
+          
+          # Add WAF to the distribution configuration
+          echo "🛡️ Adding WAF to distribution configuration..."
+          jq --arg webacl "$WAF_ARN" '.WebACLId = $webacl' /tmp/distribution-config.json > /tmp/distribution-config-updated.json
+          
+          # Update the CloudFront distribution
+          echo "🚀 Updating CloudFront distribution with WAF..."
+          aws cloudfront update-distribution \
+            --id "$CLOUDFRONT_ID" \
+            --distribution-config file:///tmp/distribution-config-updated.json \
+            --if-match "$ETAG"
+          
+          echo "✅ WAF successfully associated with CloudFront distribution"
 
       - name: Invalidate CloudFront cache
         run: |
