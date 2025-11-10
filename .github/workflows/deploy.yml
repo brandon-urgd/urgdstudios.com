@@ -77,11 +77,44 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Debug OIDC Token Claims
+        id: oidc-debug
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          echo ""
+          echo "Expected subject patterns:"
+          echo "  - repo:${{ github.repository }}:ref:${{ github.ref }}"
+          echo "  - repo:${{ github.repository }}:*"
+          echo ""
+          echo "Fetching OIDC token..."
+          TOKEN_RESPONSE=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com")
+          TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.value')
+          if [ "$TOKEN" != "null" ] && [ -n "$TOKEN" ]; then
+            echo "Token received (length: ${#TOKEN})"
+            echo ""
+            echo "Decoding token claims..."
+            PAYLOAD=$(echo "$TOKEN" | cut -d'.' -f2)
+            # Add padding if needed
+            case $((${#PAYLOAD} % 4)) in
+              2) PAYLOAD="${PAYLOAD}==" ;;
+              3) PAYLOAD="${PAYLOAD}=" ;;
+            esac
+            echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '.' || echo "Failed to decode token"
+          else
+            echo "Failed to get token. Response: $TOKEN_RESPONSE"
+          fi
+        env:
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_URL }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::198919428218:role/urgd-urgdstudios-com-deploy
           aws-region: us-west-2
+          audience: sts.amazonaws.com
 
       - name: Sync files to S3
         run: |
@@ -99,6 +132,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::198919428218:role/urgd-urgdstudios-com-deploy
           aws-region: us-east-1
+          audience: sts.amazonaws.com
 
       - name: Associate WAF with CloudFront
         id: waf
