@@ -611,6 +611,121 @@ li a {
 }
 
 /* ============================================================================
+   App Components (Slice 2)
+   ============================================================================ */
+
+/* App Grid */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+@media (max-width: 767px) {
+  .app-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* App Card */
+.app-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  text-decoration: none;
+  color: inherit;
+  min-height: 200px;
+}
+
+.app-card h3 {
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.app-card p {
+  color: var(--color-text-secondary);
+  flex: 1;
+  margin-bottom: var(--space-md);
+}
+
+.app-card .badge {
+  align-self: flex-start;
+}
+
+.app-card .external-link-icon {
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.app-card:hover .external-link-icon {
+  color: var(--color-text-primary);
+}
+
+/* Studio Item (About page) */
+.studio-item {
+  margin-bottom: var(--space-xl);
+}
+
+.studio-item:last-child {
+  margin-bottom: 0;
+}
+
+.studio-item h3 {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.studio-item p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.studio-item p:last-child {
+  margin-bottom: 0;
+}
+
+/* Principle Item (About page) */
+.principle-item {
+  margin-bottom: var(--space-lg);
+}
+
+.principle-item:last-child {
+  margin-bottom: 0;
+}
+
+.principle-item h3 {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.principle-item p {
+  color: var(--color-text-secondary);
+  margin-bottom: 0;
+}
+
+/* Legal Placeholder */
+.legal-placeholder {
+  text-align: center;
+  margin-top: var(--space-2xl);
+}
+
+.legal-placeholder p {
+  margin-bottom: var(--space-md);
+}
+
+.legal-placeholder p:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================================
    Reduced Motion Support (WCAG 2.2 AA)
    ============================================================================ */
 
