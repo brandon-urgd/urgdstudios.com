@@ -176,7 +176,7 @@ Resources:
           FunctionAssociations:
             - FunctionARN: arn:aws:cloudfront::198919428218:function/RedirectWWWToRoot
               EventType: viewer-request
-            - FunctionARN: !GetAtt DirectoryIndexFunction.FunctionMetadata.FunctionARN
+            - FunctionARN: !GetAtt DirectoryIndexFunction.FunctionARN
               EventType: viewer-request
         CustomErrorResponses:
           - ErrorCode: 403
