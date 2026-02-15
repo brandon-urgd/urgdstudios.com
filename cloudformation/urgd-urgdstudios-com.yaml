@@ -97,7 +97,7 @@ Resources:
     Properties:
       Bucket: !Ref SiteBucket
       PolicyDocument:
-        Version: '2008-10-17'
+        Version: '2012-10-17'
         Id: PolicyForCloudFrontPrivateContent
         Statement:
           - Sid: AllowCloudFrontServicePrincipal
