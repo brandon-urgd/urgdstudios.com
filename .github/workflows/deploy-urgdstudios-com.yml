@@ -15,7 +15,7 @@ on:
 env:
   APP_NAME: urgdstudios-com
   AWS_REGION: us-west-2
-  AWS_ACCOUNT_ID: "198919428218"
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
   CF_STACK_PREFIX: urgd
   ARTIFACT_BUCKET: urgd-applicationdata
 
@@ -147,10 +147,12 @@ jobs:
 
       - name: Production deployment confirmation
         if: github.event_name == 'workflow_dispatch'
+        env:
+          CONFIRM_INPUT: ${{ github.event.inputs.confirm_prod }}
         run: |
-          if [ "${{ github.event.inputs.confirm_prod }}" != "DEPLOY" ]; then
+          if [ "$CONFIRM_INPUT" != "DEPLOY" ]; then
             echo "❌ Production deployment requires confirm_prod input to be 'DEPLOY'"
-            echo "You provided: '${{ github.event.inputs.confirm_prod }}'"
+            echo "You provided: '$CONFIRM_INPUT'"
             exit 1
           fi
           echo "✅ Production deployment confirmed"

@@ -1,0 +1,108 @@
+---
+description: Run security scans before committing code to catch issues early
+alwaysApply: true
+---
+
+# Pre-Commit Security Scanning
+
+Before committing code changes, especially for deployment workflows and infrastructure, run security scans to catch issues before they reach CI/CD.
+
+## Required Scans
+
+### 1. Semgrep (Code Security)
+```bash
+semgrep --config=auto .
+```
+
+**What it catches:**
+- Shell injection vulnerabilities
+- Hardcoded credentials
+- Insecure code patterns
+- OWASP Top 10 issues
+
+### 2. Checkov (Infrastructure Security)
+```bash
+checkov -f cloudformation/*.yaml --framework cloudformation
+```
+
+**What it catches:**
+- Misconfigured AWS resources
+- Missing encryption
+- Public access issues
+- IAM overpermissions
+
+### 3. cfn-lint (CloudFormation Validation)
+```bash
+cfn-lint cloudformation/*.yaml
+```
+
+**What it catches:**
+- Invalid CloudFormation syntax
+- Resource property errors
+- Missing required fields
+
+## When to Run
+
+**Always run before committing:**
+- GitHub Actions workflow files (`.github/workflows/*.yml`)
+- CloudFormation templates (`cloudformation/*.yaml`)
+- Lambda function code (`lambdas/**/*`)
+- Frontend code with sensitive data handling
+
+## Fixing Issues
+
+### Semgrep Shell Injection
+❌ **BAD** - Direct context interpolation:
+```yaml
+run: |
+  if [ "${{ github.event.inputs.value }}" != "expected" ]; then
+    exit 1
+  fi
+```
+
+✅ **GOOD** - Use environment variable:
+```yaml
+env:
+  INPUT_VALUE: ${{ github.event.inputs.value }}
+run: |
+  if [ "$INPUT_VALUE" != "expected" ]; then
+    exit 1
+  fi
+```
+
+### Hardcoded Secrets
+❌ **BAD** - Hardcoded in code:
+```yaml
+AWS_ACCOUNT_ID: "198919428218"
+```
+
+✅ **GOOD** - Use GitHub variable:
+```yaml
+AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+```
+
+## Quick Pre-Commit Script
+
+Create `.git/hooks/pre-commit` (optional but recommended for automation):
+```bash
+#!/bin/bash
+set -euo pipefail
+
+echo "🔍 Running pre-commit security scans..."
+
+# Run Semgrep
+if command -v semgrep &> /dev/null; then
+  echo "Running Semgrep..."
+  semgrep --config=auto --error .
+fi
+
+# Run Checkov on CloudFormation if it exists
+if [ -d "cloudformation" ]; then
+  echo "Running Checkov..."
+  checkov -d cloudformation/ --framework cloudformation --quiet
+fi
+
+echo "✅ Pre-commit scans passed"
+```
+
+Make it executable: `chmod +x .git/hooks/pre-commit`
