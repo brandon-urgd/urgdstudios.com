@@ -73,6 +73,7 @@ run: |
 ### Hardcoded Secrets
 ❌ **BAD** - Hardcoded in code:
 ```yaml
+# nosemgrep: generic.secrets.security.detected-aws-account-id.detected-aws-account-id
 AWS_ACCOUNT_ID: "198919428218"
 ```
 
