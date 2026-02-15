@@ -91,25 +91,24 @@ Resources:
 
   # ========================================
   # S3 Bucket Policy (OAC-based)
-  # NOTE: This will be added in a subsequent stack update after import
   # ========================================
-  # SiteBucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Properties:
-  #     Bucket: !Ref SiteBucket
-  #     PolicyDocument:
-  #       Version: '2008-10-17'
-  #       Id: PolicyForCloudFrontPrivateContent
-  #       Statement:
-  #         - Sid: AllowCloudFrontServicePrincipal
-  #           Effect: Allow
-  #           Principal:
-  #             Service: cloudfront.amazonaws.com
-  #           Action: s3:GetObject
-  #           Resource: !Sub '${SiteBucket.Arn}/*'
-  #           Condition:
-  #             StringEquals:
-  #               'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: '2008-10-17'
+        Id: PolicyForCloudFrontPrivateContent
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
 
   # ========================================
   # CloudFront Distribution (Import-ready)
@@ -171,23 +170,22 @@ Resources:
 
 # ========================================
 # Outputs (CI/CD contract)
-# NOTE: These will be added in a subsequent stack update after import
 # ========================================
-# Outputs:
-#   CloudFrontDistributionId:
-#     Description: 'CloudFront distribution ID (used by CI/CD for cache invalidation and WAF association)'
-#     Value: !Ref SiteDistribution
-#     Export:
-#       Name: !Sub '${AWS::StackName}-CloudFrontDistributionId'
-# 
-#   S3BucketName:
-#     Description: 'S3 bucket name (used by CI/CD for S3 sync)'
-#     Value: !Ref SiteBucket
-#     Export:
-#       Name: !Sub '${AWS::StackName}-S3BucketName'
-# 
-#   CloudFrontDistributionURL:
-#     Description: 'CloudFront domain name'
-#     Value: !GetAtt SiteDistribution.DomainName
-#     Export:
-#       Name: !Sub '${AWS::StackName}-CloudFrontDistributionURL'
+Outputs:
+  CloudFrontDistributionId:
+    Description: 'CloudFront distribution ID (used by CI/CD for cache invalidation and WAF association)'
+    Value: !Ref SiteDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontDistributionId'
+
+  S3BucketName:
+    Description: 'S3 bucket name (used by CI/CD for S3 sync)'
+    Value: !Ref SiteBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-S3BucketName'
+
+  CloudFrontDistributionURL:
+    Description: 'CloudFront domain name'
+    Value: !GetAtt SiteDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontDistributionURL'
