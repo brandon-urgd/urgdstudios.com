@@ -1,0 +1,23 @@
+[
+  {
+    "ResourceType": "AWS::S3::Bucket",
+    "LogicalResourceId": "SiteBucket",
+    "ResourceIdentifier": {
+      "BucketName": "urgdstudios.com"
+    }
+  },
+  {
+    "ResourceType": "AWS::CloudFront::OriginAccessControl",
+    "LogicalResourceId": "SiteOriginAccessControl",
+    "ResourceIdentifier": {
+      "Id": "EG9CJ5349TAHJ"
+    }
+  },
+  {
+    "ResourceType": "AWS::CloudFront::Distribution",
+    "LogicalResourceId": "SiteDistribution",
+    "ResourceIdentifier": {
+      "Id": "E7TMQTQJURH86"
+    }
+  }
+]

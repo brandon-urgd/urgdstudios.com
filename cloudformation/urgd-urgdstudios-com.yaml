@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ur/gd urgdstudios.com - Corporate website static site infrastructure'
+
+Metadata:
+  urgd:
+    version: '1.0.0'
+    environment: 'prod'
+    lastUpdated: '2026-02-15'
+    owner: 'ur/gd Studios'
+    securityLevel: 'high'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: 'prod'
+    AllowedValues:
+      - prod
+    Description: 'Environment name (single-environment deployment)'
+
+  WafWebAclArn:
+    Type: String
+    Description: 'WAF WebACL ARN from SSM Parameter Store (/urgd/waf/web_acl_arn)'
+    Default: ''
+
+  ArtifactBucket:
+    Type: String
+    Default: 'urgd-applicationdata'
+    Description: 'S3 bucket containing deployment artifacts'
+
+  IntakeCodeKey:
+    Type: String
+    Description: 'S3 key for intake Lambda ZIP (versioned) - used in Slice 3'
+    Default: 'urgdstudios-com/artifacts/placeholder/urgd-urgdstudios-com-intake-placeholder.zip'
+
+  CorsAllowedOrigins:
+    Type: String
+    Description: 'Comma-separated list of allowed CORS origins for API'
+    Default: 'https://urgdstudios.com'
+
+  AlertsEmail:
+    Type: String
+    Description: 'Email address for operational alerts'
+    Default: 'alerts@urgd.dev'
+
+Resources:
+  # ========================================
+  # S3 Bucket (Import-ready)
+  # ========================================
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: urgdstudios.com
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+        - Key: brand
+          Value: urgd
+
+  # ========================================
+  # Origin Access Control (OAC) - Import-ready
+  # ========================================
+  SiteOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      OriginAccessControlConfig:
+        Name: 'oac-urgdstudios.com.s3.us-west-2.amazonaws.com-mentjrr0wy4'
+        Description: 'Created by CloudFront'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ========================================
+  # S3 Bucket Policy (OAC-based)
+  # NOTE: This will be added in a subsequent stack update after import
+  # ========================================
+  # SiteBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: !Ref SiteBucket
+  #     PolicyDocument:
+  #       Version: '2008-10-17'
+  #       Id: PolicyForCloudFrontPrivateContent
+  #       Statement:
+  #         - Sid: AllowCloudFrontServicePrincipal
+  #           Effect: Allow
+  #           Principal:
+  #             Service: cloudfront.amazonaws.com
+  #           Action: s3:GetObject
+  #           Resource: !Sub '${SiteBucket.Arn}/*'
+  #           Condition:
+  #             StringEquals:
+  #               'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
+
+  # ========================================
+  # CloudFront Distribution (Import-ready)
+  # ========================================
+  SiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - urgdstudios.com
+          - www.urgdstudios.com
+        DefaultRootObject: index.html
+        Origins:
+          - Id: !Sub '${SiteBucket}.s3.us-west-2.amazonaws.com-menteyvako7'
+            DomainName: !Sub '${SiteBucket}.s3.us-west-2.amazonaws.com'
+            OriginPath: ''
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            ConnectionAttempts: 3
+            ConnectionTimeout: 10
+            OriginShield:
+              Enabled: false
+            OriginAccessControlId: !Ref SiteOriginAccessControl
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub '${SiteBucket}.s3.us-west-2.amazonaws.com-menteyvako7'
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - HEAD
+            - GET
+          CachedMethods:
+            - HEAD
+            - GET
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          FunctionAssociations:
+            - FunctionARN: arn:aws:cloudfront::198919428218:function/RedirectWWWToRoot
+              EventType: viewer-request
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponsePagePath: /403.html
+            ResponseCode: '403'
+            ErrorCachingMinTTL: 10
+          - ErrorCode: 404
+            ResponsePagePath: /404.html
+            ResponseCode: '404'
+            ErrorCachingMinTTL: 10
+        Comment: 'Primary CloudFront distribution for urgdstudios.com (index.html + static assets)'
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: PriceClass_All
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:198919428218:certificate/61b3ca01-c69c-4e97-ad75-8134b6145af5
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        WebACLId: !Ref WafWebAclArn
+
+# ========================================
+# Outputs (CI/CD contract)
+# NOTE: These will be added in a subsequent stack update after import
+# ========================================
+# Outputs:
+#   CloudFrontDistributionId:
+#     Description: 'CloudFront distribution ID (used by CI/CD for cache invalidation and WAF association)'
+#     Value: !Ref SiteDistribution
+#     Export:
+#       Name: !Sub '${AWS::StackName}-CloudFrontDistributionId'
+# 
+#   S3BucketName:
+#     Description: 'S3 bucket name (used by CI/CD for S3 sync)'
+#     Value: !Ref SiteBucket
+#     Export:
+#       Name: !Sub '${AWS::StackName}-S3BucketName'
+# 
+#   CloudFrontDistributionURL:
+#     Description: 'CloudFront domain name'
+#     Value: !GetAtt SiteDistribution.DomainName
+#     Export:
+#       Name: !Sub '${AWS::StackName}-CloudFrontDistributionURL'

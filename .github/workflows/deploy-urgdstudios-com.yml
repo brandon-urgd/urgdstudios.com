@@ -1,0 +1,553 @@
+name: Deploy urgdstudios.com
+
+on:
+  push:
+    branches:
+      - main      # Auto-deploy to prod on push to main
+  workflow_dispatch:
+    inputs:
+      confirm_prod:
+        description: 'Type "DEPLOY" to confirm production deployment'
+        required: true
+        type: string
+
+# Define shared values once — reference via ${{ env.* }} throughout
+env:
+  APP_NAME: urgdstudios-com
+  AWS_REGION: us-west-2
+  AWS_ACCOUNT_ID: "198919428218"
+  CF_STACK_PREFIX: urgd
+  ARTIFACT_BUCKET: urgd-applicationdata
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve VERSION
+        id: version
+        run: |
+          if [ -f "VERSION" ]; then
+            VERSION=$(cat VERSION | tr -d '\n\r')
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Resolved version: $VERSION"
+
+  security-checks:
+    runs-on: ubuntu-latest
+    needs: version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Security Tools
+        run: |
+          pip install --upgrade cfn-lint checkov semgrep
+
+      - name: Lint CloudFormation
+        run: |
+          echo "🔍 Running cfn-lint on CloudFormation templates..."
+          cfn-lint cloudformation/*.yaml --ignore-checks W3045,W2001
+
+      - name: Run Checkov Security Scan
+        run: |
+          echo "🔍 Running Checkov security scan..."
+          checkov -f cloudformation/urgd-urgdstudios-com.yaml \
+            --framework cloudformation \
+            --output cli \
+            --output-file-path /tmp/checkov-results.txt 2>&1 | tee /tmp/checkov-output.txt
+          CHECKOV_EXIT_CODE=${PIPESTATUS[0]}
+          
+          echo "Checkov exit code: $CHECKOV_EXIT_CODE"
+          
+          if [ -f /tmp/checkov-results.txt ]; then
+            if grep -q "FAILED" /tmp/checkov-results.txt; then
+              echo "❌ Checkov security scan found issues"
+              cat /tmp/checkov-results.txt
+              exit 1
+            else
+              echo "✅ Checkov security scan passed"
+            fi
+          else
+            echo "✅ Checkov security scan passed (no results file generated)"
+          fi
+
+      - name: Run Semgrep Security Scan
+        run: |
+          echo "🔍 Running Semgrep security scan..."
+          semgrep --config=auto --json --output=/tmp/semgrep-results.json .
+          
+          if [ -s /tmp/semgrep-results.json ]; then
+            findings=$(jq '.results | length' /tmp/semgrep-results.json)
+            if [ "$findings" -gt 0 ]; then
+              echo "❌ Semgrep found $findings security issues"
+              cat /tmp/semgrep-results.json
+              exit 1
+            else
+              echo "✅ Semgrep security scan passed"
+            fi
+          else
+            echo "✅ Semgrep security scan passed"
+          fi
+
+      - name: Validate S3 ACLs
+        run: |
+          echo "🔍 Validating S3 bucket configuration..."
+          if grep -r "AWS::S3::Bucket" cloudformation/; then
+            if grep -r "PublicAccessBlockConfiguration.*false\|AccessControl.*PublicRead\|AccessControl.*PublicReadWrite" cloudformation/; then
+              echo "❌ S3 buckets found with public access"
+              exit 1
+            fi
+          fi
+          echo "✅ S3 buckets are private"
+
+      - name: Validate DeletionPolicy
+        run: |
+          echo "🔍 Validating DeletionPolicy on critical resources..."
+          if grep -r "AWS::DynamoDB::Table\|AWS::S3::Bucket\|AWS::RDS::DBInstance" cloudformation/; then
+            if ! grep -r "DeletionPolicy.*Retain\|DeletionPolicy.*Snapshot" cloudformation/; then
+              echo "❌ Critical resources found without DeletionPolicy"
+              exit 1
+            fi
+          fi
+          echo "✅ Critical resources have DeletionPolicy"
+
+      - name: Validate WAF Attached
+        run: |
+          echo "🔍 Validating WAF attachment..."
+          if grep -r "AWS::CloudFront::Distribution" cloudformation/; then
+            if ! grep -r "WebACLId\|WebACL" cloudformation/; then
+              echo "❌ CloudFront distribution found without WAF attachment"
+              exit 1
+            fi
+          fi
+          echo "✅ CloudFront distribution has WAF configured"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [version, security-checks]
+    permissions:
+      id-token: write   # Required for OIDC authentication
+      contents: read    # Required for checkout
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      ENVIRONMENT: prod
+      STACK_NAME: urgd-urgdstudios-com-prod
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Production deployment confirmation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm_prod }}" != "DEPLOY" ]; then
+            echo "❌ Production deployment requires confirm_prod input to be 'DEPLOY'"
+            echo "You provided: '${{ github.event.inputs.confirm_prod }}'"
+            exit 1
+          fi
+          echo "✅ Production deployment confirmed"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/urgd-${{ env.APP_NAME }}-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Upload CloudFormation template to S3
+        run: |
+          set -euo pipefail
+          
+          echo "📦 Uploading CloudFormation template to S3..."
+          TEMPLATE_S3_PATH="s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/cloudformation/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}.yaml"
+          
+          aws s3 cp cloudformation/urgd-${{ env.APP_NAME }}.yaml \
+            "$TEMPLATE_S3_PATH" \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✅ Template uploaded to: $TEMPLATE_S3_PATH"
+          echo "TEMPLATE_S3_PATH=$TEMPLATE_S3_PATH" >> $GITHUB_ENV
+
+      - name: Generate parameter files
+        run: |
+          set -euo pipefail
+          
+          echo "📝 Generating CloudFormation parameter file for prod..."
+          mkdir -p parameter-files
+          
+          # Get WAF ARN from SSM Parameter Store
+          WAF_ARN=$(aws ssm get-parameter \
+            --name "/urgd/waf/web_acl_arn" \
+            --query 'Parameter.Value' \
+            --output text \
+            --region us-east-1)
+          
+          if [ -z "$WAF_ARN" ] || [ "$WAF_ARN" = "None" ]; then
+            echo "❌ WAF ARN not found in SSM parameter: /urgd/waf/web_acl_arn"
+            exit 1
+          fi
+          
+          echo "✅ WAF ARN: $WAF_ARN"
+          
+          # Generate prod parameter file
+          cat > parameter-files/prod.json << EOF
+          [
+            {"ParameterKey": "Environment", "ParameterValue": "prod"},
+            {"ParameterKey": "WafWebAclArn", "ParameterValue": "$WAF_ARN"},
+            {"ParameterKey": "ArtifactBucket", "ParameterValue": "${{ env.ARTIFACT_BUCKET }}"},
+            {"ParameterKey": "IntakeCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-intake-${{ env.VERSION }}.zip"},
+            {"ParameterKey": "CorsAllowedOrigins", "ParameterValue": "https://urgdstudios.com"},
+            {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"}
+          ]
+          EOF
+          
+          echo "✅ Parameter file generated"
+          cat parameter-files/prod.json
+
+      - name: Upload parameter files to S3
+        run: |
+          set -euo pipefail
+          
+          echo "📦 Uploading parameter files to S3..."
+          aws s3 cp parameter-files/prod.json \
+            "s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/cloudformation/${{ env.VERSION }}/prod.json" \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✅ Parameter files uploaded to S3"
+
+      - name: Deploy CloudFormation stack
+        run: |
+          set -euo pipefail
+          
+          echo "🚀 Deploying CloudFormation stack: ${{ env.STACK_NAME }}"
+          
+          # Construct template URL
+          TEMPLATE_URL="https://${{ env.ARTIFACT_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.APP_NAME }}/cloudformation/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}.yaml"
+          echo "Template URL: $TEMPLATE_URL"
+          
+          # Check if stack exists
+          if aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --region ${{ env.AWS_REGION }} >/dev/null 2>&1; then
+            echo "Stack exists — performing update"
+            STACK_OPERATION="update"
+            
+            # Attempt update and capture output
+            if aws cloudformation update-stack \
+              --stack-name ${{ env.STACK_NAME }} \
+              --template-url "$TEMPLATE_URL" \
+              --parameters file://parameter-files/prod.json \
+              --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+              --region ${{ env.AWS_REGION }} 2>&1 | tee /tmp/update-output.log; then
+              echo "✅ Stack update initiated"
+              echo "SKIP_POLLING=false" >> $GITHUB_ENV
+            else
+              # Check if "No updates" error
+              if grep -q "No updates are to be performed" /tmp/update-output.log; then
+                echo "ℹ️ Stack is already up to date — no changes needed"
+                echo "SKIP_POLLING=true" >> $GITHUB_ENV
+              else
+                echo "❌ Stack update failed"
+                cat /tmp/update-output.log
+                exit 1
+              fi
+            fi
+          else
+            echo "Stack does not exist — performing create"
+            STACK_OPERATION="create"
+            
+            aws cloudformation create-stack \
+              --stack-name ${{ env.STACK_NAME }} \
+              --template-url "$TEMPLATE_URL" \
+              --parameters file://parameter-files/prod.json \
+              --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+              --region ${{ env.AWS_REGION }}
+            
+            echo "✅ Stack create initiated"
+            echo "SKIP_POLLING=false" >> $GITHUB_ENV
+          fi
+
+      - name: Poll CloudFormation stack status
+        if: env.SKIP_POLLING != 'true'
+        run: |
+          set -euo pipefail
+          
+          echo "⏳ Polling CloudFormation stack status..."
+          
+          TIMEOUT=1800       # 30 minutes
+          ELAPSED=0
+          POLL_INTERVAL=30   # 30 seconds
+          
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            STATUS=$(aws cloudformation describe-stacks \
+              --stack-name ${{ env.STACK_NAME }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'Stacks[0].StackStatus' \
+              --output text 2>/dev/null)
+            
+            echo "Current status: $STATUS (elapsed: ${ELAPSED}s)"
+            
+            # Success states
+            if [[ "$STATUS" == "CREATE_COMPLETE" ]] || [[ "$STATUS" == "UPDATE_COMPLETE" ]]; then
+              echo "✅ Stack deployment completed successfully"
+              break
+            fi
+            
+            # Failure states
+            if [[ "$STATUS" == *"FAILED"* ]] || [[ "$STATUS" == *"ROLLBACK"* ]]; then
+              echo "❌ Stack deployment failed with status: $STATUS"
+              exit 1
+            fi
+            
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+          
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "❌ Stack deployment timed out after ${TIMEOUT}s"
+            exit 1
+          fi
+
+      - name: Validate stack outputs
+        run: |
+          set -euo pipefail
+          
+          echo "🔍 Validating CloudFormation stack outputs..."
+          
+          # Get CloudFront Distribution ID
+          CLOUDFRONT_ID=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$CLOUDFRONT_ID" ] || [ "$CLOUDFRONT_ID" = "None" ]; then
+            echo "❌ FATAL: CloudFrontDistributionId not found in stack outputs"
+            echo "Ensure the CloudFormation template exports this output."
+            exit 1
+          fi
+          
+          echo "✅ CloudFront Distribution ID: $CLOUDFRONT_ID"
+          echo "CLOUDFRONT_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
+          
+          # Get S3 Bucket Name
+          S3_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`S3BucketName`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$S3_BUCKET" ] || [ "$S3_BUCKET" = "None" ]; then
+            echo "❌ FATAL: S3BucketName not found in stack outputs"
+            echo "Ensure the CloudFormation template exports this output."
+            exit 1
+          fi
+          
+          echo "✅ S3 Bucket Name: $S3_BUCKET"
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV
+
+      - name: Build Lambda functions
+        if: false  # Skipped until Slice 3
+        run: |
+          set -euo pipefail
+          
+          echo "🔨 Building Lambda functions..."
+          echo "ℹ️ Lambda build skipped in Slice 0 — will be activated in Slice 3"
+
+      - name: Deploy Lambda functions
+        if: false  # Skipped until Slice 3
+        run: |
+          set -euo pipefail
+          
+          echo "🚀 Deploying Lambda functions..."
+          echo "ℹ️ Lambda deploy skipped in Slice 0 — will be activated in Slice 3"
+
+      - name: Run smoke tests
+        if: false  # Skipped until Slice 3
+        run: |
+          set -euo pipefail
+          
+          echo "🧪 Running smoke tests..."
+          echo "ℹ️ Smoke tests skipped in Slice 0 — will be activated in Slice 3"
+
+      - name: Sync static site to S3
+        run: |
+          set -euo pipefail
+          
+          echo "📦 Syncing static site to S3..."
+          echo "Source: site/"
+          echo "Destination: s3://$S3_BUCKET/"
+          
+          aws s3 sync site/ "s3://$S3_BUCKET/" \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --metadata-directive REPLACE \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✅ Static site synced to S3"
+
+      - name: Configure AWS credentials (us-east-1 for WAF)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/urgd-${{ env.APP_NAME }}-deploy
+          aws-region: us-east-1
+          audience: sts.amazonaws.com
+
+      - name: Associate WAF with CloudFront
+        run: |
+          set -euo pipefail
+          
+          echo "🛡️ Associating WAF with CloudFront distribution..."
+          echo "CloudFront Distribution ID: $CLOUDFRONT_ID"
+          
+          # Get WAF ARN from SSM Parameter Store
+          WAF_ARN=$(aws ssm get-parameter \
+            --name "/urgd/waf/web_acl_arn" \
+            --query 'Parameter.Value' \
+            --output text \
+            --region us-east-1)
+          
+          if [ -z "$WAF_ARN" ] || [ "$WAF_ARN" = "None" ]; then
+            echo "❌ WAF ARN not found in SSM parameter: /urgd/waf/web_acl_arn"
+            exit 1
+          fi
+          
+          echo "✅ WAF ARN: $WAF_ARN"
+          
+          # Get current CloudFront distribution configuration
+          echo "🔍 Getting CloudFront distribution configuration..."
+          aws cloudfront get-distribution-config \
+            --id "$CLOUDFRONT_ID" \
+            --output json > /tmp/distribution-response.json
+          
+          # Extract ETag for the update
+          ETAG=$(jq -r '.ETag' /tmp/distribution-response.json)
+          echo "✅ ETag: $ETAG"
+          
+          # Extract just the DistributionConfig part
+          echo "🔧 Extracting DistributionConfig..."
+          jq '.DistributionConfig' /tmp/distribution-response.json > /tmp/distribution-config.json
+          
+          # Add WAF to the distribution configuration
+          echo "🛡️ Adding WAF to distribution configuration..."
+          jq --arg webacl "$WAF_ARN" '.WebACLId = $webacl' \
+            /tmp/distribution-config.json > /tmp/distribution-config-updated.json
+          
+          # Update the CloudFront distribution
+          echo "🚀 Updating CloudFront distribution with WAF..."
+          aws cloudfront update-distribution \
+            --id "$CLOUDFRONT_ID" \
+            --distribution-config file:///tmp/distribution-config-updated.json \
+            --if-match "$ETAG"
+          
+          echo "✅ WAF successfully associated with CloudFront distribution"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          set -euo pipefail
+          
+          echo "🔄 Invalidating CloudFront cache..."
+          
+          if [ -z "$CLOUDFRONT_ID" ] || [ "$CLOUDFRONT_ID" = "None" ]; then
+            echo "❌ FATAL: CloudFront Distribution ID is empty"
+            exit 1
+          fi
+          
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_ID" \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text \
+            --region us-east-1)
+          
+          echo "✅ Invalidation created with ID: $INVALIDATION_ID"
+          echo "Cache will be cleared for all paths (/*)"
+
+      - name: Generate deployment metadata
+        run: |
+          set -euo pipefail
+          
+          echo "📝 Generating deployment metadata..."
+          
+          # Get WAF ARN again (needed for metadata)
+          WAF_ARN=$(aws ssm get-parameter \
+            --name "/urgd/waf/web_acl_arn" \
+            --query 'Parameter.Value' \
+            --output text \
+            --region us-east-1)
+          
+          # Generate metadata.json
+          cat > metadata.json << EOF
+          {
+            "commit_sha": "${{ github.sha }}",
+            "artifact_id": "${{ env.APP_NAME }}-${{ env.VERSION }}",
+            "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "stack_name": "${{ env.STACK_NAME }}",
+            "cloudfront_distribution_id": "$CLOUDFRONT_ID",
+            "webacl_arn": "$WAF_ARN",
+            "environment": "${{ env.ENVIRONMENT }}",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+          
+          echo "✅ Metadata generated"
+          cat metadata.json
+
+      - name: Upload deployment metadata
+        run: |
+          set -euo pipefail
+          
+          echo "📦 Uploading deployment metadata to S3..."
+          aws s3 cp metadata.json \
+            "s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/metadata.json" \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✅ Metadata uploaded to S3"
+
+      - name: Clean up old artifacts
+        run: |
+          set -euo pipefail
+          
+          echo "🧹 Cleaning up old artifact versions..."
+          echo "Retention policy: Keep last 5 versions"
+          
+          # List all version directories, sort reverse chronologically, skip first 5, delete the rest
+          aws s3 ls "s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/artifacts/" --region ${{ env.AWS_REGION }} | \
+            sort -r | tail -n +6 | awk '{print $2}' | \
+            while read -r version_dir; do
+              if [ -n "$version_dir" ]; then
+                echo "Deleting old version: $version_dir"
+                aws s3 rm "s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/artifacts/$version_dir" \
+                  --recursive --region ${{ env.AWS_REGION }}
+              fi
+            done
+          
+          echo "✅ Artifact cleanup complete"
+
+      - name: Deployment summary
+        run: |
+          set -euo pipefail
+          
+          echo ""
+          echo "========================================="
+          echo "🎉 Deployment Complete!"
+          echo "========================================="
+          echo ""
+          echo "Environment: ${{ env.ENVIRONMENT }}"
+          echo "Version: ${{ env.VERSION }}"
+          echo "Stack: ${{ env.STACK_NAME }}"
+          echo "CloudFront Distribution: $CLOUDFRONT_ID"
+          echo "S3 Bucket: $S3_BUCKET"
+          echo "Deployed by: ${{ github.actor }}"
+          echo "Workflow run: ${{ github.run_id }}"
+          echo ""
+          echo "🌐 Site URL: https://urgdstudios.com"
+          echo ""
+          echo "========================================="
