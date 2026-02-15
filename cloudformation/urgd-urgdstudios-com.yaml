@@ -151,12 +151,12 @@ Resources:
         CustomErrorResponses:
           - ErrorCode: 403
             ResponsePagePath: /403.html
-            ResponseCode: '403'
-            ErrorCachingMinTTL: 10
+            ResponseCode: '200'
+            ErrorCachingMinTTL: 300
           - ErrorCode: 404
             ResponsePagePath: /404.html
-            ResponseCode: '404'
-            ErrorCachingMinTTL: 10
+            ResponseCode: '200'
+            ErrorCachingMinTTL: 300
         Comment: 'Primary CloudFront distribution for urgdstudios.com (index.html + static assets)'
         Enabled: true
         HttpVersion: http2
