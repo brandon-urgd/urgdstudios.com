@@ -187,7 +187,7 @@ Resources:
             ResponsePagePath: /404.html
             ResponseCode: '200'
             ErrorCachingMinTTL: 300
-        Comment: 'Primary CloudFront distribution for urgdstudios.com (index.html + static assets)'
+        Comment: 'Primary CloudFront distribution for urgdstudios.com (index.html + static assets) - with directory index rewrite'
         Enabled: true
         HttpVersion: http2
         IPV6Enabled: true
