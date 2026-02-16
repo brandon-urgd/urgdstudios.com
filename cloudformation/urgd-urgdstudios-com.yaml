@@ -111,26 +111,40 @@ Resources:
                 'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
 
   # ========================================
-  # CloudFront Function - Directory Index Rewrite
+  # CloudFront Function - Viewer Request Handler
+  # Combines: www-to-root redirect + directory index rewrite
   # ========================================
-  DirectoryIndexFunction:
+  ViewerRequestFunction:
     Type: AWS::CloudFront::Function
     Properties:
-      Name: urgdstudios-directory-index-rewrite
+      Name: urgdstudios-viewer-request
       FunctionConfig:
-        Comment: 'Rewrites directory paths to append index.html'
+        Comment: 'Redirects www to root domain and rewrites directory paths to index.html'
         Runtime: cloudfront-js-2.0
       FunctionCode: |
         function handler(event) {
             var request = event.request;
+            var host = request.headers.host.value;
+            
+            // Redirect www.urgdstudios.com -> urgdstudios.com
+            if (host.startsWith('www.')) {
+                return {
+                    statusCode: 301,
+                    statusDescription: 'Moved Permanently',
+                    headers: {
+                        location: { value: 'https://urgdstudios.com' + request.uri }
+                    }
+                };
+            }
+            
             var uri = request.uri;
             
             // If URI ends with '/', append 'index.html'
             if (uri.endsWith('/')) {
                 request.uri += 'index.html';
             }
-            // If URI doesn't have an extension and doesn't end with '/', append '/index.html'
-            else if (!uri.includes('.') && !uri.endsWith('/')) {
+            // If URI doesn't have an extension, append '/index.html'
+            else if (!uri.includes('.')) {
                 request.uri += '/index.html';
             }
             
@@ -174,9 +188,7 @@ Resources:
           Compress: true
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
           FunctionAssociations:
-            - FunctionARN: arn:aws:cloudfront::198919428218:function/RedirectWWWToRoot
-              EventType: viewer-request
-            - FunctionARN: !GetAtt DirectoryIndexFunction.FunctionARN
+            - FunctionARN: !GetAtt ViewerRequestFunction.FunctionARN
               EventType: viewer-request
         CustomErrorResponses:
           - ErrorCode: 403
