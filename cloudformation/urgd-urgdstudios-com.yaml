@@ -458,12 +458,14 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:Query
                   - dynamodb:GetItem
+                  - dynamodb:DescribeTable  # Health check
                 Resource:
                   - !GetAtt IntakeSubmissionsTable.Arn
                   - !Sub '${IntakeSubmissionsTable.Arn}/index/*'
               - Effect: Allow
                 Action:
                   - sns:Publish
+                  - sns:GetTopicAttributes  # Health check
                 Resource:
                   - !Ref IntakeTopic
               - Effect: Allow
