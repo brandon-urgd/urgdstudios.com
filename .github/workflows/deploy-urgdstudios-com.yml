@@ -446,16 +446,7 @@ jobs:
           
           echo "🔗 HTTP API ID: $INTAKE_API_ID"
           
-          # For HTTP APIs with AutoDeploy: true, we must disable AutoDeploy, 
-          # create a manual deployment, then re-enable AutoDeploy
-          echo "Temporarily disabling AutoDeploy..."
-          aws apigatewayv2 update-stage \
-            --api-id "$INTAKE_API_ID" \
-            --stage-name "${{ env.ENVIRONMENT }}" \
-            --auto-deploy false \
-            --region ${{ env.AWS_REGION }} \
-            --output text > /dev/null
-          
+          # Create deployment (AutoDeploy is false in CloudFormation, so we control deployments)
           echo "Creating deployment..."
           DEPLOYMENT_ID=$(aws apigatewayv2 create-deployment \
             --api-id "$INTAKE_API_ID" \
@@ -464,14 +455,6 @@ jobs:
             --region ${{ env.AWS_REGION }} \
             --query 'DeploymentId' \
             --output text)
-          
-          echo "Re-enabling AutoDeploy..."
-          aws apigatewayv2 update-stage \
-            --api-id "$INTAKE_API_ID" \
-            --stage-name "${{ env.ENVIRONMENT }}" \
-            --auto-deploy true \
-            --region ${{ env.AWS_REGION }} \
-            --output text > /dev/null
           
           echo "✅ HTTP API deployment created: $DEPLOYMENT_ID"
           echo "✅ API changes are now active"

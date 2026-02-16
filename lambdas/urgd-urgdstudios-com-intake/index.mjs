@@ -33,7 +33,11 @@ const VALID_TYPES = [
 export async function handler(event) {
   const requestId = event.requestContext?.requestId || 'unknown';
   const method = event.requestContext?.http?.method;
-  const path = event.requestContext?.http?.path;
+  const rawPath = event.requestContext?.http?.path;
+  
+  // Strip stage prefix from path (e.g., /prod/v1/intake/health → /v1/intake/health)
+  // HTTP API v2 includes stage name in path
+  const path = rawPath?.replace(/^\/[^/]+/, '') || rawPath;
   
   log('INFO', 'Request received', {
     requestId,

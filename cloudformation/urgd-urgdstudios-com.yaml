@@ -425,7 +425,7 @@ Resources:
       ApiId: !Ref IntakeApi
       StageName: !Ref Environment
       Description: !Sub 'API Gateway stage for ${Environment} environment'
-      AutoDeploy: true
+      AutoDeploy: false  # CI/CD handles deployments explicitly
       DefaultRouteSettings:
         ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50
