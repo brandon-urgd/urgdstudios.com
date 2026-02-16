@@ -575,7 +575,7 @@ Resources:
   IntakeTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub 'urgd-urgdstudios-com-intake-v2-${Environment}'
+      TopicName: !Sub 'urgd-urgdstudios-com-intake-notifications-${Environment}'
       DisplayName: 'urgdstudios.com Intake Notifications'
       KmsMasterKeyId: !Ref IntakeKmsKey
       Tags:
@@ -655,7 +655,7 @@ Resources:
   AlertsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub 'urgd-urgdstudios-com-alerts-${Environment}'
+      TopicName: !Sub 'urgd-urgdstudios-com-operational-alerts-${Environment}'
       DisplayName: 'urgdstudios.com Operational Alerts'
       KmsMasterKeyId: !Ref IntakeKmsKey
       Tags:
