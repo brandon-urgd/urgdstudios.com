@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — ur/gd Studios</title>
+  <meta name="description" content="Get in touch with ur/gd Studios. Submit a question, report a bug, or reach us about privacy — we'll respond.">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Contact — ur/gd Studios">
+  <meta property="og:description" content="Get in touch with ur/gd Studios. Submit a question, report a bug, or reach us about privacy — we'll respond.">
+  <meta property="og:type" content="website">
+  
+  <!-- Canonical URL -->
+  <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity - canonical links are metadata only, not executable resources -->
+  <link rel="canonical" href="https://urgdstudios.com/contact/">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  
+  <!-- Google Fonts: Rubik -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/styles/global.css">
+</head>
+<body>
+  <!-- Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Site Header & Navigation -->
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/" class="site-nav__logo" aria-label="ur/gd Studios — home">
+        <img src="/assets/logo.svg" alt="ur/gd Studios" width="120" height="32">
+      </a>
+      
+      <button class="nav-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">☰</button>
+      
+      <ul class="site-nav__links" id="mobile-menu">
+        <li><a href="/" class="site-nav__link">Home</a></li>
+        <li><a href="/applications/" class="site-nav__link">Applications</a></li>
+        <li><a href="/contact/" class="site-nav__link" aria-current="page">Contact</a></li>
+        <li><a href="/about/" class="site-nav__link">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content">
+    <div class="content-container content-container--narrow">
+      
+      <!-- Page Hero -->
+      <section class="page-hero">
+        <h1>Contact</h1>
+        <p>Have a question, an idea, or something to report? We're here. Fill out the form below and we'll get back to you.</p>
+      </section>
+
+      <!-- Success Alert (hidden by default, replaces form on success) -->
+      <div class="alert alert--success" role="status" id="success-alert" hidden>
+        <strong>Message received</strong>
+        <p>Thank you. We'll review your message and get back to you if a response is needed.</p>
+      </div>
+
+      <!-- Error Alert (hidden by default, appears above form on error) -->
+      <div class="alert alert--error" role="alert" id="error-alert" hidden>
+        <strong id="error-heading">Something went wrong</strong>
+        <p id="error-message">We weren't able to send your message. Please try again, or reach us directly at <a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a>.</p>
+      </div>
+
+      <!-- Contact Form -->
+      <form class="glass-surface" id="contact-form" aria-label="Contact form" novalidate>
+        <p class="form-note form-note--required">All fields are required.</p>
+
+        <div class="form-group">
+          <label for="intake-name">Name</label>
+          <input type="text" id="intake-name" name="name" class="form-input"
+                 placeholder="Your name" required maxlength="200"
+                 autocomplete="name">
+          <span class="form-error" id="name-error" hidden></span>
+        </div>
+
+        <div class="form-group">
+          <label for="intake-email">Email</label>
+          <input type="email" id="intake-email" name="email" class="form-input"
+                 placeholder="your@email.com" required maxlength="200"
+                 autocomplete="email">
+          <span class="form-error" id="email-error" hidden></span>
+        </div>
+
+        <div class="form-group">
+          <label for="intake-type">Reason for reaching out</label>
+          <select id="intake-type" name="type" class="form-input form-select" required>
+            <option value="" disabled selected>Select a reason...</option>
+            <option value="general-contact">General question</option>
+            <option value="business-inquiry">Business inquiry</option>
+            <option value="app-idea">App idea or suggestion</option>
+            <option value="bug-report">Bug report</option>
+            <option value="abuse-report">Report abuse</option>
+            <option value="privacy-question">Privacy question</option>
+          </select>
+          <span class="form-error" id="type-error" hidden></span>
+        </div>
+
+        <!-- Guidance box container (populated by JS based on type selection) -->
+        <div id="guidance-container" role="status" aria-live="polite"></div>
+
+        <div class="form-group">
+          <label for="intake-message">Message</label>
+          <textarea id="intake-message" name="message" class="form-input form-textarea"
+                    placeholder="Your message" required maxlength="5000" rows="6"></textarea>
+          <span class="form-error" id="message-error" hidden></span>
+        </div>
+
+        <button type="submit" class="btn btn--primary" id="submit-btn">Send</button>
+      </form>
+
+      <!-- Feature flag off fallback (hidden when form is active) -->
+      <div class="fallback-contact" id="flag-off-fallback" hidden>
+        <p>The contact form is coming soon.</p>
+        <p>In the meantime, reach us at <a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a>.</p>
+      </div>
+
+      <!-- No-JS fallback -->
+      <noscript>
+        <div class="fallback-contact">
+          <p>To get in touch, send us an email at <a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a>.</p>
+          <p>Include your name and reason for reaching out, and we'll respond as soon as we can.</p>
+        </div>
+      </noscript>
+
+      <p class="form-note">Please don't include sensitive personal information like passwords, government IDs, or financial details.</p>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <p>&copy; 2026 ur/gd Studios LLC</p>
+      <p>ATTN: ur/gd Studios LLC<br>The Cloud Room<br>1424 11th Ave STE 400<br>Seattle, WA 98122</p>
+      <ul class="site-footer__links">
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="/config.js"></script>
+  <script src="/scripts/nav.js"></script>
+  <script src="/scripts/intake.js"></script>
+</body>
+</html>
