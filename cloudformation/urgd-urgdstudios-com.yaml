@@ -42,6 +42,32 @@ Parameters:
     Description: 'Email address for operational alerts'
     Default: 'alerts@urgd.dev'
 
+  # Slice 3 intake notification emails
+  GeneralContactEmail:
+    Type: String
+    Description: 'Email for general contact inquiries'
+    Default: 'brandon@urgdstudios.com'
+
+  BugReportEmail:
+    Type: String
+    Description: 'Email for bug reports'
+    Default: 'brandon@urgdstudios.com'
+
+  FeatureRequestEmail:
+    Type: String
+    Description: 'Email for feature requests'
+    Default: 'brandon@urgdstudios.com'
+
+  PrivacyQuestionEmail:
+    Type: String
+    Description: 'Email for privacy questions'
+    Default: 'privacy@urgdstudios.com'
+
+  ReportAbuseEmail:
+    Type: String
+    Description: 'Email for abuse reports'
+    Default: 'abuse@urgdstudios.com'
+
 Resources:
   # ========================================
   # S3 Bucket (Import-ready)
@@ -190,6 +216,24 @@ Resources:
           FunctionAssociations:
             - FunctionARN: !GetAtt ViewerRequestFunction.FunctionARN
               EventType: viewer-request
+        CacheBehaviors:
+          - PathPattern: '/v1/*'
+            TargetOriginId: !Sub 'intake-api-${Environment}'
+            ViewerProtocolPolicy: https-only
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            Compress: true
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac  # AllViewerExceptHostHeader
         CustomErrorResponses:
           - ErrorCode: 403
             ResponsePagePath: /403.html
@@ -209,6 +253,544 @@ Resources:
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2021
         WebACLId: !Ref WafWebAclArn
+
+  # ========================================
+  # Slice 3: Intake Backend Infrastructure
+  # ========================================
+
+  # KMS Key for Encryption
+  IntakeKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: 'KMS key for urgdstudios.com intake backend encryption'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow CloudWatch Logs
+            Effect: Allow
+            Principal:
+              Service: !Sub 'logs.${AWS::Region}.amazonaws.com'
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:CreateGrant'
+              - 'kms:DescribeKey'
+            Resource: '*'
+            Condition:
+              ArnLike:
+                'kms:EncryptionContext:aws:logs:arn': !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*'
+          - Sid: Allow Lambda
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+          - Sid: Allow DynamoDB
+            Effect: Allow
+            Principal:
+              Service: dynamodb.amazonaws.com
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:CreateGrant'
+              - 'kms:DescribeKey'
+            Resource: '*'
+          - Sid: Allow SNS
+            Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey*'
+            Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  IntakeKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/urgd-urgdstudios-com-intake-${Environment}'
+      TargetKeyId: !Ref IntakeKmsKey
+
+  # DynamoDB Table - Submissions
+  IntakeSubmissionsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub 'urgd-urgdstudios-com-submissions-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: submissionId
+          AttributeType: S
+        - AttributeName: ipHash
+          AttributeType: S
+        - AttributeName: submittedAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: submissionId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: ipHash-submittedAt-index
+          KeySchema:
+            - AttributeName: ipHash
+              KeyType: HASH
+            - AttributeName: submittedAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # API Gateway HTTP API
+  IntakeApi:
+    Type: AWS::ApiGatewayV2::Api
+    # checkov:skip=CKV_AWS_95:Access logging not required for V1 static site contact form
+    Properties:
+      Name: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+      Description: 'Intake API for urgdstudios.com contact form'
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref CorsAllowedOrigins
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - X-Amz-Date
+          - Authorization
+          - X-Api-Key
+        MaxAge: 600
+      Tags:
+        Environment: !Ref Environment
+        Application: urgdstudios-com
+        Owner: ur/gd Studios
+
+  # API Gateway Stage
+  IntakeApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    # checkov:skip=CKV_AWS_95:Access logging not required for V1 static site contact form
+    Properties:
+      ApiId: !Ref IntakeApi
+      StageName: !Ref Environment
+      AutoDeploy: true
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 100
+        ThrottlingRateLimit: 50
+      Tags:
+        Environment: !Ref Environment
+        Application: urgdstudios-com
+
+  # Lambda IAM Role
+  IntakeLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: IntakePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:GetItem
+                Resource:
+                  - !GetAtt IntakeSubmissionsTable.Arn
+                  - !Sub '${IntakeSubmissionsTable.Arn}/index/*'
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource:
+                  - !Ref IntakeTopic
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !GetAtt IntakeDLQ.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  # Dead Letter Queue for Lambda
+  IntakeDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'urgd-urgdstudios-com-intake-dlq-${Environment}'
+      MessageRetentionPeriod: 1209600  # 14 days
+      KmsMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  # Lambda Function
+  IntakeFunction:
+    Type: AWS::Lambda::Function
+    # checkov:skip=CKV_AWS_117:Lambda VPC not required for this use case - no private resources accessed
+    Properties:
+      FunctionName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+      Runtime: nodejs22.x
+      Handler: index.handler
+      Role: !GetAtt IntakeLambdaRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref IntakeCodeKey
+      Timeout: 30
+      MemorySize: 256
+      ReservedConcurrentExecutions: 5
+      DeadLetterConfig:
+        TargetArn: !GetAtt IntakeDLQ.Arn
+      KmsKeyArn: !GetAtt IntakeKmsKey.Arn
+      Environment:
+        Variables:
+          SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
+          INTAKE_TOPIC_ARN: !Ref IntakeTopic
+          CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
+          ENVIRONMENT: !Ref Environment
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  # Lambda Permissions for API Gateway
+  IntakeFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref IntakeFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IntakeApi}/*'
+
+  # API Gateway Routes
+  IntakeHealthRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/intake/health'
+      Target: !Sub 'integrations/${IntakeIntegration}'
+
+  IntakeSubmitRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'POST /v1/intake'
+      Target: !Sub 'integrations/${IntakeIntegration}'
+
+  IntakeOptionsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'OPTIONS /v1/intake'
+      Target: !Sub 'integrations/${IntakeIntegration}'
+
+  # API Gateway Integration
+  IntakeIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref IntakeApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IntakeFunction.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
+
+  # SNS Topic - Intake Notifications
+  IntakeTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+      DisplayName: 'urgdstudios.com Intake Notifications'
+      KmsMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  # SNS Subscriptions with Filter Policies
+  GeneralContactSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref GeneralContactEmail
+      FilterPolicy:
+        type:
+          - general-contact
+          - other
+
+  BugReportSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref BugReportEmail
+      FilterPolicy:
+        type:
+          - bug-report
+
+  FeatureRequestSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref FeatureRequestEmail
+      FilterPolicy:
+        type:
+          - feature-request
+
+  PrivacyQuestionSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref PrivacyQuestionEmail
+      FilterPolicy:
+        type:
+          - privacy-question
+
+  ReportAbuseSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref ReportAbuseEmail
+      FilterPolicy:
+        type:
+          - report-abuse
+
+  # CloudWatch Log Group
+  IntakeFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-intake-${Environment}'
+      RetentionInDays: 90
+      KmsKeyId: !GetAtt IntakeKmsKey.Arn
+
+  # SNS Topic - Alerts
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'urgd-urgdstudios-com-alerts-${Environment}'
+      DisplayName: 'urgdstudios.com Operational Alerts'
+      KmsMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+
+  AlertsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlertsEmail
+
+  # CloudWatch Alarms
+  IntakeLambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-intake-errors-${Environment}'
+      AlarmDescription: 'Intake Lambda error rate exceeded 10%'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref IntakeFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  IntakeLambdaThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-intake-throttles-${Environment}'
+      AlarmDescription: 'Intake Lambda throttle detected'
+      MetricName: Throttles
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref IntakeFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  IntakeLambdaLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-intake-latency-${Environment}'
+      AlarmDescription: 'Intake Lambda p99 latency exceeded 3s'
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      ExtendedStatistic: p99
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 3000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref IntakeFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  IntakeDynamoDBThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-intake-dynamodb-throttles-${Environment}'
+      AlarmDescription: 'DynamoDB throttle detected on submissions table'
+      MetricName: UserErrors
+      Namespace: AWS/DynamoDB
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref IntakeSubmissionsTable
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  # CloudWatch Dashboard
+  IntakeDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", {"stat": "Sum", "label": "Invocations"}],
+                  [".", "Errors", {"stat": "Sum", "label": "Errors"}],
+                  [".", "Throttles", {"stat": "Sum", "label": "Throttles"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Intake Lambda Metrics",
+                "period": 300,
+                "dimensions": {
+                  "FunctionName": ["${IntakeFunction}"]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Duration", {"stat": "Average", "label": "p50"}],
+                  ["...", {"stat": "p99", "label": "p99"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Intake Lambda Duration",
+                "period": 300,
+                "dimensions": {
+                  "FunctionName": ["${IntakeFunction}"]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", {"stat": "Sum"}],
+                  [".", "ConsumedWriteCapacityUnits", {"stat": "Sum"}],
+                  [".", "UserErrors", {"stat": "Sum"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "DynamoDB Metrics",
+                "period": 300,
+                "dimensions": {
+                  "TableName": ["${IntakeSubmissionsTable}"]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/SNS", "NumberOfMessagesPublished", {"stat": "Sum"}],
+                  [".", "NumberOfNotificationsFailed", {"stat": "Sum"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "SNS Notifications",
+                "period": 300,
+                "dimensions": {
+                  "TopicName": ["${IntakeTopic.TopicName}"]
+                }
+              }
+            }
+          ]
+        }
 
 # ========================================
 # Outputs (CI/CD contract)
@@ -231,3 +813,16 @@ Outputs:
     Value: !GetAtt SiteDistribution.DomainName
     Export:
       Name: !Sub '${AWS::StackName}-CloudFrontDistributionURL'
+
+  # Slice 3 Outputs
+  ApiBaseUrl:
+    Description: 'API Gateway base URL (used by CI/CD for smoke tests)'
+    Value: !Sub 'https://${IntakeApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApiBaseUrl'
+
+  IntakeApiId:
+    Description: 'API Gateway ID'
+    Value: !Ref IntakeApi
+    Export:
+      Name: !Sub '${AWS::StackName}-IntakeApiId'
