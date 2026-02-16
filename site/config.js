@@ -4,6 +4,6 @@
  */
 
 window.URGD_CONFIG = {
-  intakeFormEnabled: false,
+  intakeFormEnabled: true,
   apiBaseUrl: 'https://urgdstudios.com'
 };
