@@ -183,6 +183,9 @@ Resources:
   # ========================================
   SiteDistribution:
     Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - IntakeApi
+      - IntakeApiStage
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
@@ -316,6 +319,16 @@ Resources:
               - 'kms:Encrypt'
               - 'kms:Decrypt'
               - 'kms:GenerateDataKey*'
+            Resource: '*'
+          - Sid: Allow SQS
+            Effect: Allow
+            Principal:
+              Service: sqs.amazonaws.com
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey*'
+              - 'kms:CreateGrant'
             Resource: '*'
       Tags:
         - Key: Environment
@@ -451,6 +464,12 @@ Resources:
                   - sqs:SendMessage
                 Resource:
                   - !GetAtt IntakeDLQ.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !GetAtt IntakeKmsKey.Arn
       Tags:
         - Key: Environment
           Value: !Ref Environment
