@@ -424,6 +424,7 @@ Resources:
     Properties:
       ApiId: !Ref IntakeApi
       StageName: !Ref Environment
+      Description: !Sub 'API Gateway stage for ${Environment} environment'
       AutoDeploy: true
       DefaultRouteSettings:
         ThrottlingBurstLimit: 100
