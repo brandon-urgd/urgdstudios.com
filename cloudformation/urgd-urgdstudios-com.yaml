@@ -585,56 +585,60 @@ Resources:
           Value: urgdstudios-com
 
   # SNS Subscriptions with Filter Policies
-  GeneralContactSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref GeneralContactEmail
-      FilterPolicy:
-        type:
-          - general-contact
-          - other
+  # TEMPORARILY COMMENTED OUT - Orphaned pending subscriptions blocking creation
+  # Will re-enable after 3-day auto-expiration period
+  # See: Slice 3 deployment - pending subscription conflict resolution
+  
+  # GeneralContactSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref IntakeTopic
+  #     Protocol: email
+  #     Endpoint: !Ref GeneralContactEmail
+  #     FilterPolicy:
+  #       type:
+  #         - general-contact
+  #         - other
 
-  BugReportSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref BugReportEmail
-      FilterPolicy:
-        type:
-          - bug-report
+  # BugReportSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref IntakeTopic
+  #     Protocol: email
+  #     Endpoint: !Ref BugReportEmail
+  #     FilterPolicy:
+  #       type:
+  #         - bug-report
 
-  FeatureRequestSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref FeatureRequestEmail
-      FilterPolicy:
-        type:
-          - feature-request
+  # FeatureRequestSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref IntakeTopic
+  #     Protocol: email
+  #     Endpoint: !Ref FeatureRequestEmail
+  #     FilterPolicy:
+  #       type:
+  #         - feature-request
 
-  PrivacyQuestionSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref PrivacyQuestionEmail
-      FilterPolicy:
-        type:
-          - privacy-question
+  # PrivacyQuestionSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref IntakeTopic
+  #     Protocol: email
+  #     Endpoint: !Ref PrivacyQuestionEmail
+  #     FilterPolicy:
+  #       type:
+  #         - privacy-question
 
-  ReportAbuseSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref ReportAbuseEmail
-      FilterPolicy:
-        type:
-          - report-abuse
+  # ReportAbuseSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref IntakeTopic
+  #     Protocol: email
+  #     Endpoint: !Ref ReportAbuseEmail
+  #     FilterPolicy:
+  #       type:
+  #         - report-abuse
 
   # CloudWatch Log Group
   IntakeFunctionLogGroup:
@@ -664,12 +668,16 @@ Resources:
         - Key: Application
           Value: urgdstudios-com
 
-  AlertsSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref AlertsTopic
-      Protocol: email
-      Endpoint: !Ref AlertsEmail
+  # TEMPORARILY COMMENTED OUT - Orphaned pending subscriptions blocking creation
+  # Will re-enable after 3-day auto-expiration period
+  # See: Slice 3 deployment - pending subscription conflict resolution
+  
+  # AlertsSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     TopicArn: !Ref AlertsTopic
+  #     Protocol: email
+  #     Endpoint: !Ref AlertsEmail
 
   # CloudWatch Alarms
   IntakeLambdaErrorAlarm:
