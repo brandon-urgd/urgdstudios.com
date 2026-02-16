@@ -68,10 +68,17 @@
   // Type change handler — show/hide guidance box
   typeInput.addEventListener('change', () => {
     const type = typeInput.value;
+    // Clear previous content
+    guidanceContainer.textContent = '';
+    
     if (guidanceContent[type]) {
-      guidanceContainer.innerHTML = guidanceContent[type];
-    } else {
-      guidanceContainer.innerHTML = '';
+      // Parse the static HTML content safely
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(guidanceContent[type], 'text/html');
+      // Move all body child nodes to the guidance container
+      Array.from(doc.body.childNodes).forEach(node => {
+        guidanceContainer.appendChild(node);
+      });
     }
   });
 
@@ -160,7 +167,32 @@
 
   function showErrorAlert(heading, message) {
     errorHeading.textContent = heading;
-    errorMessage.innerHTML = message; // Contains mailto link
+    
+    // Clear previous content
+    errorMessage.textContent = '';
+    
+    // Parse message for mailto links and create DOM elements
+    if (message.includes('<a href="mailto:')) {
+      const parts = message.split(/(<a href="mailto:[^"]+">.*?<\/a>)/);
+      parts.forEach(part => {
+        if (part.startsWith('<a href="mailto:')) {
+          // Extract email and text from the link
+          const emailMatch = part.match(/mailto:([^"]+)/);
+          const textMatch = part.match(/>([^<]+)<\/a>/);
+          if (emailMatch && textMatch) {
+            const link = document.createElement('a');
+            link.href = `mailto:${emailMatch[1]}`;
+            link.textContent = textMatch[1];
+            errorMessage.appendChild(link);
+          }
+        } else if (part) {
+          errorMessage.appendChild(document.createTextNode(part));
+        }
+      });
+    } else {
+      errorMessage.textContent = message;
+    }
+    
     errorAlert.hidden = false;
     successAlert.hidden = true;
     errorAlert.focus();
