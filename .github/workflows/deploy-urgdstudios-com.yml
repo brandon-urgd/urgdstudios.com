@@ -421,6 +421,61 @@ jobs:
           echo "✅ S3 Bucket Name: $S3_BUCKET"
           echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV
 
+      - name: Deploy HTTP API changes
+        run: |
+          set -euo pipefail
+          
+          echo "🚀 Creating HTTP API deployment to activate CloudFormation updates..."
+          
+          # Get the API ID from CloudFormation outputs
+          INTAKE_API_ID=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`IntakeApiId`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$INTAKE_API_ID" ] || [ "$INTAKE_API_ID" = "None" ]; then
+            echo "❌ Could not get Intake API ID from CloudFormation outputs"
+            aws cloudformation describe-stacks \
+              --stack-name ${{ env.STACK_NAME }} \
+              --query 'Stacks[0].Outputs' \
+              --output table \
+              --region ${{ env.AWS_REGION }}
+            exit 1
+          fi
+          
+          echo "🔗 HTTP API ID: $INTAKE_API_ID"
+          
+          # For HTTP APIs with AutoDeploy: true, we must disable AutoDeploy, 
+          # create a manual deployment, then re-enable AutoDeploy
+          echo "Temporarily disabling AutoDeploy..."
+          aws apigatewayv2 update-stage \
+            --api-id "$INTAKE_API_ID" \
+            --stage-name "${{ env.ENVIRONMENT }}" \
+            --auto-deploy false \
+            --region ${{ env.AWS_REGION }} \
+            --output text > /dev/null
+          
+          echo "Creating deployment..."
+          DEPLOYMENT_ID=$(aws apigatewayv2 create-deployment \
+            --api-id "$INTAKE_API_ID" \
+            --stage-name "${{ env.ENVIRONMENT }}" \
+            --description "Deploy CloudFormation changes - $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --region ${{ env.AWS_REGION }} \
+            --query 'DeploymentId' \
+            --output text)
+          
+          echo "Re-enabling AutoDeploy..."
+          aws apigatewayv2 update-stage \
+            --api-id "$INTAKE_API_ID" \
+            --stage-name "${{ env.ENVIRONMENT }}" \
+            --auto-deploy true \
+            --region ${{ env.AWS_REGION }} \
+            --output text > /dev/null
+          
+          echo "✅ HTTP API deployment created: $DEPLOYMENT_ID"
+          echo "✅ API changes are now active"
+
       - name: Run smoke tests
         run: |
           set -euo pipefail
