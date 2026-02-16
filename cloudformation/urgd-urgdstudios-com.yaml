@@ -497,79 +497,83 @@ Resources:
           Value: ur/gd Studios
 
   # Lambda Function
-  IntakeFunction:
-    Type: AWS::Lambda::Function
-    # checkov:skip=CKV_AWS_117:Lambda VPC not required for this use case - no private resources accessed
-    Properties:
-      FunctionName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
-      Runtime: nodejs22.x
-      Handler: index.handler
-      Role: !GetAtt IntakeLambdaRole.Arn
-      Code:
-        S3Bucket: !Ref ArtifactBucket
-        S3Key: !Ref IntakeCodeKey
-      Timeout: 30
-      MemorySize: 256
-      ReservedConcurrentExecutions: 5
-      DeadLetterConfig:
-        TargetArn: !GetAtt IntakeDLQ.Arn
-      KmsKeyArn: !GetAtt IntakeKmsKey.Arn
-      Environment:
-        Variables:
-          SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
-          INTAKE_TOPIC_ARN: !Ref IntakeTopic
-          CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
-          CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
-          CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
-          ENVIRONMENT: !Ref Environment
-          VERSION: '1.0.0'
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Application
-          Value: urgdstudios-com
-        - Key: Owner
-          Value: ur/gd Studios
+  # TEMPORARILY COMMENTED OUT - Lambda and related resources will be added in Batch 2
+  # These resources require actual Lambda code, which will be created in Batch 2
+  # Batch 1 creates the data layer (DynamoDB, SNS, KMS), Batch 2 adds compute layer
+  
+  # IntakeFunction:
+  #   Type: AWS::Lambda::Function
+  #   # checkov:skip=CKV_AWS_117:Lambda VPC not required for this use case - no private resources accessed
+  #   Properties:
+  #     FunctionName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+  #     Runtime: nodejs22.x
+  #     Handler: index.handler
+  #     Role: !GetAtt IntakeLambdaRole.Arn
+  #     Code:
+  #       S3Bucket: !Ref ArtifactBucket
+  #       S3Key: !Ref IntakeCodeKey
+  #     Timeout: 30
+  #     MemorySize: 256
+  #     ReservedConcurrentExecutions: 5
+  #     DeadLetterConfig:
+  #       TargetArn: !GetAtt IntakeDLQ.Arn
+  #     KmsKeyArn: !GetAtt IntakeKmsKey.Arn
+  #     Environment:
+  #       Variables:
+  #         SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
+  #         INTAKE_TOPIC_ARN: !Ref IntakeTopic
+  #         CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
+  #         CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
+  #         CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
+  #         ENVIRONMENT: !Ref Environment
+  #         VERSION: '1.0.0'
+  #     Tags:
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: Application
+  #         Value: urgdstudios-com
+  #       - Key: Owner
+  #         Value: ur/gd Studios
 
-  # Lambda Permissions for API Gateway
-  IntakeFunctionPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref IntakeFunction
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IntakeApi}/*'
+  # # Lambda Permissions for API Gateway
+  # IntakeFunctionPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref IntakeFunction
+  #     Action: lambda:InvokeFunction
+  #     Principal: apigateway.amazonaws.com
+  #     SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IntakeApi}/*'
 
-  # API Gateway Routes
-  IntakeHealthRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref IntakeApi
-      RouteKey: 'GET /v1/intake/health'
-      Target: !Sub 'integrations/${IntakeIntegration}'
+  # # API Gateway Routes
+  # IntakeHealthRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref IntakeApi
+  #     RouteKey: 'GET /v1/intake/health'
+  #     Target: !Sub 'integrations/${IntakeIntegration}'
 
-  IntakeSubmitRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref IntakeApi
-      RouteKey: 'POST /v1/intake'
-      Target: !Sub 'integrations/${IntakeIntegration}'
+  # IntakeSubmitRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref IntakeApi
+  #     RouteKey: 'POST /v1/intake'
+  #     Target: !Sub 'integrations/${IntakeIntegration}'
 
-  IntakeOptionsRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref IntakeApi
-      RouteKey: 'OPTIONS /v1/intake'
-      Target: !Sub 'integrations/${IntakeIntegration}'
+  # IntakeOptionsRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref IntakeApi
+  #     RouteKey: 'OPTIONS /v1/intake'
+  #     Target: !Sub 'integrations/${IntakeIntegration}'
 
-  # API Gateway Integration
-  IntakeIntegration:
-    Type: AWS::ApiGatewayV2::Integration
-    Properties:
-      ApiId: !Ref IntakeApi
-      IntegrationType: AWS_PROXY
-      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IntakeFunction.Arn}/invocations'
-      PayloadFormatVersion: '2.0'
+  # # API Gateway Integration
+  # IntakeIntegration:
+  #   Type: AWS::ApiGatewayV2::Integration
+  #   Properties:
+  #     ApiId: !Ref IntakeApi
+  #     IntegrationType: AWS_PROXY
+  #     IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IntakeFunction.Arn}/invocations'
+  #     PayloadFormatVersion: '2.0'
 
   # SNS Topic - Intake Notifications
   IntakeTopic:
@@ -640,20 +644,20 @@ Resources:
   #       type:
   #         - report-abuse
 
-  # CloudWatch Log Group
-  IntakeFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-intake-${Environment}'
-      RetentionInDays: 90
-      KmsKeyId: !GetAtt IntakeKmsKey.Arn
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Application
-          Value: urgdstudios-com
-        - Key: Owner
-          Value: ur/gd Studios
+  # TEMPORARILY COMMENTED OUT - Lambda log group will be added in Batch 2
+  # IntakeFunctionLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-intake-${Environment}'
+  #     RetentionInDays: 90
+  #     KmsKeyId: !GetAtt IntakeKmsKey.Arn
+  #     Tags:
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: Application
+  #         Value: urgdstudios-com
+  #       - Key: Owner
+  #         Value: ur/gd Studios
 
   # SNS Topic - Alerts
   AlertsTopic:
@@ -679,63 +683,63 @@ Resources:
   #     Protocol: email
   #     Endpoint: !Ref AlertsEmail
 
-  # CloudWatch Alarms
-  IntakeLambdaErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'urgd-urgdstudios-com-intake-errors-${Environment}'
-      AlarmDescription: 'Intake Lambda error rate exceeded 10%'
-      MetricName: Errors
-      Namespace: AWS/Lambda
-      Statistic: Sum
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 10
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref IntakeFunction
-      AlarmActions:
-        - !Ref AlertsTopic
-      TreatMissingData: notBreaching
+  # TEMPORARILY COMMENTED OUT - Lambda-dependent alarms will be added in Batch 2
+  # IntakeLambdaErrorAlarm:
+  #   Type: AWS::CloudWatch::Alarm
+  #   Properties:
+  #     AlarmName: !Sub 'urgd-urgdstudios-com-intake-errors-${Environment}'
+  #     AlarmDescription: 'Intake Lambda error rate exceeded 10%'
+  #     MetricName: Errors
+  #     Namespace: AWS/Lambda
+  #     Statistic: Sum
+  #     Period: 300
+  #     EvaluationPeriods: 1
+  #     Threshold: 10
+  #     ComparisonOperator: GreaterThanThreshold
+  #     Dimensions:
+  #       - Name: FunctionName
+  #         Value: !Ref IntakeFunction
+  #     AlarmActions:
+  #       - !Ref AlertsTopic
+  #     TreatMissingData: notBreaching
 
-  IntakeLambdaThrottleAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'urgd-urgdstudios-com-intake-throttles-${Environment}'
-      AlarmDescription: 'Intake Lambda throttle detected'
-      MetricName: Throttles
-      Namespace: AWS/Lambda
-      Statistic: Sum
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref IntakeFunction
-      AlarmActions:
-        - !Ref AlertsTopic
-      TreatMissingData: notBreaching
+  # IntakeLambdaThrottleAlarm:
+  #   Type: AWS::CloudWatch::Alarm
+  #   Properties:
+  #     AlarmName: !Sub 'urgd-urgdstudios-com-intake-throttles-${Environment}'
+  #     AlarmDescription: 'Intake Lambda throttle detected'
+  #     MetricName: Throttles
+  #     Namespace: AWS/Lambda
+  #     Statistic: Sum
+  #     Period: 300
+  #     EvaluationPeriods: 1
+  #     Threshold: 0
+  #     ComparisonOperator: GreaterThanThreshold
+  #     Dimensions:
+  #       - Name: FunctionName
+  #         Value: !Ref IntakeFunction
+  #     AlarmActions:
+  #       - !Ref AlertsTopic
+  #     TreatMissingData: notBreaching
 
-  IntakeLambdaLatencyAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'urgd-urgdstudios-com-intake-latency-${Environment}'
-      AlarmDescription: 'Intake Lambda p99 latency exceeded 3s'
-      MetricName: Duration
-      Namespace: AWS/Lambda
-      ExtendedStatistic: p99
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 3000
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref IntakeFunction
-      AlarmActions:
-        - !Ref AlertsTopic
-      TreatMissingData: notBreaching
+  # IntakeLambdaLatencyAlarm:
+  #   Type: AWS::CloudWatch::Alarm
+  #   Properties:
+  #     AlarmName: !Sub 'urgd-urgdstudios-com-intake-latency-${Environment}'
+  #     AlarmDescription: 'Intake Lambda p99 latency exceeded 3s'
+  #     MetricName: Duration
+  #     Namespace: AWS/Lambda
+  #     ExtendedStatistic: p99
+  #     Period: 300
+  #     EvaluationPeriods: 1
+  #     Threshold: 3000
+  #     ComparisonOperator: GreaterThanThreshold
+  #     Dimensions:
+  #       - Name: FunctionName
+  #         Value: !Ref IntakeFunction
+  #     AlarmActions:
+  #       - !Ref AlertsTopic
+  #     TreatMissingData: notBreaching
 
   IntakeDynamoDBThrottleAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -756,74 +760,74 @@ Resources:
         - !Ref AlertsTopic
       TreatMissingData: notBreaching
 
-  # CloudWatch Dashboard
-  IntakeDashboard:
-    Type: AWS::CloudWatch::Dashboard
-    Properties:
-      DashboardName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
-      DashboardBody: !Sub |
-        {
-          "widgets": [
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/Lambda", "Invocations", "FunctionName", "${IntakeFunction}", {"stat": "Sum", "label": "Invocations"}],
-                  [".", "Errors", ".", ".", {"stat": "Sum", "label": "Errors"}],
-                  [".", "Throttles", ".", ".", {"stat": "Sum", "label": "Throttles"}]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "title": "Intake Lambda Metrics",
-                "period": 300
-              }
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/Lambda", "Duration", "FunctionName", "${IntakeFunction}", {"stat": "Average", "label": "p50"}],
-                  ["...", {"stat": "p99", "label": "p99"}]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "title": "Intake Lambda Duration",
-                "period": 300
-              }
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "${IntakeSubmissionsTable}", {"stat": "Sum"}],
-                  [".", "ConsumedWriteCapacityUnits", ".", ".", {"stat": "Sum"}],
-                  [".", "WriteThrottleEvents", ".", ".", {"stat": "Sum"}]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "title": "DynamoDB Metrics",
-                "period": 300
-              }
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/SNS", "NumberOfMessagesPublished", "TopicName", "${IntakeTopic.TopicName}", {"stat": "Sum"}],
-                  [".", "NumberOfNotificationsFailed", ".", ".", {"stat": "Sum"}]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "title": "SNS Notifications",
-                "period": 300
-              }
-            }
-          ]
-        }
+  # TEMPORARILY COMMENTED OUT - Dashboard references Lambda metrics, will be added in Batch 2
+  # IntakeDashboard:
+  #   Type: AWS::CloudWatch::Dashboard
+  #   Properties:
+  #     DashboardName: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
+  #     DashboardBody: !Sub |
+  #       {
+  #         "widgets": [
+  #           {
+  #             "type": "metric",
+  #             "properties": {
+  #               "metrics": [
+  #                 ["AWS/Lambda", "Invocations", "FunctionName", "${IntakeFunction}", {"stat": "Sum", "label": "Invocations"}],
+  #                 [".", "Errors", ".", ".", {"stat": "Sum", "label": "Errors"}],
+  #                 [".", "Throttles", ".", ".", {"stat": "Sum", "label": "Throttles"}]
+  #               ],
+  #               "view": "timeSeries",
+  #               "stacked": false,
+  #               "region": "${AWS::Region}",
+  #               "title": "Intake Lambda Metrics",
+  #               "period": 300
+  #             }
+  #           },
+  #           {
+  #             "type": "metric",
+  #             "properties": {
+  #               "metrics": [
+  #                 ["AWS/Lambda", "Duration", "FunctionName", "${IntakeFunction}", {"stat": "Average", "label": "p50"}],
+  #                 ["...", {"stat": "p99", "label": "p99"}]
+  #               ],
+  #               "view": "timeSeries",
+  #               "stacked": false,
+  #               "region": "${AWS::Region}",
+  #               "title": "Intake Lambda Duration",
+  #               "period": 300
+  #             }
+  #           },
+  #           {
+  #             "type": "metric",
+  #             "properties": {
+  #               "metrics": [
+  #                 ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "${IntakeSubmissionsTable}", {"stat": "Sum"}],
+  #                 [".", "ConsumedWriteCapacityUnits", ".", ".", {"stat": "Sum"}],
+  #                 [".", "WriteThrottleEvents", ".", ".", {"stat": "Sum"}]
+  #               ],
+  #               "view": "timeSeries",
+  #               "stacked": false,
+  #               "region": "${AWS::Region}",
+  #               "title": "DynamoDB Metrics",
+  #               "period": 300
+  #             }
+  #           },
+  #           {
+  #             "type": "metric",
+  #             "properties": {
+  #               "metrics": [
+  #                 ["AWS/SNS", "NumberOfMessagesPublished", "TopicName", "${IntakeTopic.TopicName}", {"stat": "Sum"}],
+  #                 [".", "NumberOfNotificationsFailed", ".", ".", {"stat": "Sum"}]
+  #               ],
+  #               "view": "timeSeries",
+  #               "stacked": false,
+  #               "region": "${AWS::Region}",
+  #               "title": "SNS Notifications",
+  #               "period": 300
+  #             }
+  #           }
+  #         ]
+  #       }
 
 # ========================================
 # Outputs (CI/CD contract)
