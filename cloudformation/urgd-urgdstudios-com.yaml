@@ -205,6 +205,16 @@ Resources:
             OriginShield:
               Enabled: false
             OriginAccessControlId: !Ref SiteOriginAccessControl
+          - Id: !Sub 'intake-api-${Environment}'
+            DomainName: !Sub '${IntakeApi}.execute-api.${AWS::Region}.amazonaws.com'
+            OriginPath: !Sub '/${Environment}'
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+            ConnectionAttempts: 3
+            ConnectionTimeout: 10
         DefaultCacheBehavior:
           TargetOriginId: !Sub '${SiteBucket}.s3.us-west-2.amazonaws.com-menteyvako7'
           ViewerProtocolPolicy: redirect-to-https
