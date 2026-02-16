@@ -416,6 +416,11 @@ Resources:
   IntakeApiStage:
     Type: AWS::ApiGatewayV2::Stage
     # checkov:skip=CKV_AWS_95:Access logging not required for V1 static site contact form
+    DependsOn:
+      - IntakeHealthRoute
+      - IntakeSubmitRoute
+      - IntakeOptionsRoute
+      - IntakeIntegration
     Properties:
       ApiId: !Ref IntakeApi
       StageName: !Ref Environment
