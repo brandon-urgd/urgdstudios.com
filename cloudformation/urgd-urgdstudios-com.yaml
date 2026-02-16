@@ -183,9 +183,6 @@ Resources:
   # ========================================
   SiteDistribution:
     Type: AWS::CloudFront::Distribution
-    DependsOn:
-      - IntakeApi
-      - IntakeApiStage
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
@@ -274,6 +271,8 @@ Resources:
   # KMS Key for Encryption
   IntakeKmsKey:
     Type: AWS::KMS::Key
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Description: 'KMS key for urgdstudios.com intake backend encryption'
       EnableKeyRotation: true
@@ -329,6 +328,7 @@ Resources:
               - 'kms:Encrypt'
               - 'kms:Decrypt'
               - 'kms:GenerateDataKey*'
+              - 'kms:DescribeKey'
             Resource: '*'
           - Sid: Allow SQS
             Effect: Allow
@@ -339,12 +339,15 @@ Resources:
               - 'kms:Decrypt'
               - 'kms:GenerateDataKey*'
               - 'kms:CreateGrant'
+              - 'kms:DescribeKey'
             Resource: '*'
       Tags:
         - Key: Environment
           Value: !Ref Environment
         - Key: Application
           Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
 
   IntakeKmsKeyAlias:
     Type: AWS::KMS::Alias
@@ -404,19 +407,6 @@ Resources:
       Name: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
       Description: 'Intake API for urgdstudios.com contact form'
       ProtocolType: HTTP
-      CorsConfiguration:
-        AllowOrigins:
-          - !Ref CorsAllowedOrigins
-        AllowMethods:
-          - GET
-          - POST
-          - OPTIONS
-        AllowHeaders:
-          - Content-Type
-          - X-Amz-Date
-          - Authorization
-          - X-Api-Key
-        MaxAge: 600
       Tags:
         Environment: !Ref Environment
         Application: urgdstudios-com
@@ -436,6 +426,7 @@ Resources:
       Tags:
         Environment: !Ref Environment
         Application: urgdstudios-com
+        Owner: ur/gd Studios
 
   # Lambda IAM Role
   IntakeLambdaRole:
@@ -485,10 +476,14 @@ Resources:
           Value: !Ref Environment
         - Key: Application
           Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
 
   # Dead Letter Queue for Lambda
   IntakeDLQ:
     Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       QueueName: !Sub 'urgd-urgdstudios-com-intake-dlq-${Environment}'
       MessageRetentionPeriod: 1209600  # 14 days
@@ -498,6 +493,8 @@ Resources:
           Value: !Ref Environment
         - Key: Application
           Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
 
   # Lambda Function
   IntakeFunction:
@@ -522,13 +519,17 @@ Resources:
           SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
           INTAKE_TOPIC_ARN: !Ref IntakeTopic
           CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
+          CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
+          CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          VERSION: '1.0.0'
       Tags:
         - Key: Environment
           Value: !Ref Environment
         - Key: Application
           Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
 
   # Lambda Permissions for API Gateway
   IntakeFunctionPermission:
@@ -642,6 +643,13 @@ Resources:
       LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-intake-${Environment}'
       RetentionInDays: 90
       KmsKeyId: !GetAtt IntakeKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
 
   # SNS Topic - Alerts
   AlertsTopic:
@@ -726,7 +734,7 @@ Resources:
     Properties:
       AlarmName: !Sub 'urgd-urgdstudios-com-intake-dynamodb-throttles-${Environment}'
       AlarmDescription: 'DynamoDB throttle detected on submissions table'
-      MetricName: UserErrors
+      MetricName: WriteThrottleEvents
       Namespace: AWS/DynamoDB
       Statistic: Sum
       Period: 300
@@ -752,70 +760,58 @@ Resources:
               "type": "metric",
               "properties": {
                 "metrics": [
-                  ["AWS/Lambda", "Invocations", {"stat": "Sum", "label": "Invocations"}],
-                  [".", "Errors", {"stat": "Sum", "label": "Errors"}],
-                  [".", "Throttles", {"stat": "Sum", "label": "Throttles"}]
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${IntakeFunction}", {"stat": "Sum", "label": "Invocations"}],
+                  [".", "Errors", ".", ".", {"stat": "Sum", "label": "Errors"}],
+                  [".", "Throttles", ".", ".", {"stat": "Sum", "label": "Throttles"}]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "title": "Intake Lambda Metrics",
-                "period": 300,
-                "dimensions": {
-                  "FunctionName": ["${IntakeFunction}"]
-                }
+                "period": 300
               }
             },
             {
               "type": "metric",
               "properties": {
                 "metrics": [
-                  ["AWS/Lambda", "Duration", {"stat": "Average", "label": "p50"}],
+                  ["AWS/Lambda", "Duration", "FunctionName", "${IntakeFunction}", {"stat": "Average", "label": "p50"}],
                   ["...", {"stat": "p99", "label": "p99"}]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "title": "Intake Lambda Duration",
-                "period": 300,
-                "dimensions": {
-                  "FunctionName": ["${IntakeFunction}"]
-                }
+                "period": 300
               }
             },
             {
               "type": "metric",
               "properties": {
                 "metrics": [
-                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", {"stat": "Sum"}],
-                  [".", "ConsumedWriteCapacityUnits", {"stat": "Sum"}],
-                  [".", "UserErrors", {"stat": "Sum"}]
+                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "${IntakeSubmissionsTable}", {"stat": "Sum"}],
+                  [".", "ConsumedWriteCapacityUnits", ".", ".", {"stat": "Sum"}],
+                  [".", "WriteThrottleEvents", ".", ".", {"stat": "Sum"}]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "title": "DynamoDB Metrics",
-                "period": 300,
-                "dimensions": {
-                  "TableName": ["${IntakeSubmissionsTable}"]
-                }
+                "period": 300
               }
             },
             {
               "type": "metric",
               "properties": {
                 "metrics": [
-                  ["AWS/SNS", "NumberOfMessagesPublished", {"stat": "Sum"}],
-                  [".", "NumberOfNotificationsFailed", {"stat": "Sum"}]
+                  ["AWS/SNS", "NumberOfMessagesPublished", "TopicName", "${IntakeTopic.TopicName}", {"stat": "Sum"}],
+                  [".", "NumberOfNotificationsFailed", ".", ".", {"stat": "Sum"}]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "title": "SNS Notifications",
-                "period": 300,
-                "dimensions": {
-                  "TopicName": ["${IntakeTopic.TopicName}"]
-                }
+                "period": 300
               }
             }
           ]
