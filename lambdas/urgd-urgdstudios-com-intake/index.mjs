@@ -2,8 +2,8 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { randomUUID } from 'crypto';
-import { createResponse, errorResponse, getCorsHeaders, sanitizeInput, validateEmail, hashIp, log } from '../shared/utils.mjs';
-import { performHealthCheck } from '../shared/healthCheck.mjs';
+import { createResponse, errorResponse, getCorsHeaders, sanitizeInput, validateEmail, hashIp, log } from './shared/utils.mjs';
+import { performHealthCheck } from './shared/healthCheck.mjs';
 
 // Initialize AWS SDK clients
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-west-2' });
