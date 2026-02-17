@@ -98,6 +98,23 @@ jobs:
             echo "✅ Semgrep security scan passed"
           fi
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install frontend dependencies
+        working-directory: apps/web
+        run: |
+          echo "📦 Installing frontend dependencies..."
+          npm ci
+
+      - name: Run npm audit
+        working-directory: apps/web
+        run: |
+          echo "🔍 Running npm audit for dependency vulnerabilities..."
+          npm audit --audit-level=high
+
       - name: Validate S3 ACLs
         run: |
           echo "🔍 Validating S3 bucket configuration..."
@@ -493,15 +510,32 @@ jobs:
           
           echo "✅ Smoke tests passed"
 
+      - name: Setup Node.js (for Vite build)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install frontend dependencies (for build)
+        working-directory: apps/web
+        run: |
+          echo "📦 Installing frontend dependencies for build..."
+          npm ci
+
+      - name: Build frontend with Vite
+        working-directory: apps/web
+        run: |
+          echo "🔨 Building frontend with Vite..."
+          npm run build
+
       - name: Sync static site to S3
         run: |
           set -euo pipefail
           
           echo "📦 Syncing static site to S3..."
-          echo "Source: site/"
+          echo "Source: apps/web/dist/"
           echo "Destination: s3://$S3_BUCKET/"
           
-          aws s3 sync site/ "s3://$S3_BUCKET/" \
+          aws s3 sync apps/web/dist/ "s3://$S3_BUCKET/" \
             --delete \
             --cache-control "public, max-age=31536000" \
             --metadata-directive REPLACE \
