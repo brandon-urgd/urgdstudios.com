@@ -1,0 +1,329 @@
+.home {
+  width: 100%;
+}
+
+/* ----------------------------------------------------------------
+   Hero Section
+   ---------------------------------------------------------------- */
+
+.hero {
+  padding: var(--space-4xl) var(--width-content-padding) var(--space-md) var(--width-content-padding);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.heroLogo {
+  width: clamp(225px, 37.5vw, 375px);
+  height: auto;
+  margin-top: -13rem;
+  margin-bottom: -2rem;
+}
+
+.intro {
+  font-family: var(--font-body);
+  font-size: var(--font-size-intro);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: var(--width-narrow-max);
+}
+
+/* ----------------------------------------------------------------
+   Studios Section - Quietly Powerful
+   ---------------------------------------------------------------- */
+
+.quietlyPowerful {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------
+   Sections (Studios, Principles, Teasers)
+   ---------------------------------------------------------------- */
+
+.section {
+  max-width: var(--width-content-max);
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--width-content-padding);
+}
+
+.sectionHeading {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.sectionIntro {
+  font-family: var(--font-body);
+  font-size: var(--font-size-intro);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+  margin: 0 auto var(--space-2xl) auto;
+  max-width: var(--width-narrow-max);
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------
+   Studios Container & Grid
+   ---------------------------------------------------------------- */
+
+.studiosContainer {
+  cursor: default;
+}
+
+.studiosGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .studiosGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Orbit spans both columns on tablet */
+  .studiosGrid > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .studiosGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Reset Orbit on desktop */
+  .studiosGrid > :nth-child(3) {
+    grid-column: auto;
+  }
+}
+
+/* Individual studio cards with distinct glow colors */
+.studioCard {
+  transition: 
+    background var(--transition-normal) var(--easing-default),
+    border-color var(--transition-normal) var(--easing-default),
+    box-shadow var(--transition-normal) var(--easing-default);
+}
+
+/* Vault - Blue glow (precision, technical) */
+.studioCard:nth-child(1):hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 
+    0 0 20px rgba(96, 165, 250, 0.15),
+    inset 0 0 30px rgba(96, 165, 250, 0.05);
+}
+
+/* Station - Green glow (trust, growth) */
+.studioCard:nth-child(2):hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(52, 211, 153, 0.3);
+  box-shadow: 
+    0 0 20px rgba(52, 211, 153, 0.15),
+    inset 0 0 30px rgba(52, 211, 153, 0.05);
+}
+
+/* Orbit - Indigo glow (humanity, connection) */
+.studioCard:nth-child(3):hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(129, 140, 248, 0.3);
+  box-shadow: 
+    0 0 20px rgba(129, 140, 248, 0.15),
+    inset 0 0 30px rgba(129, 140, 248, 0.05);
+}
+
+/* Reduced motion: instant transitions, no glow */
+@media (prefers-reduced-motion: reduce) {
+  .studioCard {
+    transition: none;
+  }
+  
+  .studioCard:hover {
+    box-shadow: none;
+  }
+}
+
+/* Studio card content - simplified structure */
+.studioName {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-accent);
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.studioDescription {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------
+   Principles List
+   ---------------------------------------------------------------- */
+
+.principlesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: var(--width-narrow-max);
+  margin: 0 auto;
+}
+
+.principle {
+  /* No glass surface — principles are plain text on dark canvas */
+}
+
+/* Principle name colors - distinct colors from brand palette */
+.principle:nth-child(1) .principleName {
+  /* Stability - Blue (solid, reliable) */
+  color: var(--color-info);
+}
+
+.principle:nth-child(2) .principleName {
+  /* Compassion - Green (growth, care) */
+  color: var(--color-success);
+}
+
+.principle:nth-child(3) .principleName {
+  /* Connection - Amber/Yellow (warmth, linking) */
+  color: var(--color-warning);
+}
+
+.principle:nth-child(4) .principleName {
+  /* Growth - Success green (upward) */
+  color: var(--color-success);
+}
+
+.principle:nth-child(5) .principleName {
+  /* Warmth - Red (warmth, human emotion) */
+  color: var(--color-error);
+}
+
+.principleName {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-accent);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.principleDescription {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   Teaser Cards
+   ---------------------------------------------------------------- */
+
+.teaserLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+}
+
+.teaserLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--card-radius);
+}
+
+.teaserHeading {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.teaserText {
+  font-family: var(--font-body);
+  font-size: var(--font-size-intro);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+/* App highlights (Applications teaser only) */
+.appHighlights {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.appName {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Status badges */
+.badgeLive,
+.badgeSoon {
+  display: inline-block;
+  padding: var(--badge-padding);
+  border-radius: var(--badge-radius);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.badgeLive {
+  background: var(--badge-live-bg);
+  color: var(--badge-live-text);
+}
+
+.badgeSoon {
+  background: var(--badge-soon-bg);
+  color: var(--badge-soon-text);
+}
+
+/* ----------------------------------------------------------------
+   Responsive spacing adjustments
+   ---------------------------------------------------------------- */
+
+/* Tighten spacing between the two teaser cards */
+.section:has(.teaserLink) + .section:has(.teaserLink) {
+  padding-top: var(--space-sm);
+}

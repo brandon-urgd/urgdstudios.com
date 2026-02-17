@@ -15,7 +15,7 @@
      ---------------------------------------------------------------- */
 
   /* Palette */
-  --base-bg: #0a0a14;
+  --base-bg: #000000;
   --base-white: #ffffff;
   --base-accent: #818cf8;
   --base-accent-hover: #a5b4fc;
@@ -58,8 +58,8 @@
   --color-info: var(--base-info);
 
   /* Glass effect */
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-bg-hover: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-bg-hover: rgba(255, 255, 255, 0.04);
   --glass-blur: 16px;
   --glass-blur-mobile: 10px;
   --glass-border: rgba(255, 255, 255, 0.08);

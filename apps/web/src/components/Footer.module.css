@@ -1,6 +1,7 @@
 .footer {
   padding: var(--space-xl) var(--width-content-padding);
   text-align: center;
+  border-top: 1px solid var(--glass-border);
 }
 
 .inner {
@@ -8,7 +9,7 @@
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   align-items: center;
 }
 
@@ -16,10 +17,20 @@
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
   line-height: var(--line-height-normal);
+  margin: 0;
 }
 
 .legalNav {
   font-size: var(--font-size-small);
+  margin: 0;
+}
+
+.tagline {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  margin: 0;
 }
 
 .separator {

@@ -1,0 +1,17 @@
+.quote {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  color: var(--color-accent);
+  text-align: center;
+  margin: var(--space-3xl) auto var(--space-2xl) auto;
+  max-width: var(--width-narrow-max);
+  padding: 0 var(--width-content-padding);
+}
+
+/* Prevent orphaned words on narrow viewports */
+.quote::before,
+.quote::after {
+  content: '';
+}

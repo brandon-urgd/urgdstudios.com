@@ -22,6 +22,9 @@ export default function Footer() {
             </span>
           ))}
         </nav>
+        <p className={styles.tagline}>
+          Your data. Your privacy. Your experience. You're good.
+        </p>
       </div>
     </footer>
   );
