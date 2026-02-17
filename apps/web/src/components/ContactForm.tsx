@@ -345,11 +345,11 @@ export default function ContactForm() {
             <option value="" disabled>
               Select an inquiry type...
             </option>
-            <option value="general-inquiry">General inquiry</option>
-            <option value="bug-report">Bug report</option>
-            <option value="abuse-report">Abuse report</option>
-            <option value="privacy-question">Privacy question</option>
-            <option value="feature-request">Feature request</option>
+            <option value="general-inquiry">General Inquiry</option>
+            <option value="bug-report">Bug Report</option>
+            <option value="report-abuse">Abuse Report</option>
+            <option value="privacy-question">Privacy Question</option>
+            <option value="feature-request">Feature Request</option>
           </select>
           {errors.type && (
             <span role="alert" id="type-error" className={styles.error}>
