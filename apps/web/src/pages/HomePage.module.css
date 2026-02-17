@@ -121,7 +121,7 @@
     box-shadow var(--transition-normal) var(--easing-default);
 }
 
-/* Vault - Blue glow (precision, technical) */
+/* Vault - Blue glow (stability, precision, technical) */
 .studioCard:nth-child(1):hover {
   background: var(--glass-bg-hover);
   border-color: rgba(96, 165, 250, 0.3);
@@ -130,22 +130,22 @@
     inset 0 0 30px rgba(96, 165, 250, 0.05);
 }
 
-/* Station - Green glow (trust, growth) */
+/* Station - Yellow/Amber glow (connection, trust) */
 .studioCard:nth-child(2):hover {
   background: var(--glass-bg-hover);
-  border-color: rgba(52, 211, 153, 0.3);
+  border-color: rgba(251, 191, 36, 0.3);
   box-shadow: 
-    0 0 20px rgba(52, 211, 153, 0.15),
-    inset 0 0 30px rgba(52, 211, 153, 0.05);
+    0 0 20px rgba(251, 191, 36, 0.15),
+    inset 0 0 30px rgba(251, 191, 36, 0.05);
 }
 
-/* Orbit - Indigo glow (humanity, connection) */
+/* Orbit - Red glow (warmth, humanity) */
 .studioCard:nth-child(3):hover {
   background: var(--glass-bg-hover);
-  border-color: rgba(129, 140, 248, 0.3);
+  border-color: rgba(248, 113, 113, 0.3);
   box-shadow: 
-    0 0 20px rgba(129, 140, 248, 0.15),
-    inset 0 0 30px rgba(129, 140, 248, 0.05);
+    0 0 20px rgba(248, 113, 113, 0.15),
+    inset 0 0 30px rgba(248, 113, 113, 0.05);
 }
 
 /* Reduced motion: instant transitions, no glow */
@@ -203,8 +203,8 @@
 }
 
 .principle:nth-child(2) .principleName {
-  /* Compassion - Green (growth, care) */
-  color: var(--color-success);
+  /* Compassion - Indigo/Purple (empathy, understanding) */
+  color: var(--color-accent);
 }
 
 .principle:nth-child(3) .principleName {
