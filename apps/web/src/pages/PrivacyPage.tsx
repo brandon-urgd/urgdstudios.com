@@ -1,5 +1,6 @@
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
+import SectionReveal from '../components/SectionReveal';
 import ContentSection from '../components/ContentSection';
 import { useMeta } from '../utils/useMeta';
 
@@ -12,9 +13,11 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <ContentSection heading="">
-        <p>Coming soon.</p>
-      </ContentSection>
+      <SectionReveal>
+        <ContentSection heading="">
+          <p>Coming soon.</p>
+        </ContentSection>
+      </SectionReveal>
     </ContentContainer>
   );
 }
