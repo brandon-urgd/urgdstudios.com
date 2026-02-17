@@ -1,0 +1,14 @@
+.counter {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-align: right;
+  margin-top: var(--space-2xs);
+}
+
+.counter.warning {
+  color: var(--color-warning);
+}
+
+.counter.error {
+  color: var(--color-error);
+}

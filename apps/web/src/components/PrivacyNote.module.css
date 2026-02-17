@@ -1,0 +1,19 @@
+.note {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: var(--space-sm) 0 0 0;
+  line-height: var(--line-height-normal);
+}
+
+.link {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover,
+.link:focus {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}

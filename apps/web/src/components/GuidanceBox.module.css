@@ -1,0 +1,46 @@
+.box {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--base-radius-md);
+  backdrop-filter: blur(var(--glass-blur));
+  overflow: hidden;
+  animation: reveal 0.2s ease-out;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box {
+    animation: none;
+  }
+}
+
+.text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.link {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover,
+.link:focus {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
