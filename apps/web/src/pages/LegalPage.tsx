@@ -1,11 +1,20 @@
 import ContentContainer from '../components/ContentContainer';
-import styles from './page.module.css';
+import PageHeader from '../components/PageHeader';
+import ContentSection from '../components/ContentSection';
+import { useMeta } from '../utils/useMeta';
 
 export default function LegalPage() {
+  useMeta({
+    title: 'Legal — ur/gd Studios',
+    description: 'Legal information for ur/gd Studios LLC.',
+  });
+
   return (
     <ContentContainer narrow>
-      <h1 className={styles.heading}>Legal</h1>
-      <p className={styles.placeholder}>This page is being prepared.</p>
+      <PageHeader title="Legal" />
+      <ContentSection heading="">
+        <p>Coming soon.</p>
+      </ContentSection>
     </ContentContainer>
   );
 }

@@ -102,6 +102,10 @@ h1 {
   letter-spacing: var(--letter-spacing-tight);
 }
 
+h1[tabindex="-1"] {
+  outline: none;
+}
+
 h2 {
   font-size: var(--font-size-h2);
 }

@@ -1,11 +1,20 @@
 import ContentContainer from '../components/ContentContainer';
-import styles from './page.module.css';
+import PageHeader from '../components/PageHeader';
+import ContentSection from '../components/ContentSection';
+import { useMeta } from '../utils/useMeta';
 
 export default function TermsPage() {
+  useMeta({
+    title: 'Terms of Service — ur/gd Studios',
+    description: 'Terms of service for ur/gd Studios and its applications.',
+  });
+
   return (
     <ContentContainer narrow>
-      <h1 className={styles.heading}>Terms of Service</h1>
-      <p className={styles.placeholder}>This page is being prepared.</p>
+      <PageHeader title="Terms of Service" />
+      <ContentSection heading="">
+        <p>Coming soon.</p>
+      </ContentSection>
     </ContentContainer>
   );
 }
