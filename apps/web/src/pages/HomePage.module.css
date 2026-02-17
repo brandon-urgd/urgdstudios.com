@@ -124,28 +124,28 @@
 /* Vault - Blue glow (stability, precision, technical) */
 .studioCard:nth-child(1):hover {
   background: var(--glass-bg-hover);
-  border-color: rgba(96, 165, 250, 0.3);
+  border-color: color-mix(in srgb, var(--base-info) 30%, transparent);
   box-shadow: 
-    0 0 20px rgba(96, 165, 250, 0.15),
-    inset 0 0 30px rgba(96, 165, 250, 0.05);
+    0 0 20px color-mix(in srgb, var(--base-info) 15%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--base-info) 5%, transparent);
 }
 
 /* Station - Yellow/Amber glow (connection, trust) */
 .studioCard:nth-child(2):hover {
   background: var(--glass-bg-hover);
-  border-color: rgba(251, 191, 36, 0.3);
+  border-color: color-mix(in srgb, var(--base-warning) 30%, transparent);
   box-shadow: 
-    0 0 20px rgba(251, 191, 36, 0.15),
-    inset 0 0 30px rgba(251, 191, 36, 0.05);
+    0 0 20px color-mix(in srgb, var(--base-warning) 15%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--base-warning) 5%, transparent);
 }
 
 /* Orbit - Red glow (warmth, humanity) */
 .studioCard:nth-child(3):hover {
   background: var(--glass-bg-hover);
-  border-color: rgba(248, 113, 113, 0.3);
+  border-color: color-mix(in srgb, var(--base-error) 30%, transparent);
   box-shadow: 
-    0 0 20px rgba(248, 113, 113, 0.15),
-    inset 0 0 30px rgba(248, 113, 113, 0.05);
+    0 0 20px color-mix(in srgb, var(--base-error) 15%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--base-error) 5%, transparent);
 }
 
 /* Reduced motion: instant transitions, no glow */
@@ -168,6 +168,21 @@
   color: var(--color-accent);
   margin: 0 0 var(--space-md) 0;
   text-align: center;
+}
+
+/* Vault - Blue (Stability) */
+.studioCard:nth-child(1) .studioName {
+  color: var(--base-info);
+}
+
+/* Station - Yellow/Amber (Connection) */
+.studioCard:nth-child(2) .studioName {
+  color: var(--base-warning);
+}
+
+/* Orbit - Red (Warmth) */
+.studioCard:nth-child(3) .studioName {
+  color: var(--base-error);
 }
 
 .studioDescription {
