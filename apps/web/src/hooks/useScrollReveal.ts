@@ -18,12 +18,15 @@ interface UseScrollRevealReturn {
  *
  * Reveals are one-time — sections do not re-hide when scrolled past.
  *
+ * Default rootMargin of '-100px' triggers reveals slightly before content enters viewport,
+ * allowing the animation to complete as content becomes visible (just-in-time reveal).
+ *
  * Fallback: If IntersectionObserver is not supported, isVisible is always true (sections visible immediately).
  */
 export function useScrollReveal(
   options: UseScrollRevealOptions = {}
 ): UseScrollRevealReturn {
-  const { threshold = 0.1, rootMargin = '0px' } = options;
+  const { threshold = 0.1, rootMargin = '0px 0px -100px 0px' } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
