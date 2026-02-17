@@ -19,7 +19,7 @@ const GUIDANCE_CONTENT: Record<
   'bug-report': {
     text: 'Include steps to reproduce the issue, what you expected to happen, and what actually happened. If the issue involves a specific feature or data, include details.',
   },
-  'abuse-report': {
+  'report-abuse': {
     text: 'Urgent reports are prioritized. Include as much detail as possible — links, usernames, timestamps, and a description of the issue.',
   },
   'privacy-question': {

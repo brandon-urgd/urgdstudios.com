@@ -8,7 +8,7 @@
 const INQUIRY_TYPES = [
   'general-inquiry',
   'bug-report',
-  'abuse-report',
+  'report-abuse',
   'privacy-question',
   'feature-request',
 ];
