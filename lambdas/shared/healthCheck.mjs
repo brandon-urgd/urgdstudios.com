@@ -81,3 +81,42 @@ export async function performHealthCheck({ tableName, topicArn, requiredEnvVars 
     checks
   };
 }
+
+/**
+ * Handles health check requests
+ * @param {object} event - API Gateway event
+ * @param {string} requestId - Request ID for logging
+ * @param {object} options - Health check options
+ * @returns {object} API Gateway response
+ */
+export async function handleHealthCheck(event, requestId, options) {
+  const { createResponse, errorResponse, log } = await import('./utils.mjs');
+  
+  try {
+    const healthResult = await performHealthCheck(options);
+    
+    const response = {
+      status: healthResult.healthy ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.VERSION || '2.0.0',
+      checks: healthResult.checks
+    };
+    
+    const statusCode = healthResult.healthy ? 200 : 503;
+    
+    log('info', 'Health check completed', {
+      requestId,
+      status: response.status
+    });
+    
+    return createResponse(statusCode, response, event);
+    
+  } catch (error) {
+    log('error', 'Health check failed', {
+      requestId,
+      error: error.message
+    });
+    
+    return errorResponse(503, 'Health check failed', null, event);
+  }
+}

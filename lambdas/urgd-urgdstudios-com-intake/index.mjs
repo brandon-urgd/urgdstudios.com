@@ -2,8 +2,10 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { randomUUID } from 'crypto';
-import { createResponse, errorResponse, getCorsHeaders, sanitizeInput, validateEmail, hashIp, log } from './shared/utils.mjs';
-import { performHealthCheck } from './shared/healthCheck.mjs';
+import crypto from 'crypto';
+import sanitizeHtml from 'sanitize-html';
+import { createResponse, errorResponse, getCorsHeaders, validateEmail, hashIp, log } from './shared/utils.mjs';
+import { handleHealthCheck } from './shared/healthCheck.mjs';
 
 // Initialize AWS SDK clients
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-west-2' });
@@ -14,17 +16,26 @@ const snsClient = new SNSClient({ region: process.env.AWS_REGION || 'us-west-2' 
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
 const INTAKE_TOPIC_ARN = process.env.INTAKE_TOPIC_ARN;
 const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
-const VERSION = process.env.VERSION || '1.0.0';
+const VERSION = process.env.VERSION || '2.0.0';
+const POW_DIFFICULTY = parseInt(process.env.POW_DIFFICULTY || '4', 10);
 
 // Valid submission types
 const VALID_TYPES = [
-  'general-contact',
+  'general-inquiry',
   'bug-report',
   'feature-request',
   'privacy-question',
-  'report-abuse',
-  'other'
+  'report-abuse'
 ];
+
+// Type display labels for SNS notifications
+const TYPE_LABELS = {
+  'general-inquiry': 'General inquiry',
+  'bug-report': 'Bug report',
+  'feature-request': 'Feature request',
+  'privacy-question': 'Privacy question',
+  'report-abuse': 'Abuse report'
+};
 
 /**
  * Main Lambda handler
@@ -36,10 +47,9 @@ export async function handler(event) {
   const rawPath = event.requestContext?.http?.path;
   
   // Strip stage prefix from path (e.g., /prod/v1/intake/health → /v1/intake/health)
-  // HTTP API v2 includes stage name in path
   const path = rawPath?.replace(/^\/[^/]+/, '') || rawPath;
   
-  log('INFO', 'Request received', {
+  log('info', 'Request received', {
     requestId,
     method,
     path,
@@ -54,20 +64,24 @@ export async function handler(event) {
     
     // Route: GET /v1/intake/health
     if (method === 'GET' && path === '/v1/intake/health') {
-      return await handleHealthCheck(event, requestId);
+      return await handleHealthCheck(event, requestId, {
+        tableName: SUBMISSIONS_TABLE,
+        topicArn: INTAKE_TOPIC_ARN,
+        requiredEnvVars: ['SUBMISSIONS_TABLE', 'INTAKE_TOPIC_ARN', 'CORS_ALLOWED_ORIGINS', 'POW_DIFFICULTY']
+      });
     }
     
     // Route: POST /v1/intake
     if (method === 'POST' && path === '/v1/intake') {
-      return await handleIntake(event, requestId);
+      return await handleIntakeSubmission(event, requestId);
     }
     
     // Unknown route
-    log('WARN', 'Unknown route', { requestId, method, path });
+    log('warn', 'Unknown route', { requestId, method, path });
     return errorResponse(404, 'Not found', null, event);
     
   } catch (error) {
-    log('ERROR', 'Unhandled error', {
+    log('error', 'Unhandled error', {
       requestId,
       error: error.message,
       stack: error.stack
@@ -75,7 +89,7 @@ export async function handler(event) {
     
     return errorResponse(
       500,
-      'Something went wrong. Please try again later.',
+      'An unexpected error occurred. Please try again.',
       null,
       event
     );
@@ -83,134 +97,129 @@ export async function handler(event) {
 }
 
 /**
- * Handles health check requests
+ * Handles intake form submission with honeypot and proof-of-work verification
  */
-async function handleHealthCheck(event, requestId) {
-  try {
-    const healthResult = await performHealthCheck({
-      tableName: SUBMISSIONS_TABLE,
-      topicArn: INTAKE_TOPIC_ARN,
-      requiredEnvVars: ['SUBMISSIONS_TABLE', 'INTAKE_TOPIC_ARN', 'CORS_ALLOWED_ORIGINS']
-    });
-    
-    const response = {
-      status: healthResult.healthy ? 'healthy' : 'unhealthy',
-      timestamp: new Date().toISOString(),
-      service: `urgd-urgdstudios-com-intake-${ENVIRONMENT}`,
-      runtime: 'nodejs22.x',
-      region: process.env.AWS_REGION || 'us-west-2',
-      checks: healthResult.checks
-    };
-    
-    const statusCode = healthResult.healthy ? 200 : 503;
-    
-    log('INFO', 'Health check completed', {
-      requestId,
-      status: response.status
-    });
-    
-    return createResponse(statusCode, response, event);
-    
-  } catch (error) {
-    log('ERROR', 'Health check failed', {
-      requestId,
-      error: error.message
-    });
-    
-    return errorResponse(
-      503,
-      'Health check failed',
-      null,
-      event
-    );
-  }
-}
-
-/**
- * Handles intake form submission
- */
-async function handleIntake(event, requestId) {
+async function handleIntakeSubmission(event, requestId) {
   try {
     // Parse request body
     let body;
     try {
       body = JSON.parse(event.body || '{}');
     } catch (error) {
-      return errorResponse(400, 'Invalid JSON', null, event);
+      log('warn', 'Invalid JSON', { requestId });
+      return errorResponse(400, 'Invalid request format', null, event);
     }
     
-    // Validate input
+    // STEP 1: Honeypot check - FIRST defense layer
+    // If honeypot is non-empty, silently reject (return 200 to avoid bot learning)
+    if (body.honeypot && body.honeypot.trim().length > 0) {
+      log('warn', 'Bot detected via honeypot', { requestId });
+      
+      // Return 200 with fake success (silent rejection)
+      return createResponse(200, {
+        message: 'Submission received',
+        submissionId: `bot-${randomUUID()}`
+      }, event);
+    }
+    
+    // STEP 2: Validate required fields
     const validationErrors = validateInput(body);
     if (Object.keys(validationErrors).length > 0) {
-      return errorResponse(
-        400,
-        'Validation failed',
-        validationErrors,
-        event
-      );
+      log('info', 'Validation failed', {
+        requestId,
+        errors: Object.keys(validationErrors)
+      });
+      
+      // Return first error message
+      const firstError = Object.values(validationErrors)[0];
+      return errorResponse(400, firstError, null, event);
     }
     
-    // Sanitize input
-    const name = sanitizeInput(body.name, 200);
-    const email = sanitizeInput(body.email, 200);
-    const message = sanitizeInput(body.message, 5000);
-    const type = body.type; // Already validated against allowlist
+    // STEP 3: Verify proof-of-work
+    const powResult = verifyProofOfWork(body.proofOfWork, requestId);
+    if (!powResult.valid) {
+      log('warn', 'Proof of work verification failed', {
+        requestId,
+        reason: powResult.reason
+      });
+      
+      return errorResponse(400, powResult.message, null, event);
+    }
     
-    // Hash IP address
+    // STEP 4: Get and hash IP address
     const sourceIp = event.requestContext?.http?.sourceIp || 'unknown';
     const ipHash = hashIp(sourceIp);
     
-    // Rate limit check
+    // STEP 5: Rate limit check
     const isRateLimited = await checkRateLimit(ipHash, requestId);
     if (isRateLimited) {
+      log('warn', 'Rate limit exceeded', {
+        requestId,
+        ipHash
+      });
+      
       return errorResponse(
         429,
-        "You've sent several messages recently. Please wait a few minutes and try again.",
+        'Too many submissions. Please try again later.',
         null,
         event
       );
     }
     
-    // Generate submission
-    const submissionId = randomUUID();
-    const submittedAt = new Date().toISOString();
-    const ttl = Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60); // 1 year
-    const userAgent = event.headers?.['user-agent'] || event.headers?.['User-Agent'] || 'unknown';
+    // STEP 6: Sanitize input (especially message field)
+    const sanitizedMessage = sanitizeHtml(body.message.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+      disallowedTagsMode: 'discard'
+    });
     
-    // Store in DynamoDB
+    const name = body.name.trim().substring(0, 200);
+    const email = body.email.trim().substring(0, 200);
+    const type = body.type;
+    
+    // STEP 7: Store submission in DynamoDB
+    const submissionId = randomUUID();
+    const timestamp = new Date().toISOString();
+    const ttl = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days
+    
     await storeSubmission({
       submissionId,
-      type,
+      timestamp,
       name,
       email,
-      message,
-      submittedAt,
+      type,
+      message: sanitizedMessage,
       ipHash,
-      userAgent,
-      status: 'received',
+      honeypot: body.honeypot || '',
+      proofOfWork: body.proofOfWork,
       ttl
     });
     
-    // Publish SNS notification (no PII)
+    // STEP 8: Publish SNS notification
     await publishNotification({
       submissionId,
+      timestamp,
+      name,
+      email,
       type,
-      submittedAt
+      message: sanitizedMessage
     });
     
-    log('INFO', 'Submission processed successfully', {
+    log('info', 'Submission received', {
       requestId,
       submissionId,
-      type
+      type,
+      ipHash
     });
     
+    // STEP 9: Return success
     return createResponse(200, {
-      message: 'Message received',
+      message: 'Submission received',
       submissionId
     }, event);
     
   } catch (error) {
-    log('ERROR', 'Intake processing failed', {
+    log('error', 'Intake processing failed', {
       requestId,
       error: error.message,
       stack: error.stack
@@ -218,7 +227,7 @@ async function handleIntake(event, requestId) {
     
     return errorResponse(
       500,
-      'Something went wrong. Please try again later.',
+      'An unexpected error occurred. Please try again.',
       null,
       event
     );
@@ -227,54 +236,168 @@ async function handleIntake(event, requestId) {
 
 /**
  * Validates intake form input
+ * Returns object with field-specific error messages
  */
 function validateInput(body) {
   const errors = {};
   
   // Name validation
   if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
-    errors.name = 'Please enter your name.';
+    errors.name = 'Name is required';
   } else if (body.name.trim().length > 200) {
-    errors.name = 'Name must be 200 characters or less.';
+    errors.name = 'Name must be 200 characters or fewer';
   }
   
   // Email validation
   if (!body.email || typeof body.email !== 'string' || body.email.trim().length === 0) {
-    errors.email = 'Please enter your email address.';
+    errors.email = 'Email is required';
   } else if (!validateEmail(body.email.trim())) {
-    errors.email = 'Please enter a valid email address.';
+    errors.email = 'Invalid email address';
   }
   
   // Type validation
   if (!body.type || !VALID_TYPES.includes(body.type)) {
-    errors.type = 'Please select a valid reason.';
+    errors.type = 'Invalid inquiry type';
   }
   
   // Message validation
   if (!body.message || typeof body.message !== 'string' || body.message.trim().length === 0) {
-    errors.message = 'Please enter a message.';
+    errors.message = 'Message is required';
   } else if (body.message.trim().length > 5000) {
-    errors.message = 'Message must be 5,000 characters or less.';
+    errors.message = 'Message must be 5,000 characters or fewer';
+  }
+  
+  // Proof-of-work validation (presence check only - verification happens separately)
+  if (!body.proofOfWork || typeof body.proofOfWork !== 'object') {
+    errors.proofOfWork = 'Proof of work is required';
+  } else {
+    if (!body.proofOfWork.challenge || !body.proofOfWork.nonce || !body.proofOfWork.solution) {
+      errors.proofOfWork = 'Proof of work is required';
+    }
   }
   
   return errors;
 }
 
 /**
+ * Verifies proof-of-work solution
+ * @param {object} proofOfWork - PoW object from client
+ * @param {string} requestId - Request ID for logging
+ * @returns {object} Verification result { valid: boolean, reason?: string, message?: string }
+ */
+function verifyProofOfWork(proofOfWork, requestId) {
+  if (!proofOfWork) {
+    return {
+      valid: false,
+      reason: 'missing',
+      message: 'Proof of work is required'
+    };
+  }
+  
+  const { challenge, nonce, solution } = proofOfWork;
+  
+  // Validate presence
+  if (!challenge || !nonce || !solution) {
+    return {
+      valid: false,
+      reason: 'missing fields',
+      message: 'Proof of work verification failed'
+    };
+  }
+  
+  // Extract timestamp from challenge (format: urgd-{ISO timestamp}-{random})
+  const challengeParts = challenge.split('-');
+  if (challengeParts.length < 3 || challengeParts[0] !== 'urgd') {
+    return {
+      valid: false,
+      reason: 'invalid challenge format',
+      message: 'Proof of work verification failed'
+    };
+  }
+  
+  // Parse timestamp (second part is ISO timestamp)
+  const timestampStr = challengeParts.slice(1, -1).join('-'); // Handle ISO format with multiple dashes
+  let challengeTime;
+  try {
+    challengeTime = new Date(timestampStr).getTime();
+    if (isNaN(challengeTime)) {
+      throw new Error('Invalid timestamp');
+    }
+  } catch (error) {
+    return {
+      valid: false,
+      reason: 'invalid timestamp',
+      message: 'Proof of work verification failed'
+    };
+  }
+  
+  // Check if challenge is within 5-minute window
+  const now = Date.now();
+  const fiveMinutes = 5 * 60 * 1000;
+  
+  if (now - challengeTime > fiveMinutes) {
+    return {
+      valid: false,
+      reason: 'expired challenge',
+      message: 'Challenge expired. Please try again.'
+    };
+  }
+  
+  if (challengeTime > now + 60000) { // Allow 1 min clock skew
+    return {
+      valid: false,
+      reason: 'future challenge',
+      message: 'Challenge expired. Please try again.'
+    };
+  }
+  
+  // Compute SHA-256 hash of challenge + nonce
+  const hash = crypto
+    .createHash('sha256')
+    .update(challenge + nonce.toString())
+    .digest('hex');
+  
+  // Verify hash matches solution
+  if (hash !== solution) {
+    return {
+      valid: false,
+      reason: 'hash mismatch',
+      message: 'Proof of work verification failed'
+    };
+  }
+  
+  // Verify hash has required leading zeros
+  const leadingZeros = hash.match(/^0*/)[0].length;
+  if (leadingZeros < POW_DIFFICULTY) {
+    return {
+      valid: false,
+      reason: 'insufficient leading zeros',
+      message: 'Proof of work verification failed'
+    };
+  }
+  
+  // All checks passed
+  return { valid: true };
+}
+
+/**
  * Checks if the IP has exceeded the rate limit
- * Limit: 5 submissions per 15 minutes
+ * Limit: 3 submissions per 5 minutes
  */
 async function checkRateLimit(ipHash, requestId) {
   try {
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     
     const command = new QueryCommand({
       TableName: SUBMISSIONS_TABLE,
-      IndexName: 'ipHash-submittedAt-index',
-      KeyConditionExpression: 'ipHash = :ipHash AND submittedAt > :timestamp',
+      IndexName: 'ipHash-timestamp-index',
+      KeyConditionExpression: 'ipHash = :ipHash AND #ts > :timestamp',
+      ExpressionAttributeNames: {
+        '#ts': 'timestamp'
+      },
       ExpressionAttributeValues: {
         ':ipHash': ipHash,
-        ':timestamp': fifteenMinutesAgo
+        ':timestamp': fiveMinutesAgo
       },
       Select: 'COUNT'
     });
@@ -282,16 +405,17 @@ async function checkRateLimit(ipHash, requestId) {
     const response = await docClient.send(command);
     const recentCount = response.Count || 0;
     
-    log('INFO', 'Rate limit check', {
+    log('info', 'Rate limit check', {
       requestId,
+      ipHash,
       recentCount,
-      limit: 5
+      limit: 3
     });
     
-    return recentCount >= 5;
+    return recentCount >= 3;
     
   } catch (error) {
-    log('ERROR', 'Rate limit check failed', {
+    log('error', 'Rate limit check failed', {
       requestId,
       error: error.message
     });
@@ -314,21 +438,30 @@ async function storeSubmission(submission) {
 }
 
 /**
- * Publishes notification to SNS
- * Does NOT include PII - only submissionId, type, and timestamp
+ * Publishes notification to SNS with full submission details
+ * Uses MessageAttributes for type-based routing via filter policies
  */
-async function publishNotification({ submissionId, type, submittedAt }) {
-  const message = JSON.stringify({
-    submissionId,
-    type,
-    submittedAt,
-    environment: ENVIRONMENT
-  });
-  
+async function publishNotification({ submissionId, timestamp, name, email, type, message }) {
+  // Format notification message (plaintext)
+  const messageBody = `New submission from urgdstudios.com contact form.
+
+Name: ${name}
+Email: ${email}
+Type: ${TYPE_LABELS[type] || type}
+Submission ID: ${submissionId}
+Timestamp: ${timestamp}
+
+Message:
+${message}
+
+---
+This is an automated notification from urgdstudios.com.
+To manage notifications, update the SNS subscription in AWS Console.`;
+
   const command = new PublishCommand({
     TopicArn: INTAKE_TOPIC_ARN,
-    Message: message,
-    Subject: `New ${type} submission`,
+    Message: messageBody,
+    Subject: 'New contact form submission — urgdstudios.com',
     MessageAttributes: {
       type: {
         DataType: 'String',

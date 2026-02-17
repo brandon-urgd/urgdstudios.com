@@ -291,7 +291,12 @@ jobs:
             {"ParameterKey": "ArtifactBucket", "ParameterValue": "${{ env.ARTIFACT_BUCKET }}"},
             {"ParameterKey": "IntakeCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-intake-${{ env.VERSION }}.zip"},
             {"ParameterKey": "CorsAllowedOrigins", "ParameterValue": "https://urgdstudios.com"},
-            {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"}
+            {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"},
+            {"ParameterKey": "AdminEmail", "ParameterValue": "admin@urgdstudios.com"},
+            {"ParameterKey": "CriticalEmail", "ParameterValue": "critical@urgd.dev"},
+            {"ParameterKey": "PrivacyEmail", "ParameterValue": "privacy@urgdstudios.com"},
+            {"ParameterKey": "AbuseEmail", "ParameterValue": "abuse@urgdstudios.com"},
+            {"ParameterKey": "PowDifficulty", "ParameterValue": "4"}
           ]
           EOF
           
@@ -482,24 +487,10 @@ jobs:
           
           echo "🧪 Running smoke tests..."
           
-          # Get API Base URL from stack outputs
-          API_BASE_URL=$(aws cloudformation describe-stacks \
-            --stack-name ${{ env.STACK_NAME }} \
-            --query 'Stacks[0].Outputs[?OutputKey==`ApiBaseUrl`].OutputValue' \
-            --output text \
-            --region ${{ env.AWS_REGION }})
+          # Test health check endpoint via CloudFront (production URL)
+          echo "🔍 Testing health check: https://urgdstudios.com/v1/intake/health"
           
-          if [ -z "$API_BASE_URL" ] || [ "$API_BASE_URL" = "None" ]; then
-            echo "❌ FATAL: ApiBaseUrl not found in stack outputs"
-            exit 1
-          fi
-          
-          echo "✅ API Base URL: $API_BASE_URL"
-          
-          # Test health check endpoint
-          echo "🔍 Testing health check: $API_BASE_URL/v1/intake/health"
-          
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE_URL/v1/intake/health")
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "https://urgdstudios.com/v1/intake/health")
           
           if [ "$RESPONSE" = "200" ]; then
             echo "✅ Health check passed (HTTP 200)"

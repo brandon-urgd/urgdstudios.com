@@ -42,43 +42,22 @@ export function errorResponse(statusCode, error, details, event) {
  */
 export function getCorsHeaders(event) {
   const origin = event?.headers?.origin || event?.headers?.Origin;
-  const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '').split(',');
+  const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
   
   // Check if origin is allowed
   if (origin && allowedOrigins.includes(origin)) {
     return {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': process.env.CORS_ALLOWED_METHODS || 'GET,POST,OPTIONS',
-      'Access-Control-Allow-Headers': process.env.CORS_ALLOWED_HEADERS || 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
+      'Access-Control-Allow-Headers': process.env.CORS_ALLOWED_HEADERS || 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+      'Vary': 'Origin'
     };
   }
   
   return {};
-}
-
-/**
- * Sanitizes user input by trimming whitespace and stripping HTML tags
- * @param {string} input - User input string
- * @param {number} maxLength - Maximum allowed length
- * @returns {string} Sanitized string
- */
-export function sanitizeInput(input, maxLength) {
-  if (!input || typeof input !== 'string') {
-    return '';
-  }
-  
-  // Trim whitespace
-  let sanitized = input.trim();
-  
-  // Strip HTML tags (simple approach - removes anything between < and >)
-  sanitized = sanitized.replace(/<[^>]*>/g, '');
-  
-  // Enforce max length
-  if (maxLength && sanitized.length > maxLength) {
-    sanitized = sanitized.substring(0, maxLength);
-  }
-  
-  return sanitized;
 }
 
 /**
@@ -93,38 +72,39 @@ export function validateEmail(email) {
   
   // Basic email regex - checks for format user@domain.tld
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email) && email.length <= 200;
+  return emailRegex.test(email.trim()) && email.trim().length <= 200;
 }
 
 /**
- * Hashes an IP address using SHA-256
+ * Hashes an IP address using MD5
  * Raw IP is never stored or logged
  * @param {string} ip - IP address to hash
- * @returns {string} SHA-256 hash of the IP address
+ * @returns {string} MD5 hash of the IP address
  */
 export function hashIp(ip) {
   if (!ip) {
-    return '';
+    return 'unknown';
   }
   
   return crypto
-    .createHash('sha256')
+    .createHash('md5')
     .update(ip)
     .digest('hex');
 }
 
 /**
  * Logs a structured JSON log entry to CloudWatch
- * @param {string} level - Log level (INFO, WARN, ERROR)
+ * @param {string} level - Log level (info, warn, error)
  * @param {string} message - Log message
- * @param {object} [metadata] - Optional metadata object
+ * @param {object} [context] - Optional context object
  */
-export function log(level, message, metadata = {}) {
+export function log(level, message, context = {}) {
   const logEntry = {
-    timestamp: new Date().toISOString(),
     level,
     message,
-    ...metadata
+    timestamp: new Date().toISOString(),
+    requestId: context.requestId || 'unknown',
+    ...context
   };
   
   console.log(JSON.stringify(logEntry));

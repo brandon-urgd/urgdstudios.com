@@ -42,31 +42,32 @@ Parameters:
     Description: 'Email address for operational alerts'
     Default: 'alerts@urgd.dev'
 
-  # Slice 3 intake notification emails
-  GeneralContactEmail:
+  AdminEmail:
     Type: String
-    Description: 'Email for general contact inquiries'
-    Default: 'brandon@urgdstudios.com'
+    Description: 'Email for general inquiries and feature requests'
+    Default: 'admin@urgdstudios.com'
 
-  BugReportEmail:
+  CriticalEmail:
     Type: String
-    Description: 'Email for bug reports'
-    Default: 'brandon@urgdstudios.com'
+    Description: 'Email for bug reports (urgent/critical issues)'
+    Default: 'critical@urgd.dev'
 
-  FeatureRequestEmail:
-    Type: String
-    Description: 'Email for feature requests'
-    Default: 'brandon@urgdstudios.com'
-
-  PrivacyQuestionEmail:
+  PrivacyEmail:
     Type: String
     Description: 'Email for privacy questions'
     Default: 'privacy@urgdstudios.com'
 
-  ReportAbuseEmail:
+  AbuseEmail:
     Type: String
     Description: 'Email for abuse reports'
     Default: 'abuse@urgdstudios.com'
+
+  PowDifficulty:
+    Type: Number
+    Description: 'Proof-of-work difficulty (number of leading zeros required in hash)'
+    Default: 4
+    MinValue: 1
+    MaxValue: 8
 
 Resources:
   # ========================================
@@ -531,7 +532,8 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '1.0.0'
+          VERSION: '2.0.0'
+          POW_DIFFICULTY: !Ref PowDifficulty
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -594,57 +596,47 @@ Resources:
           Value: urgdstudios-com
 
   # SNS Subscriptions with Filter Policies
-  # TEMPORARILY COMMENTED OUT - Orphaned pending subscriptions blocking creation
-  # Will re-enable after 3-day auto-expiration period
-  # See: Slice 3 deployment - pending subscription conflict resolution
+  # TEMPORARILY COMMENTED OUT - SNS subscription issue requires 48-hour wait
+  # Will re-enable after resolution
+  # Route different inquiry types to appropriate email addresses
   
-  # GeneralContactSubscription:
+  # AdminEmailSubscription:
   #   Type: AWS::SNS::Subscription
   #   Properties:
   #     TopicArn: !Ref IntakeTopic
   #     Protocol: email
-  #     Endpoint: !Ref GeneralContactEmail
+  #     Endpoint: !Ref AdminEmail
   #     FilterPolicy:
   #       type:
-  #         - general-contact
-  #         - other
+  #         - general-inquiry
+  #         - feature-request
 
-  # BugReportSubscription:
+  # CriticalEmailSubscription:
   #   Type: AWS::SNS::Subscription
   #   Properties:
   #     TopicArn: !Ref IntakeTopic
   #     Protocol: email
-  #     Endpoint: !Ref BugReportEmail
+  #     Endpoint: !Ref CriticalEmail
   #     FilterPolicy:
   #       type:
   #         - bug-report
 
-  # FeatureRequestSubscription:
+  # PrivacyEmailSubscription:
   #   Type: AWS::SNS::Subscription
   #   Properties:
   #     TopicArn: !Ref IntakeTopic
   #     Protocol: email
-  #     Endpoint: !Ref FeatureRequestEmail
-  #     FilterPolicy:
-  #       type:
-  #         - feature-request
-
-  # PrivacyQuestionSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref IntakeTopic
-  #     Protocol: email
-  #     Endpoint: !Ref PrivacyQuestionEmail
+  #     Endpoint: !Ref PrivacyEmail
   #     FilterPolicy:
   #       type:
   #         - privacy-question
 
-  # ReportAbuseSubscription:
+  # AbuseEmailSubscription:
   #   Type: AWS::SNS::Subscription
   #   Properties:
   #     TopicArn: !Ref IntakeTopic
   #     Protocol: email
-  #     Endpoint: !Ref ReportAbuseEmail
+  #     Endpoint: !Ref AbuseEmail
   #     FilterPolicy:
   #       type:
   #         - report-abuse
@@ -654,7 +646,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-intake-${Environment}'
-      RetentionInDays: 90
+      RetentionInDays: 30
       KmsKeyId: !GetAtt IntakeKmsKey.Arn
       Tags:
         - Key: Environment
@@ -677,9 +669,9 @@ Resources:
         - Key: Application
           Value: urgdstudios-com
 
-  # TEMPORARILY COMMENTED OUT - Orphaned pending subscriptions blocking creation
-  # Will re-enable after 3-day auto-expiration period
-  # See: Slice 3 deployment - pending subscription conflict resolution
+  # SNS Subscription - Alerts Email
+  # TEMPORARILY COMMENTED OUT - SNS subscription issue requires 48-hour wait
+  # Will re-enable after resolution
   
   # AlertsSubscription:
   #   Type: AWS::SNS::Subscription
