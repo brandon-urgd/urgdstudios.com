@@ -1,0 +1,14 @@
+.page {
+  max-width: var(--width-content-max);
+  margin-inline: auto;
+  padding-inline: var(--width-content-padding);
+}
+
+.heading {
+  margin-bottom: var(--space-md);
+}
+
+.placeholder {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}

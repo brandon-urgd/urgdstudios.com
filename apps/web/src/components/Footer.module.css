@@ -1,0 +1,46 @@
+.footer {
+  padding: var(--space-xl) var(--width-content-padding);
+  text-align: center;
+}
+
+.inner {
+  max-width: var(--width-content-max);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.address {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.legalNav {
+  font-size: var(--font-size-small);
+}
+
+.separator {
+  color: var(--color-text-secondary);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.link:hover {
+  color: var(--color-accent);
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}

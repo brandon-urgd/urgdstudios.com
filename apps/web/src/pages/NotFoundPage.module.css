@@ -1,0 +1,24 @@
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
+  min-height: 44px;
+  color: var(--color-accent);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color var(--transition-fast) var(--easing-default);
+}
+
+.backLink:hover {
+  background-color: rgba(129, 140, 248, 0.10);
+  color: var(--color-accent-hover);
+}
+
+.backLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
