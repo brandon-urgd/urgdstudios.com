@@ -41,7 +41,7 @@ export default function Header() {
 
   return (
     <>
-      <header role="banner" className={styles.header}>
+      <header className={styles.header}>
         <div className={styles.inner}>
           <Link to="/" className={styles.logo} aria-label="ur/gd Studios home">
             <img src="/assets/logo.svg" alt="ur/gd Studios" className={styles.logoImg} />

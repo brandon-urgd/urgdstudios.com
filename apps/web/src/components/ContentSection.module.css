@@ -41,6 +41,14 @@
   padding-inline-start: var(--space-xl);
 }
 
+.content ul {
+  list-style: disc;
+}
+
+.content ol {
+  list-style: decimal;
+}
+
 .content li {
   margin-block-end: var(--space-xs);
 }

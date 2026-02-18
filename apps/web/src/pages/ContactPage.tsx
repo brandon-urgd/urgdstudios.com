@@ -4,35 +4,27 @@
  * Contact form (feature-flagged) or email-only fallback.
  */
 
-import { useEffect } from 'react';
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
 import SectionReveal from '../components/SectionReveal';
 import GlassPanel from '../components/GlassPanel';
 import ContactForm from '../components/ContactForm';
 import PrivacyNote from '../components/PrivacyNote';
+import { useMeta } from '../utils/useMeta';
 import styles from './ContactPage.module.css';
 
 export default function ContactPage() {
-  // Update document title and meta description
-  useEffect(() => {
-    document.title = 'Contact — ur/gd Studios';
-    
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.setAttribute(
-      'content',
-      'Get in touch with ur/gd Studios. Send a message or reach us by email.'
-    );
-  }, []);
+  useMeta({
+    title: 'Contact — ur/gd Studios',
+    description: 'Get in touch with ur/gd Studios. Questions, ideas, bug reports, or anything else.',
+    ogUrl: 'https://urgdstudios.com/contact/',
+  });
 
-  // Check feature flag
-  const config = (window as any).URGD_CONFIG;
-  const intakeFormEnabled = config?.intakeFormEnabled === true;
+  // Check feature flag — guard window access for SSR compatibility.
+  // During SSR (pre-rendering), window is not available; default true so the pre-rendered
+  // HTML matches what the client will hydrate (intakeFormEnabled is true in production config.js).
+  const config = typeof window !== 'undefined' ? (window as any).URGD_CONFIG : null;
+  const intakeFormEnabled = config === null ? true : config?.intakeFormEnabled === true;
 
   return (
     <ContentContainer>

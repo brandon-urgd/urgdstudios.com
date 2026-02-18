@@ -8,6 +8,7 @@ export default function PrivacyPage() {
   useMeta({
     title: 'Privacy — ur/gd Studios',
     description: 'Privacy policy for ur/gd Studios and its applications.',
+    ogUrl: 'https://urgdstudios.com/privacy/',
   });
 
   return (

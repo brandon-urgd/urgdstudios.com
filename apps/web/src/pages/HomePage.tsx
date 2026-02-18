@@ -2,9 +2,17 @@ import { Link } from 'react-router';
 import GlassPanel from '../components/GlassPanel';
 import SectionReveal from '../components/SectionReveal';
 import PullQuote from '../components/PullQuote';
+import { useMeta } from '../utils/useMeta';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
+  useMeta({
+    title: 'ur/gd Studios',
+    description:
+      'ur/gd Studios is a creative technology studio building tools for people who need them most. Calm, respectful, quietly powerful.',
+    ogUrl: 'https://urgdstudios.com/',
+  });
+
   return (
     <div className={styles.home}>
       {/* Hero Section */}

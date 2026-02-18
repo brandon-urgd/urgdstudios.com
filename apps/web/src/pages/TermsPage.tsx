@@ -8,6 +8,7 @@ export default function TermsPage() {
   useMeta({
     title: 'Terms of Service — ur/gd Studios',
     description: 'Terms of service for ur/gd Studios and its applications.',
+    ogUrl: 'https://urgdstudios.com/terms/',
   });
 
   return (

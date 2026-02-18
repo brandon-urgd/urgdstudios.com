@@ -7,4 +7,8 @@ export default defineConfig({
   build: {
     sourcemap: false,
   },
+  ssr: {
+    // Treat these as external in SSR build to avoid Node.js bundle issues
+    noExternal: [],
+  },
 })

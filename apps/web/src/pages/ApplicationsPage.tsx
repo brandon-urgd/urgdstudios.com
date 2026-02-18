@@ -32,6 +32,7 @@ export default function ApplicationsPage() {
     title: 'Applications — ur/gd Studios',
     description:
       'Applications built by ur/gd Studios. Tools we wish we had — some live, some on the way.',
+    ogUrl: 'https://urgdstudios.com/applications/',
   });
 
   return (

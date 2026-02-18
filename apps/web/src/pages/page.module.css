@@ -12,3 +12,10 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-body);
 }
+
+.effectiveDate {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-small);
+  margin-block-end: var(--space-2xl);
+  margin-block-start: calc(var(--space-md) * -1);
+}

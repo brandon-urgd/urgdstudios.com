@@ -8,6 +8,7 @@ export default function LegalPage() {
   useMeta({
     title: 'Legal — ur/gd Studios',
     description: 'Legal information for ur/gd Studios LLC.',
+    ogUrl: 'https://urgdstudios.com/legal/',
   });
 
   return (

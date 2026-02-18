@@ -9,7 +9,7 @@ const LEGAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer role="contentinfo" className={styles.footer}>
+    <footer className={styles.footer}>
       <div className={styles.inner}>
         <p className={styles.tagline}>
           Your data. Your privacy. Your experience. You're good.

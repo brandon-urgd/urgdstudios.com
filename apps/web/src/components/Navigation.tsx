@@ -15,7 +15,6 @@ const NAV_LINKS = [
 export default function Navigation({ orientation = 'horizontal', onLinkClick }: NavigationProps) {
   return (
     <nav
-      role="navigation"
       aria-label="Main navigation"
       className={`${styles.nav} ${orientation === 'vertical' ? styles.vertical : ''}`}
     >
