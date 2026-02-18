@@ -21,6 +21,9 @@ export default function HomePage() {
           src="/assets/logo.svg"
           alt="ur/gd Studios"
           className={styles.heroLogo}
+          loading="eager"
+          fetchPriority="high"
+          draggable={false}
         />
         <p id="hero-heading" className={styles.intro}>
           We build the tools we wish we had. Calm, respectful software for
