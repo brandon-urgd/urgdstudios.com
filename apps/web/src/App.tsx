@@ -83,62 +83,15 @@ export default function App() {
     <>
       <RouteChangeManager />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <HomePage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/applications/"
-          element={
-            <Layout>
-              <ApplicationsPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/contact/"
-          element={
-            <Layout>
-              <ContactPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/privacy/"
-          element={
-            <Layout>
-              <PrivacyPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/terms/"
-          element={
-            <Layout>
-              <TermsPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/legal/"
-          element={
-            <Layout>
-              <LegalPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <Layout>
-              <NotFoundPage />
-            </Layout>
-          }
-        />
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/applications/" element={<ApplicationsPage />} />
+          <Route path="/contact/" element={<ContactPage />} />
+          <Route path="/privacy/" element={<PrivacyPage />} />
+          <Route path="/terms/" element={<TermsPage />} />
+          <Route path="/legal/" element={<LegalPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Routes>
     </>
   );

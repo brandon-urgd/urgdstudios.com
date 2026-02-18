@@ -49,6 +49,7 @@ export default function Header() {
               alt="ur/gd Studios"
               className={styles.logoImg}
               loading="eager"
+              decoding="sync"
               fetchPriority="high"
               draggable={false}
             />
