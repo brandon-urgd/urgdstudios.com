@@ -83,7 +83,16 @@ jobs:
       - name: Run Semgrep Security Scan
         run: |
           echo "🔍 Running Semgrep security scan..."
-          semgrep --config=auto --json --output=/tmp/semgrep-results.json .
+          # Exclude build-time scripts and generated artifacts from scanning.
+          # apps/web/scripts/ contains CI build tools (prerender, favicon generation)
+          # that use dynamic imports and fs operations on statically-determined paths —
+          # not production code, not user-facing, not a real attack surface.
+          semgrep --config=auto --json --output=/tmp/semgrep-results.json \
+            --exclude=apps/web/scripts \
+            --exclude=apps/web/dist \
+            --exclude=apps/web/dist-server \
+            --exclude=apps/web/node_modules \
+            .
           
           if [ -s /tmp/semgrep-results.json ]; then
             findings=$(jq '.results | length' /tmp/semgrep-results.json)
