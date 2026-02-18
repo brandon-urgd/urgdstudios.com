@@ -1,0 +1,16 @@
+# Semgrep ignore rules for urgdstudios.com
+#
+# Format follows .gitignore conventions.
+
+# Build-time Node.js scripts — not production code, not user-facing.
+# Dynamic imports and fs operations in these files are build pipeline
+# mechanics operating on statically-determined paths, not user input.
+apps/web/scripts/
+
+# Build output directories — generated artifacts, not source.
+apps/web/dist/
+apps/web/dist-server/
+
+# Dependency trees — third-party code, not our responsibility to fix.
+apps/web/node_modules/
+lambdas/urgd-urgdstudios-com-intake/node_modules/
