@@ -23,7 +23,7 @@ const APPLICATIONS: Application[] = [
     name: 'Stitch',
     description: 'Turn SVG designs into embroidery files.',
     status: 'Active',
-    url: 'https://stitch.urgd.dev',
+    url: 'https://stitch.urgdstudios.com',
   },
 ];
 
