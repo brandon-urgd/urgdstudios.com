@@ -42,7 +42,7 @@ export default function HomePage() {
           <GlassPanel interactive className={styles.studiosContainer}>
             <h1 id="studios-heading" className={styles.quietlyPowerful}>Quietly Powerful</h1>
             <p className={styles.sectionIntro}>
-              ur/gd operates through three studios, each with a distinct purpose.
+              You're Good (ur/gd) operates with three studios, each with a distinct purpose.
             </p>
 
             <div className={styles.studiosGrid}>
