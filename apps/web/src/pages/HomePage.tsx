@@ -22,6 +22,7 @@ export default function HomePage() {
           alt="ur/gd Studios"
           className={styles.heroLogo}
           loading="eager"
+          decoding="sync"
           fetchPriority="high"
           draggable={false}
         />
