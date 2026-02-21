@@ -187,10 +187,12 @@ Resources:
             
             var uri = request.uri;
             
-            // Command Center SPA: rewrite all /command/* extensionless paths to /command/index.html
-            // React Router handles client-side routing from there.
+            // Command Center SPA: rewrite all /command/* extensionless paths to the
+            // root /index.html (the Vite SPA entry point). React Router handles
+            // client-side routing from there. /command/index.html does not exist
+            // in S3 — only the root index.html is the SPA shell.
             if (uri === '/command' || (uri.startsWith('/command/') && !uri.includes('.'))) {
-                request.uri = '/command/index.html';
+                request.uri = '/index.html';
                 return request;
             }
             
