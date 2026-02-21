@@ -27,7 +27,6 @@ export function configureAuth(): void {
       Cognito: {
         userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID as string,
         userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string,
-        userPoolRegion: 'us-west-2',
       },
     },
   });
