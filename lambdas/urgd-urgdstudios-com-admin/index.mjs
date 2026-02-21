@@ -96,6 +96,14 @@ export async function handler(event) {
     return errorResponse(404, 'Not found', {}, event);
 
   } catch (error) {
+    if (isAdminHttpError(error)) {
+      log('info', 'Request error', {
+        requestId,
+        statusCode: error.statusCode,
+        message: error.message,
+      });
+      return errorResponse(error.statusCode, error.message, {}, event);
+    }
     log('error', 'Unhandled error', {
       requestId,
       error: error.message,

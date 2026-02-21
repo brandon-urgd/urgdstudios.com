@@ -83,8 +83,8 @@ authed_delete() {
 }
 
 parse_response() {
-  # Last line is HTTP code, rest is body
-  echo "$1" | head -n -1
+  # Last line is HTTP code, rest is body (sed '$d' works on macOS BSD + GNU)
+  echo "$1" | sed '$d'
 }
 
 parse_code() {
