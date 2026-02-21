@@ -1,7 +1,7 @@
 {
-  "name": "urgd-urgdstudios-com-intake",
+  "name": "urgd-urgdstudios-com-admin",
   "version": "1.0.0",
-  "description": "Contact form intake backend for urgdstudios.com",
+  "description": "Command Center admin API for urgdstudios.com — message triage, status updates, reply-via-email",
   "type": "module",
   "main": "index.mjs",
   "scripts": {
@@ -10,9 +10,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.713.0",
     "@aws-sdk/lib-dynamodb": "^3.713.0",
-    "@aws-sdk/client-sns": "^3.713.0",
-    "@aws-sdk/client-ses": "^3.713.0",
-    "sanitize-html": "^2.13.1"
+    "@aws-sdk/client-ses": "^3.713.0"
   },
   "engines": {
     "node": ">=22.0.0"

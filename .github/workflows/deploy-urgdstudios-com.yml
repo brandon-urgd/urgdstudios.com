@@ -207,69 +207,58 @@ jobs:
       - name: Build Lambda functions
         run: |
           set -euo pipefail
-          
-          echo "🔨 Building Lambda function: urgd-${{ env.APP_NAME }}-intake"
-          
-          # Create temporary build directory
-          BUILD_DIR=$(mktemp -d)
-          FUNCTION_DIR="$BUILD_DIR/urgd-${{ env.APP_NAME }}-intake"
-          
-          mkdir -p "$FUNCTION_DIR"
-          
-          # Copy function code
-          cp -r lambdas/urgd-${{ env.APP_NAME }}-intake/* "$FUNCTION_DIR/"
-          
-          # Copy shared utilities to root of function package
-          mkdir -p "$FUNCTION_DIR/shared"
-          cp -r lambdas/shared/* "$FUNCTION_DIR/shared/"
-          
-          # Install dependencies if package.json exists
-          if [ -f "$FUNCTION_DIR/package.json" ]; then
-            echo "📦 Installing dependencies..."
+
+          build_lambda() {
+            local FUNCTION_NAME="$1"
+            echo "🔨 Building Lambda function: $FUNCTION_NAME"
+
+            BUILD_DIR=$(mktemp -d)
+            FUNCTION_DIR="$BUILD_DIR/$FUNCTION_NAME"
+            mkdir -p "$FUNCTION_DIR"
+
+            cp -r "lambdas/$FUNCTION_NAME/"* "$FUNCTION_DIR/"
+
+            mkdir -p "$FUNCTION_DIR/shared"
+            cp -r lambdas/shared/* "$FUNCTION_DIR/shared/"
+
+            if [ -f "$FUNCTION_DIR/package.json" ]; then
+              echo "📦 Installing dependencies for $FUNCTION_NAME..."
+              cd "$FUNCTION_DIR"
+              npm install --production
+              cd -
+            fi
+
+            ARTIFACT_NAME="$FUNCTION_NAME-${{ env.VERSION }}.zip"
+            echo "📦 Creating artifact: $ARTIFACT_NAME"
             cd "$FUNCTION_DIR"
-            npm install --production
+            zip -r "/tmp/$ARTIFACT_NAME" . -x "*.git*" "*.DS_Store*" "node_modules/.cache/*"
             cd -
-          fi
-          
-          # Create ZIP artifact
-          ARTIFACT_NAME="urgd-${{ env.APP_NAME }}-intake-${{ env.VERSION }}.zip"
-          echo "📦 Creating artifact: $ARTIFACT_NAME"
-          
-          cd "$FUNCTION_DIR"
-          zip -r "/tmp/$ARTIFACT_NAME" . -x "*.git*" "*.DS_Store*" "node_modules/.cache/*"
-          cd -
-          
-          # Verify shared utilities are present
-          echo "🔍 Verifying ZIP contents..."
-          if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/utils.mjs"; then
-            echo "❌ FATAL: shared/utils.mjs missing from artifact"
-            echo "ZIP contents:"
-            unzip -l "/tmp/$ARTIFACT_NAME"
-            exit 1
-          fi
-          
-          if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/healthCheck.mjs"; then
-            echo "❌ FATAL: shared/healthCheck.mjs missing from artifact"
-            echo "ZIP contents:"
-            unzip -l "/tmp/$ARTIFACT_NAME"
-            exit 1
-          fi
-          
-          echo "✅ Artifact verified — shared utilities present"
-          
-          # Upload to S3
-          S3_KEY="${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/$ARTIFACT_NAME"
-          echo "📦 Uploading artifact to S3: s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY"
-          
-          aws s3 cp "/tmp/$ARTIFACT_NAME" \
-            "s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY" \
-            --region ${{ env.AWS_REGION }}
-          
-          echo "✅ Lambda function built and uploaded"
-          
-          # Clean up
-          rm -rf "$BUILD_DIR"
-          rm "/tmp/$ARTIFACT_NAME"
+
+            echo "🔍 Verifying ZIP contents for $FUNCTION_NAME..."
+            if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/utils.mjs"; then
+              echo "❌ FATAL: shared/utils.mjs missing from $FUNCTION_NAME artifact"
+              unzip -l "/tmp/$ARTIFACT_NAME"
+              exit 1
+            fi
+            if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/healthCheck.mjs"; then
+              echo "❌ FATAL: shared/healthCheck.mjs missing from $FUNCTION_NAME artifact"
+              unzip -l "/tmp/$ARTIFACT_NAME"
+              exit 1
+            fi
+            echo "✅ Artifact verified — shared utilities present"
+
+            S3_KEY="${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/$ARTIFACT_NAME"
+            echo "📦 Uploading to S3: s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY"
+            aws s3 cp "/tmp/$ARTIFACT_NAME" \
+              "s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY" \
+              --region ${{ env.AWS_REGION }}
+
+            echo "✅ $FUNCTION_NAME built and uploaded"
+            rm -rf "$BUILD_DIR" "/tmp/$ARTIFACT_NAME"
+          }
+
+          build_lambda "urgd-${{ env.APP_NAME }}-intake"
+          build_lambda "urgd-${{ env.APP_NAME }}-admin"
 
       - name: Generate parameter files
         run: |
@@ -299,13 +288,16 @@ jobs:
             {"ParameterKey": "WafWebAclArn", "ParameterValue": "$WAF_ARN"},
             {"ParameterKey": "ArtifactBucket", "ParameterValue": "${{ env.ARTIFACT_BUCKET }}"},
             {"ParameterKey": "IntakeCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-intake-${{ env.VERSION }}.zip"},
+            {"ParameterKey": "AdminCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-admin-${{ env.VERSION }}.zip"},
             {"ParameterKey": "CorsAllowedOrigins", "ParameterValue": "https://urgdstudios.com"},
             {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"},
             {"ParameterKey": "AdminEmail", "ParameterValue": "admin@urgdstudios.com"},
             {"ParameterKey": "CriticalEmail", "ParameterValue": "critical@urgd.dev"},
             {"ParameterKey": "PrivacyEmail", "ParameterValue": "privacy@urgdstudios.com"},
             {"ParameterKey": "AbuseEmail", "ParameterValue": "abuse@urgdstudios.com"},
-            {"ParameterKey": "PowDifficulty", "ParameterValue": "4"}
+            {"ParameterKey": "PowDifficulty", "ParameterValue": "4"},
+            {"ParameterKey": "CommandCenterReply", "ParameterValue": "true"},
+            {"ParameterKey": "CommandCenterAutoResponse", "ParameterValue": "true"}
           ]
           EOF
           
@@ -495,20 +487,8 @@ jobs:
           set -euo pipefail
           
           echo "🧪 Running smoke tests..."
-          
-          # Test health check endpoint via CloudFront (production URL)
-          echo "🔍 Testing health check: https://urgdstudios.com/v1/intake/health"
-          
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "https://urgdstudios.com/v1/intake/health")
-          
-          if [ "$RESPONSE" = "200" ]; then
-            echo "✅ Health check passed (HTTP 200)"
-          else
-            echo "❌ Health check failed (HTTP $RESPONSE)"
-            exit 1
-          fi
-          
-          echo "✅ Smoke tests passed"
+          chmod +x scripts/smoke-test.sh
+          BASE_URL="https://urgdstudios.com" bash scripts/smoke-test.sh
 
       - name: Setup Node.js (for Vite build)
         uses: actions/setup-node@v4

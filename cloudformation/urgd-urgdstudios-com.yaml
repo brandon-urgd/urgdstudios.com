@@ -3,9 +3,9 @@ Description: 'ur/gd urgdstudios.com - Corporate website static site infrastructu
 
 Metadata:
   urgd:
-    version: '1.0.0'
+    version: '2.0.0'
     environment: 'prod'
-    lastUpdated: '2026-02-15'
+    lastUpdated: '2026-02-20'
     owner: 'ur/gd Studios'
     securityLevel: 'high'
 
@@ -68,6 +68,27 @@ Parameters:
     Default: 4
     MinValue: 1
     MaxValue: 8
+
+  AdminCodeKey:
+    Type: String
+    Description: 'S3 key for admin Lambda ZIP (versioned) - passed by CI/CD pipeline'
+    Default: 'urgdstudios-com/artifacts/PLACEHOLDER/urgd-urgdstudios-com-admin-PLACEHOLDER.zip'
+
+  CommandCenterReply:
+    Type: String
+    Description: 'Feature flag: enable admin reply-via-email (true/false)'
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+
+  CommandCenterAutoResponse:
+    Type: String
+    Description: 'Feature flag: send auto-acknowledgment email to visitor on form submission (true/false)'
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
 
 Resources:
   # ========================================
@@ -371,6 +392,8 @@ Resources:
           AttributeType: S
         - AttributeName: submittedAt
           AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
       KeySchema:
         - AttributeName: submissionId
           KeyType: HASH
@@ -380,6 +403,14 @@ Resources:
             - AttributeName: ipHash
               KeyType: HASH
             - AttributeName: submittedAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: ipHash-timestamp-index
+          KeySchema:
+            - AttributeName: ipHash
+              KeyType: HASH
+            - AttributeName: timestamp
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
@@ -422,6 +453,13 @@ Resources:
       - IntakeSubmitRoute
       - IntakeOptionsRoute
       - IntakeIntegration
+      - AdminListRoute
+      - AdminGetRoute
+      - AdminUpdateRoute
+      - AdminDeleteRoute
+      - AdminReplyRoute
+      - AdminHealthRoute
+      - AdminIntegration
     Properties:
       ApiId: !Ref IntakeApi
       StageName: !Ref Environment
@@ -476,10 +514,21 @@ Resources:
                   - !GetAtt IntakeDLQ.Arn
               - Effect: Allow
                 Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource:
+                  - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/urgdstudios.com'
+              - Effect: Allow
+                Action:
                   - kms:Decrypt
                   - kms:GenerateDataKey
                 Resource:
                   - !GetAtt IntakeKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: '*'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -505,7 +554,22 @@ Resources:
         - Key: Owner
           Value: ur/gd Studios
 
-  # Lambda Function
+  AdminDLQ:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !Sub 'urgd-urgdstudios-com-admin-dlq-${Environment}'
+      MessageRetentionPeriod: 1209600  # 14 days
+      KmsMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
   # Lambda Function
   IntakeFunction:
     Type: AWS::Lambda::Function
@@ -524,6 +588,8 @@ Resources:
       DeadLetterConfig:
         TargetArn: !GetAtt IntakeDLQ.Arn
       KmsKeyArn: !GetAtt IntakeKmsKey.Arn
+      TracingConfig:
+        Mode: Active
       Environment:
         Variables:
           SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
@@ -532,8 +598,11 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '2.0.0'
+          VERSION: '3.0.0'
           POW_DIFFICULTY: !Ref PowDifficulty
+          COMMAND_CENTER_AUTO_RESPONSE: !Ref CommandCenterAutoResponse
+          SES_FROM_ADDRESS: 'admin@urgdstudios.com'
+          SITE_URL: 'https://urgdstudios.com'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -596,50 +665,317 @@ Resources:
           Value: urgdstudios-com
 
   # SNS Subscriptions with Filter Policies
-  # TEMPORARILY COMMENTED OUT - SNS subscription issue requires 48-hour wait
-  # Will re-enable after resolution
-  # Route different inquiry types to appropriate email addresses
-  
-  # AdminEmailSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref IntakeTopic
-  #     Protocol: email
-  #     Endpoint: !Ref AdminEmail
-  #     FilterPolicy:
-  #       type:
-  #         - general-inquiry
-  #         - feature-request
+  # Category-based routing per ARCHITECTURE.md and SLICE_00_UX.md §4.3
+  # Each subscription endpoint must confirm the AWS confirmation email before notifications flow.
 
-  # CriticalEmailSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref IntakeTopic
-  #     Protocol: email
-  #     Endpoint: !Ref CriticalEmail
-  #     FilterPolicy:
-  #       type:
-  #         - bug-report
+  AdminEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref AdminEmail
+      FilterPolicy:
+        type:
+          - general-inquiry
+          - feature-request
 
-  # PrivacyEmailSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref IntakeTopic
-  #     Protocol: email
-  #     Endpoint: !Ref PrivacyEmail
-  #     FilterPolicy:
-  #       type:
-  #         - privacy-question
+  CriticalEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref CriticalEmail
+      FilterPolicy:
+        type:
+          - bug-report
 
-  # AbuseEmailSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref IntakeTopic
-  #     Protocol: email
-  #     Endpoint: !Ref AbuseEmail
-  #     FilterPolicy:
-  #       type:
-  #         - report-abuse
+  PrivacyEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref PrivacyEmail
+      FilterPolicy:
+        type:
+          - privacy-question
+
+  AbuseEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref IntakeTopic
+      Protocol: email
+      Endpoint: !Ref AbuseEmail
+      FilterPolicy:
+        type:
+          - report-abuse
+
+  # ========================================
+  # Slice 4: Command Center — Auth, IAM, Log Group
+  # ========================================
+
+  # Cognito User Pool - Command Center admin authentication
+  CommandCenterUserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Sub 'urgd-urgdstudios-com-commandcenter-users-${Environment}'
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+      MfaConfiguration: 'OFF'
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+      UserPoolTags:
+        Environment: !Ref Environment
+        Application: urgdstudios-com
+        Owner: ur/gd Studios
+
+  # Cognito App Client - Command Center web client (SRP auth, no hosted UI)
+  CommandCenterUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref CommandCenterUserPool
+      ClientName: !Sub 'urgd-urgdstudios-com-commandcenter-web-${Environment}'
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      RefreshTokenValidity: 7
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      TokenValidityUnits:
+        RefreshToken: days
+        AccessToken: minutes
+        IdToken: minutes
+      ReadAttributes:
+        - email
+
+  # Admin Lambda IAM Role - least-privilege per ARCHITECTURE.md §4
+  AdminFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'urgd-urgdstudios-com-admin-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AdminPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Scan
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:DescribeTable
+                Resource:
+                  - !GetAtt IntakeSubmissionsTable.Arn
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource:
+                  - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/urgdstudios.com'
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !GetAtt AdminDLQ.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !GetAtt IntakeKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urgd-urgdstudios-com-admin-${Environment}:*'
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Admin Lambda Log Group
+  AdminFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-admin-${Environment}'
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt IntakeKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Admin Lambda Function (Batch 2 — requires admin ZIP in S3 before deploying)
+  AdminFunction:
+    Type: AWS::Lambda::Function
+    # checkov:skip=CKV_AWS_117:Lambda VPC not required - no private resources accessed directly
+    DependsOn:
+      - AdminFunctionLogGroup
+    Properties:
+      FunctionName: !Sub 'urgd-urgdstudios-com-admin-${Environment}'
+      Runtime: nodejs22.x
+      Handler: index.handler
+      Role: !GetAtt AdminFunctionRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref AdminCodeKey
+      Timeout: 30
+      MemorySize: 256
+      ReservedConcurrentExecutions: 10
+      DeadLetterConfig:
+        TargetArn: !GetAtt AdminDLQ.Arn
+      KmsKeyArn: !GetAtt IntakeKmsKey.Arn
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
+          CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
+          CORS_ALLOWED_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS'
+          CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
+          ENVIRONMENT: !Ref Environment
+          VERSION: '3.0.0'
+          COMMAND_CENTER_REPLY: !Ref CommandCenterReply
+          SES_FROM_ADDRESS: 'admin@urgdstudios.com'
+          SITE_URL: 'https://urgdstudios.com'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # API Gateway JWT Authorizer (Cognito native — no Lambda authorizer Lambda needed)
+  CognitoJwtAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref IntakeApi
+      AuthorizerType: JWT
+      Name: !Sub 'urgd-urgdstudios-com-cognito-${Environment}'
+      IdentitySource:
+        - '$request.header.Authorization'
+      JwtConfiguration:
+        Audience:
+          - !Ref CommandCenterUserPoolClient
+        Issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${CommandCenterUserPool}'
+
+  # API Gateway Integration for Admin Lambda
+  AdminIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref IntakeApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AdminFunction.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
+
+  # Lambda invoke permission for API Gateway → Admin Lambda
+  AdminFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AdminFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IntakeApi}/*'
+
+  # Admin API Routes — authenticated (JWT required)
+  AdminListRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/admin/messages'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  AdminGetRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/admin/messages/{id}'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  AdminUpdateRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'PATCH /v1/admin/messages/{id}'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  AdminDeleteRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'DELETE /v1/admin/messages/{id}'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  AdminReplyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'POST /v1/admin/messages/{id}/reply'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  # Admin health check — no auth (public for monitoring)
+  AdminHealthRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/admin/health'
+      AuthorizationType: NONE
+      Target: !Sub 'integrations/${AdminIntegration}'
 
   # CloudWatch Log Group
   IntakeFunctionLogGroup:
@@ -670,15 +1006,12 @@ Resources:
           Value: urgdstudios-com
 
   # SNS Subscription - Alerts Email
-  # TEMPORARILY COMMENTED OUT - SNS subscription issue requires 48-hour wait
-  # Will re-enable after resolution
-  
-  # AlertsSubscription:
-  #   Type: AWS::SNS::Subscription
-  #   Properties:
-  #     TopicArn: !Ref AlertsTopic
-  #     Protocol: email
-  #     Endpoint: !Ref AlertsEmail
+  AlertsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlertsEmail
 
   # CloudWatch Alarms
   IntakeLambdaErrorAlarm:
@@ -757,6 +1090,64 @@ Resources:
         - !Ref AlertsTopic
       TreatMissingData: notBreaching
 
+  # Admin Lambda Alarms (Batch 2 — Slice 4 Command Center)
+  AdminLambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-admin-errors-${Environment}'
+      AlarmDescription: 'Admin Lambda error rate exceeded threshold (P0)'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AdminFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  AdminLambdaLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-admin-latency-${Environment}'
+      AlarmDescription: 'Admin Lambda p99 latency exceeded 3s (P1)'
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      ExtendedStatistic: p99
+      Period: 900
+      EvaluationPeriods: 2
+      Threshold: 3000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AdminFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
+  AdminLambdaVolumeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'urgd-urgdstudios-com-admin-volume-${Environment}'
+      AlarmDescription: 'Admin Lambda invocation count anomaly — possible unauthorized access or runaway script (P1)'
+      MetricName: Invocations
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 100
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AdminFunction
+      AlarmActions:
+        - !Ref AlertsTopic
+      TreatMissingData: notBreaching
+
   # CloudWatch Dashboard
   IntakeDashboard:
     Type: AWS::CloudWatch::Dashboard
@@ -798,6 +1189,64 @@ Resources:
               "type": "metric",
               "properties": {
                 "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${AdminFunction}", {"stat": "Sum", "label": "Invocations"}],
+                  [".", "Errors", ".", ".", {"stat": "Sum", "label": "Errors"}],
+                  [".", "Throttles", ".", ".", {"stat": "Sum", "label": "Throttles"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Admin Lambda Metrics",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Duration", "FunctionName", "${AdminFunction}", {"stat": "Average", "label": "p50"}],
+                  ["...", {"stat": "p99", "label": "p99"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Admin Lambda Duration",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Cognito", "SignInSuccesses", "UserPool", "${CommandCenterUserPool}", "UserPoolClient", "${CommandCenterUserPoolClient}", {"stat": "Sum", "label": "Sign-In Successes"}],
+                  [".", "SignInThrottles", ".", ".", ".", ".", {"stat": "Sum", "label": "Sign-In Throttles"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Cognito Authentication",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/SES", "Send", {"stat": "Sum", "label": "Send"}],
+                  [".", "Bounce", {"stat": "Sum", "label": "Bounce"}],
+                  [".", "Complaint", {"stat": "Sum", "label": "Complaint"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "SES Email Delivery",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
                   ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "${IntakeSubmissionsTable}", {"stat": "Sum"}],
                   [".", "ConsumedWriteCapacityUnits", ".", ".", {"stat": "Sum"}],
                   [".", "WriteThrottleEvents", ".", ".", {"stat": "Sum"}]
@@ -805,7 +1254,7 @@ Resources:
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${AWS::Region}",
-                "title": "DynamoDB Metrics",
+                "title": "DynamoDB Consumption",
                 "period": 300
               }
             },
@@ -860,3 +1309,15 @@ Outputs:
     Value: !Ref IntakeApi
     Export:
       Name: !Sub '${AWS::StackName}-IntakeApiId'
+
+  UserPoolId:
+    Description: 'Cognito User Pool ID (Command Center admin auth — used by CI/CD for frontend env vars)'
+    Value: !Ref CommandCenterUserPool
+    Export:
+      Name: !Sub '${AWS::StackName}-UserPoolId'
+
+  UserPoolClientId:
+    Description: 'Cognito App Client ID (Command Center web client)'
+    Value: !Ref CommandCenterUserPoolClient
+    Export:
+      Name: !Sub '${AWS::StackName}-UserPoolClientId'

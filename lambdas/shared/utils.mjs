@@ -107,5 +107,33 @@ export function log(level, message, context = {}) {
     ...context
   };
   
-  console.log(JSON.stringify(logEntry));
+  if (level === 'error') console.error(JSON.stringify(logEntry));
+  else if (level === 'warn') console.warn(JSON.stringify(logEntry));
+  else console.log(JSON.stringify(logEntry));
+}
+
+/**
+ * Creates a structured HTTP error for use with the admin Lambda.
+ * Throw the returned error in a handler; the catch block calls isAdminHttpError
+ * to decide whether to return the specific status code or fall through to 500.
+ * @param {number} statusCode - HTTP status code
+ * @param {string} message - Error message
+ * @param {object} [details] - Optional additional context (NOT sent to client)
+ * @returns {Error}
+ */
+export function createAdminError(statusCode, message, details = {}) {
+  const error = new Error(message);
+  error.name = 'AdminHttpError';
+  error.statusCode = statusCode;
+  error.details = details;
+  return error;
+}
+
+/**
+ * Returns true if the error was created by createAdminError.
+ * @param {*} error
+ * @returns {boolean}
+ */
+export function isAdminHttpError(error) {
+  return error?.name === 'AdminHttpError';
 }
