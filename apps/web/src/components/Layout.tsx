@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SkipLink from './SkipLink';
 import Header from './Header';
@@ -5,6 +6,10 @@ import Footer from './Footer';
 import styles from './Layout.module.css';
 
 export default function Layout() {
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }, []);
+
   return (
     <div className={styles.layout}>
       <SkipLink />

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { labels } from '../../utils/labels';
-import ThemeToggle from './ThemeToggle';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -59,7 +58,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </ul>
 
       <div className={styles.bottom}>
-        <ThemeToggle />
         <button
           type="button"
           className={styles.signOut}

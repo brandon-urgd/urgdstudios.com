@@ -2,13 +2,7 @@
 <html lang="en">
   <head>
     <script>
-      (function() {
-        var theme = localStorage.getItem('urgd-cc-theme');
-        if (!theme) {
-          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
-        document.documentElement.setAttribute('data-theme', theme);
-      })();
+      document.documentElement.setAttribute('data-theme', 'dark');
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
