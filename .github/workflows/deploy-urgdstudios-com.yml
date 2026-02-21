@@ -565,9 +565,18 @@ jobs:
           echo "Source: apps/web/dist/"
           echo "Destination: s3://$S3_BUCKET/"
           
+          # Hashed assets (JS/CSS/fonts/images) — immutable, cache for 1 year
+          aws s3 sync apps/web/dist/assets/ "s3://$S3_BUCKET/assets/" \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --metadata-directive REPLACE \
+            --region ${{ env.AWS_REGION }}
+          
+          # HTML and root files — always revalidate so new deploys take effect immediately
           aws s3 sync apps/web/dist/ "s3://$S3_BUCKET/" \
             --delete \
-            --cache-control "public, max-age=31536000" \
+            --exclude "assets/*" \
+            --cache-control "public, max-age=0, must-revalidate" \
             --metadata-directive REPLACE \
             --region ${{ env.AWS_REGION }}
           
