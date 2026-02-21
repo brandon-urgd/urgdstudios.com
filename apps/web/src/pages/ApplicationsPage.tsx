@@ -4,7 +4,6 @@ import SectionReveal from '../components/SectionReveal';
 import GlassPanel from '../components/GlassPanel';
 import StatusBadge from '../components/StatusBadge';
 import { useMeta } from '../utils/useMeta';
-import { useAuth } from '../hooks/useAuth';
 import styles from './ApplicationsPage.module.css';
 
 interface Application {
@@ -12,9 +11,17 @@ interface Application {
   description: string;
   status: 'Active' | 'In Development' | 'Coming Soon' | 'Sunset';
   url?: string;
+  isExternal?: boolean;
 }
 
 const APPLICATIONS: Application[] = [
+  {
+    name: 'Command Center',
+    description:
+      'Admin dashboard for urgdstudios.com. Manage contact form submissions, update status, and reply via email.',
+    status: 'Active',
+    url: '/command/dashboard',
+  },
   {
     name: 'Broadcast',
     description: 'SMS and MMS broadcasting for communities and organizations.',
@@ -25,12 +32,11 @@ const APPLICATIONS: Application[] = [
     description: 'Turn SVG designs into embroidery files.',
     status: 'Active',
     url: 'https://stitch.urgdstudios.com',
+    isExternal: true,
   },
 ];
 
 export default function ApplicationsPage() {
-  const { isAuthenticated } = useAuth();
-
   useMeta({
     title: 'Applications — ur/gd Studios',
     description:
@@ -38,29 +44,14 @@ export default function ApplicationsPage() {
     ogUrl: 'https://urgdstudios.com/applications/',
   });
 
-  const commandCenterApp: Application | null = isAuthenticated
-    ? {
-        name: 'Command Center',
-        description:
-          'Admin dashboard for urgdstudios.com. Manage contact form submissions, update status, and reply via email.',
-        status: 'Active',
-        url: '/command/dashboard',
-      }
-    : null;
-
-  const allApps = commandCenterApp
-    ? [commandCenterApp, ...APPLICATIONS]
-    : APPLICATIONS;
-
   return (
     <ContentContainer>
       <PageHeader title="Applications" subtitle="What we're building" />
 
       <SectionReveal>
         <div className={styles.grid}>
-          {allApps.map((app) => {
+          {APPLICATIONS.map((app) => {
             const isActive = app.status === 'Active' && !!app.url;
-            const isExternal = app.url?.startsWith('http');
 
             const cardContent = (
               <GlassPanel interactive={isActive}>
@@ -79,10 +70,10 @@ export default function ApplicationsPage() {
                 <a
                   key={app.name}
                   href={app.url}
-                  {...(isExternal
+                  {...(app.isExternal
                     ? { target: '_blank', rel: 'noopener noreferrer' }
                     : {})}
-                  aria-label={`${app.name} — ${app.description}${isExternal ? '. Opens in a new tab.' : ''}`}
+                  aria-label={`${app.name} — ${app.description}${app.isExternal ? '. Opens in a new tab.' : ''}`}
                   className={styles.cardLink}
                 >
                   {cardContent}
