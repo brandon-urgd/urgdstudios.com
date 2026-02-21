@@ -28,17 +28,25 @@ interface AuthContextValue {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  getToken: () => Promise<string>;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Safe no-op default used when the context is unavailable (e.g. SSG pre-render
+// of public pages that are rendered outside the AuthProvider tree).
+const UNAUTHENTICATED_DEFAULT: AuthContextValue = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  signIn: () => Promise.reject(new Error('AuthProvider not mounted')),
+  signOut: () => Promise.resolve(),
+  getToken: () => Promise.resolve(null),
+};
+
 export function useAuthContext(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuthContext must be used within AuthProvider');
-  }
-  return ctx;
+  return ctx ?? UNAUTHENTICATED_DEFAULT;
 }
 
 interface AuthProviderProps {
