@@ -6,6 +6,8 @@ import GlassButton from '../../components/command/GlassButton';
 import GlassAlert from '../../components/command/GlassAlert';
 import styles from './LoginPage.module.css';
 
+type Step = 'credentials' | 'newPassword';
+
 function mapAuthError(err: unknown): string {
   if (err && typeof err === 'object' && 'name' in err) {
     const name = (err as { name: string }).name;
@@ -22,27 +24,33 @@ function mapAuthError(err: unknown): string {
 }
 
 export default function LoginPage() {
+  const [step, setStep] = useState<Step>('credentials');
   const [isExpanded, setIsExpanded] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const emailRef = useRef<HTMLInputElement>(null);
-  const { signIn, isAuthenticated } = useAuth();
+  const newPasswordRef = useRef<HTMLInputElement>(null);
+  const { signIn, completeNewPassword, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/command/dashboard';
 
-  // Already authenticated → redirect immediately
   useEffect(() => {
     if (isAuthenticated) navigate(from, { replace: true });
   }, [isAuthenticated, navigate, from]);
 
-  // Focus email input after form expands
   useEffect(() => {
     if (isExpanded) emailRef.current?.focus();
   }, [isExpanded]);
+
+  useEffect(() => {
+    if (step === 'newPassword') newPasswordRef.current?.focus();
+  }, [step]);
 
   function handleSignInClick() {
     if (!isExpanded) {
@@ -56,7 +64,28 @@ export default function LoginPage() {
     setErrorMsg(null);
     setIsLoading(true);
     try {
-      await signIn(email, password);
+      const result = await signIn(email, password);
+      if (result.status === 'newPasswordRequired') {
+        setStep('newPassword');
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
+      setErrorMsg(mapAuthError(err));
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleNewPasswordSubmit() {
+    if (newPassword !== confirmPassword) {
+      setErrorMsg(labels.errors.passwordsDoNotMatch);
+      return;
+    }
+    setErrorMsg(null);
+    setIsLoading(true);
+    try {
+      await completeNewPassword(newPassword);
       navigate(from, { replace: true });
     } catch (err) {
       setErrorMsg(mapAuthError(err));
@@ -67,6 +96,83 @@ export default function LoginPage() {
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') void handleSubmit();
+  }
+
+  if (step === 'newPassword') {
+    return (
+      <div className={styles.page}>
+        <div className={styles.card}>
+          <div
+            className={styles.logo}
+            role="img"
+            aria-label={labels.login.logoAlt}
+          />
+
+          <h1 className={styles.title}>{labels.newPassword.heading}</h1>
+          <p className={styles.subtitle}>{labels.newPassword.description}</p>
+
+          <form
+            aria-label={labels.newPassword.heading}
+            onSubmit={(e) => { e.preventDefault(); void handleNewPasswordSubmit(); }}
+            className={styles.form}
+          >
+            <div className={`${styles.formFields} ${styles.expanded}`}>
+              <div className={styles.field}>
+                <label htmlFor="new-password" className={styles.label}>
+                  {labels.newPassword.newPasswordLabel}
+                </label>
+                <input
+                  ref={newPasswordRef}
+                  id="new-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  className={styles.input}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
+                  aria-required="true"
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="confirm-password" className={styles.label}>
+                  {labels.newPassword.confirmPasswordLabel}
+                </label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  className={styles.input}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  aria-required="true"
+                />
+              </div>
+            </div>
+
+            <GlassButton
+              type="submit"
+              variant="primary"
+              isLoading={isLoading}
+              loadingText={labels.newPassword.submittingButton}
+            >
+              {labels.newPassword.submitButton}
+            </GlassButton>
+
+            {errorMsg && (
+              <GlassAlert
+                variant="error"
+                message={errorMsg}
+                onDismiss={() => setErrorMsg(null)}
+              />
+            )}
+          </form>
+        </div>
+      </div>
+    );
   }
 
   return (

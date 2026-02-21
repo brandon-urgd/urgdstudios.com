@@ -17,16 +17,19 @@ import {
   configureAuth,
   signIn as authSignIn,
   signOut as authSignOut,
+  completeNewPassword as authCompleteNewPassword,
   getAccessToken,
   getCurrentUser,
   type AuthUser,
+  type SignInResult,
 } from '../utils/auth';
 
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<SignInResult>;
+  completeNewPassword: (newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
   getToken: () => Promise<string | null>;
 }
@@ -40,6 +43,7 @@ const UNAUTHENTICATED_DEFAULT: AuthContextValue = {
   isAuthenticated: false,
   isLoading: false,
   signIn: () => Promise.reject(new Error('AuthProvider not mounted')),
+  completeNewPassword: () => Promise.reject(new Error('AuthProvider not mounted')),
   signOut: () => Promise.resolve(),
   getToken: () => Promise.resolve(null),
 };
@@ -93,8 +97,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [navigate]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const loggedInUser = await authSignIn(email, password);
-    setUser(loggedInUser);
+    const result = await authSignIn(email, password);
+    if (result.status === 'authenticated') {
+      setUser(result.user);
+    }
+    return result;
+  }, []);
+
+  const completeNewPassword = useCallback(async (newPassword: string) => {
+    const confirmedUser = await authCompleteNewPassword(newPassword);
+    setUser(confirmedUser);
   }, []);
 
   const signOut = useCallback(async () => {
@@ -110,6 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: user !== null,
     isLoading,
     signIn,
+    completeNewPassword,
     signOut,
     getToken,
   };

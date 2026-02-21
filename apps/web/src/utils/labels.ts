@@ -20,6 +20,16 @@ export const labels = {
     passwordPlaceholder: 'Your password',
   },
 
+  // ── New Password (FORCE_CHANGE_PASSWORD challenge) ────────────────────────
+  newPassword: {
+    heading: 'Set a new password',
+    description: 'Your account requires a new password before you can continue.',
+    newPasswordLabel: 'New password',
+    confirmPasswordLabel: 'Confirm new password',
+    submitButton: 'Set Password',
+    submittingButton: 'Setting password...',
+  },
+
   // ── Forgot Password ────────────────────────────────────────────────────────
   forgotPassword: {
     step1Heading: 'Reset your password',

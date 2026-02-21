@@ -7,6 +7,7 @@ import { Amplify } from '@aws-amplify/core';
 import {
   signIn as amplifySignIn,
   signOut as amplifySignOut,
+  confirmSignIn as amplifyConfirmSignIn,
   getCurrentUser as amplifyGetCurrentUser,
   fetchAuthSession,
   resetPassword,
@@ -15,6 +16,10 @@ import {
 } from '@aws-amplify/auth';
 
 export type { AuthUser };
+
+export type SignInResult =
+  | { status: 'authenticated'; user: AuthUser }
+  | { status: 'newPasswordRequired' };
 
 export function configureAuth(): void {
   Amplify.configure({
@@ -27,8 +32,22 @@ export function configureAuth(): void {
   });
 }
 
-export async function signIn(email: string, password: string): Promise<AuthUser> {
-  await amplifySignIn({ username: email, password });
+export async function signIn(email: string, password: string): Promise<SignInResult> {
+  const result = await amplifySignIn({ username: email, password });
+
+  if (
+    !result.isSignedIn &&
+    result.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED'
+  ) {
+    return { status: 'newPasswordRequired' };
+  }
+
+  const user = await amplifyGetCurrentUser();
+  return { status: 'authenticated', user };
+}
+
+export async function completeNewPassword(newPassword: string): Promise<AuthUser> {
+  await amplifyConfirmSignIn({ challengeResponse: newPassword });
   return amplifyGetCurrentUser();
 }
 
