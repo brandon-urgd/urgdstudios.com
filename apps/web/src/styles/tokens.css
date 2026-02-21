@@ -24,6 +24,14 @@
   --base-error: #f87171;
   --base-info: #60a5fa;
 
+  /* Command Center category palette */
+  --base-bug: #f87171;
+  --base-abuse: #fb923c;
+  --base-general: #60a5fa;
+  --base-feature: #34d399;
+  --base-privacy: #a78bfa;
+  --base-muted: #9ca3af;
+
   /* Font stacks */
   --base-font-heading: 'Archivo', sans-serif;
   --base-font-body: 'Rubik', sans-serif;
@@ -57,7 +65,7 @@
   --color-error: var(--base-error);
   --color-info: var(--base-info);
 
-  /* Glass effect */
+  /* Glass effect — standard */
   --glass-bg: rgba(255, 255, 255, 0.02);
   --glass-bg-hover: rgba(255, 255, 255, 0.04);
   --glass-blur: 16px;
@@ -65,10 +73,21 @@
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-border-hover: rgba(255, 255, 255, 0.12);
 
+  /* Glass effect — Command Center (elevated) */
+  --glass-bg-elevated: rgba(20, 23, 28, 0.15);
+  --glass-bg-heavy: rgba(15, 17, 23, 0.225);
+  --glass-blur-elevated: 45px;
+  --glass-blur-heavy: 67.5px;
+  --glass-saturation: 468.75%;
+  --glass-border-bright: rgba(255, 255, 255, 0.28);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
+  --glass-reflection: rgba(255, 255, 255, 0.225);
+
   /* Shadows */
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.20);
   --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.25);
   --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 20px rgba(129, 140, 248, 0.15);
 
   /* Typography */
   --font-heading: var(--base-font-heading);

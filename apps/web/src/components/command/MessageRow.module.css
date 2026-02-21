@@ -1,0 +1,92 @@
+.row {
+  cursor: pointer;
+  transition: background var(--transition-fast) var(--easing-default);
+  min-height: 56px;
+}
+
+.row:hover {
+  background: var(--table-row-hover);
+}
+
+.row:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.row.selected {
+  border-left: 3px solid var(--color-accent);
+}
+
+.row td {
+  padding: var(--space-md) var(--space-lg);
+  vertical-align: middle;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+}
+
+.date {
+  font-size: var(--font-size-small) !important;
+  color: var(--color-text-secondary) !important;
+  white-space: nowrap;
+}
+
+.name {
+  font-weight: var(--font-weight-semibold);
+}
+
+.preview {
+  color: var(--color-text-secondary) !important;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-small) !important;
+}
+
+.status {
+  white-space: nowrap;
+}
+
+.actions {
+  width: 44px;
+  text-align: center;
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast) var(--easing-default),
+              background var(--transition-fast) var(--easing-default);
+}
+
+.deleteButton:hover {
+  color: var(--color-error);
+  background: rgba(248, 113, 113, 0.10);
+}
+
+.deleteButton:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Show icon-only category on tablet */
+.categoryMobile { display: none; }
+.categoryDesktop { display: inline-flex; }
+
+@media (max-width: 1023px) {
+  .date, .preview { display: none; }
+  .categoryMobile { display: inline-flex; }
+  .categoryDesktop { display: none; }
+}
+
+@media (max-width: 767px) {
+  .status { display: none; }
+}

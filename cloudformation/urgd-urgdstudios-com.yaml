@@ -187,11 +187,18 @@ Resources:
             
             var uri = request.uri;
             
-            // If URI ends with '/', append 'index.html'
+            // Command Center SPA: rewrite all /command/* extensionless paths to /command/index.html
+            // React Router handles client-side routing from there.
+            if (uri === '/command' || (uri.startsWith('/command/') && !uri.includes('.'))) {
+                request.uri = '/command/index.html';
+                return request;
+            }
+            
+            // Static site: if URI ends with '/', append 'index.html'
             if (uri.endsWith('/')) {
                 request.uri += 'index.html';
             }
-            // If URI doesn't have an extension, append '/index.html'
+            // Static site: if URI has no extension, append '/index.html'
             else if (!uri.includes('.')) {
                 request.uri += '/index.html';
             }

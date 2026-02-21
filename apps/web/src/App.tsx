@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import ApplicationsPage from './pages/ApplicationsPage';
@@ -8,6 +8,13 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import LegalPage from './pages/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
+import ProtectedRoute from './providers/ProtectedRoute';
+
+// Command Center pages — lazy loaded (not part of the public site SSG build)
+const LoginPage = lazy(() => import('./pages/command/LoginPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/command/ForgotPasswordPage'));
+const MessageDashboard = lazy(() => import('./pages/command/MessageDashboard'));
+const CommandLayout = lazy(() => import('./layouts/CommandLayout'));
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'ur/gd Studios',
@@ -16,6 +23,9 @@ const ROUTE_TITLES: Record<string, string> = {
   '/privacy/': 'Privacy — ur/gd Studios',
   '/terms/': 'Terms of Service — ur/gd Studios',
   '/legal/': 'Legal — ur/gd Studios',
+  '/command/login': 'Sign In — Command Center',
+  '/command/dashboard': 'Messages — Command Center',
+  '/command/forgot-password': 'Reset Password — Command Center',
 };
 
 const ROUTE_DESCRIPTIONS: Record<string, string> = {
@@ -83,6 +93,7 @@ export default function App() {
     <>
       <RouteChangeManager />
       <Routes>
+        {/* Public site routes — rendered inside the public Layout shell */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/applications/" element={<ApplicationsPage />} />
@@ -91,6 +102,55 @@ export default function App() {
           <Route path="/terms/" element={<TermsPage />} />
           <Route path="/legal/" element={<LegalPage />} />
           <Route path="*" element={<NotFoundPage />} />
+        </Route>
+
+        {/* Command Center auth pages — no layout shell */}
+        <Route
+          path="/command/login"
+          element={
+            <Suspense>
+              <LoginPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/command/forgot-password"
+          element={
+            <Suspense>
+              <ForgotPasswordPage />
+            </Suspense>
+          }
+        />
+
+        {/* /command → redirect to dashboard */}
+        <Route path="/command" element={<Navigate to="/command/dashboard" replace />} />
+
+        {/* Command Center protected routes — requires auth */}
+        <Route element={<ProtectedRoute />}>
+          <Route
+            element={
+              <Suspense>
+                <CommandLayout />
+              </Suspense>
+            }
+          >
+            <Route
+              path="/command/dashboard"
+              element={
+                <Suspense>
+                  <MessageDashboard />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/command/dashboard/messages/:id"
+              element={
+                <Suspense>
+                  <MessageDashboard />
+                </Suspense>
+              }
+            />
+          </Route>
         </Route>
       </Routes>
     </>

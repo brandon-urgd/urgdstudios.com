@@ -4,6 +4,7 @@ import SectionReveal from '../components/SectionReveal';
 import GlassPanel from '../components/GlassPanel';
 import StatusBadge from '../components/StatusBadge';
 import { useMeta } from '../utils/useMeta';
+import { useAuth } from '../hooks/useAuth';
 import styles from './ApplicationsPage.module.css';
 
 interface Application {
@@ -28,6 +29,8 @@ const APPLICATIONS: Application[] = [
 ];
 
 export default function ApplicationsPage() {
+  const { isAuthenticated } = useAuth();
+
   useMeta({
     title: 'Applications — ur/gd Studios',
     description:
@@ -35,14 +38,29 @@ export default function ApplicationsPage() {
     ogUrl: 'https://urgdstudios.com/applications/',
   });
 
+  const commandCenterApp: Application | null = isAuthenticated
+    ? {
+        name: 'Command Center',
+        description:
+          'Admin dashboard for urgdstudios.com. Manage contact form submissions, update status, and reply via email.',
+        status: 'Active',
+        url: '/command/dashboard',
+      }
+    : null;
+
+  const allApps = commandCenterApp
+    ? [commandCenterApp, ...APPLICATIONS]
+    : APPLICATIONS;
+
   return (
     <ContentContainer>
       <PageHeader title="Applications" subtitle="What we're building" />
 
       <SectionReveal>
         <div className={styles.grid}>
-          {APPLICATIONS.map((app) => {
+          {allApps.map((app) => {
             const isActive = app.status === 'Active' && !!app.url;
+            const isExternal = app.url?.startsWith('http');
 
             const cardContent = (
               <GlassPanel interactive={isActive}>
@@ -56,14 +74,15 @@ export default function ApplicationsPage() {
               </GlassPanel>
             );
 
-            if (isActive) {
+            if (isActive && app.url) {
               return (
                 <a
                   key={app.name}
                   href={app.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${app.name} — ${app.description}. Opens in a new tab.`}
+                  {...(isExternal
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
+                  aria-label={`${app.name} — ${app.description}${isExternal ? '. Opens in a new tab.' : ''}`}
                   className={styles.cardLink}
                 >
                   {cardContent}

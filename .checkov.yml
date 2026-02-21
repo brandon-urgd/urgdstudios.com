@@ -3,3 +3,7 @@ skip-check:
   - CKV_AWS_18  # S3 access logging (enabled in future slice)
   - CKV_AWS_86  # CloudFront access logging (enabled in future slice)
   - CKV_AWS_68  # CloudFront WAF (false positive - WAF is configured via parameter)
+  - CKV_GHA_7   # workflow_dispatch inputs affect build output — intentional: confirm_prod is a deployment gate, not a build parameter
+
+skip-path:
+  - apps/web      # Frontend source — not infrastructure; tsconfig.json files trigger false-positive terraform plan parsing

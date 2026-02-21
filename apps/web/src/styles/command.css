@@ -1,0 +1,103 @@
+/**
+ * urgdstudios.com v3 — Command Center Component Tokens
+ *
+ * Tier 3 tokens scoped to Command Center components.
+ * Imported after tokens.css and tokens-light.css.
+ * References Tier 2 semantic tokens — never raw values.
+ */
+
+:root {
+  /* ----------------------------------------------------------------
+     Layout — Sidebar
+     ---------------------------------------------------------------- */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 0px;
+  --sidebar-bg: var(--glass-bg-elevated);
+  --sidebar-border: var(--glass-border-bright);
+  --sidebar-padding: var(--space-xl);
+
+  /* ----------------------------------------------------------------
+     Message Table
+     ---------------------------------------------------------------- */
+  --table-bg: var(--glass-bg-elevated);
+  --table-border: var(--glass-border-bright);
+  --table-row-hover: var(--glass-bg-hover);
+  --table-header-text: var(--color-text-secondary);
+  --table-radius: var(--radius-lg);
+
+  /* ----------------------------------------------------------------
+     Modals
+     ---------------------------------------------------------------- */
+  --modal-bg: var(--glass-bg-heavy);
+  --modal-border: var(--glass-border-bright);
+  --modal-blur: var(--glass-blur-heavy);
+  --modal-radius: var(--radius-xl);
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+  --modal-max-width: 640px;
+  --modal-dialog-max-width: 400px;
+
+  /* ----------------------------------------------------------------
+     Filter Bar
+     ---------------------------------------------------------------- */
+  --filter-bg: var(--glass-bg);
+  --filter-border: var(--glass-border);
+  --filter-radius: var(--radius-md);
+
+  /* ----------------------------------------------------------------
+     Inputs (Command Center overrides)
+     ---------------------------------------------------------------- */
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --input-border: var(--glass-border);
+  --input-border-focus: var(--color-accent);
+  --input-text: var(--color-text-primary);
+  --input-placeholder: var(--color-text-tertiary);
+  --input-radius: var(--radius-md);
+  --input-min-height: 44px;
+
+  /* ----------------------------------------------------------------
+     Buttons (Command Center overrides)
+     ---------------------------------------------------------------- */
+  --button-min-height: 44px;
+  --button-radius: var(--radius-md);
+  --button-padding: var(--space-sm) var(--space-lg);
+  --button-bg-primary: var(--color-accent);
+  --button-text-primary: var(--base-white);
+  --button-bg-primary-hover: var(--color-accent-hover);
+  --button-bg-secondary: transparent;
+  --button-border-secondary: var(--glass-border-bright);
+  --button-text-secondary: var(--color-text-primary);
+  --button-bg-destructive: var(--color-error);
+  --button-text-destructive: var(--base-white);
+
+  /* ----------------------------------------------------------------
+     Toast Notifications
+     ---------------------------------------------------------------- */
+  --toast-bg: var(--glass-bg-heavy);
+  --toast-border: var(--glass-border-bright);
+  --toast-radius: var(--radius-md);
+  --toast-shadow: var(--shadow-medium);
+
+  /* ----------------------------------------------------------------
+     Status Badges (dark theme defaults)
+     ---------------------------------------------------------------- */
+  --badge-new-bg: rgba(96, 165, 250, 0.15);
+  --badge-new-text: var(--color-info);          /* #60a5fa — 7.5:1 ✓ */
+  --badge-in-progress-bg: rgba(251, 191, 36, 0.15);
+  --badge-in-progress-text: var(--color-warning); /* #fbbf24 — 11.8:1 ✓ */
+  --badge-closed-bg: rgba(156, 163, 175, 0.10);
+  --badge-closed-text: var(--base-muted);        /* #9ca3af — 7.8:1 ✓ */
+
+  /* ----------------------------------------------------------------
+     Category Colors (dark theme defaults)
+     ---------------------------------------------------------------- */
+  --category-bug-text: #f87171;                  /* 6.4:1 on #000 ✓ */
+  --category-bug-bg: rgba(248, 113, 113, 0.10);
+  --category-abuse-text: #fb923c;                /* 7.4:1 on #000 ✓ */
+  --category-abuse-bg: rgba(251, 146, 60, 0.10);
+  --category-general-text: #60a5fa;              /* 7.5:1 on #000 ✓ */
+  --category-general-bg: rgba(96, 165, 250, 0.10);
+  --category-feature-text: #34d399;              /* 10.4:1 on #000 ✓ */
+  --category-feature-bg: rgba(52, 211, 153, 0.10);
+  --category-privacy-text: #a78bfa;              /* 7.0:1 on #000 ✓ */
+  --category-privacy-bg: rgba(167, 139, 250, 0.10);
+}

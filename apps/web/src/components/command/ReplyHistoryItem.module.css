@@ -1,0 +1,24 @@
+.item {
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--glass-border);
+}
+
+.item:first-child {
+  border-top: none;
+}
+
+.body {
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.meta {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}

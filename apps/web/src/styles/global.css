@@ -154,8 +154,18 @@ h4 {
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --glass-bg: rgba(20, 20, 35, 0.95);
+    --glass-bg-elevated: rgba(20, 20, 35, 0.97);
+    --glass-bg-heavy: rgba(15, 15, 28, 0.98);
     --glass-blur: 0px;
+    --glass-blur-mobile: 0px;
+    --glass-blur-elevated: 0px;
+    --glass-blur-heavy: 0px;
+    --glass-saturation: 100%;
     --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-border-bright: rgba(255, 255, 255, 0.20);
+    --glass-highlight: transparent;
+    --glass-reflection: transparent;
+    --modal-overlay: rgba(0, 0, 0, 0.85);
   }
 }
 
@@ -175,6 +185,22 @@ h4 {
    ---------------------------------------------------------------- */
 
 .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------------
+   Utility: Screen reader only (sr-only)
+   ---------------------------------------------------------------- */
+
+.sr-only {
   position: absolute;
   width: 1px;
   height: 1px;

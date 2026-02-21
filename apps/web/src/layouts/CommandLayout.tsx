@@ -1,0 +1,48 @@
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../components/command/Sidebar';
+import MobileMenuOverlay from '../components/command/MobileMenuOverlay';
+import { labels } from '../utils/labels';
+import styles from './CommandLayout.module.css';
+
+export default function CommandLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  function openSidebar() { setSidebarOpen(true); }
+  function closeSidebar() { setSidebarOpen(false); }
+
+  return (
+    <div className={styles.layout}>
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+
+      {sidebarOpen && <MobileMenuOverlay onClose={closeSidebar} />}
+
+      <div className={styles.mainWrapper}>
+        {/* Mobile hamburger header */}
+        <div className={styles.mobileHeader}>
+          <button
+            type="button"
+            className={styles.hamburger}
+            onClick={openSidebar}
+            aria-label={labels.a11y.sidebarToggleOpen}
+            aria-expanded={sidebarOpen}
+            aria-controls="command-sidebar"
+          >
+            <span className={styles.hamburgerBar} />
+            <span className={styles.hamburgerBar} />
+            <span className={styles.hamburgerBar} />
+          </button>
+          <div
+            className={styles.mobileLogo}
+            role="img"
+            aria-label={labels.sidebar.logoAlt}
+          />
+        </div>
+
+        <main id="main-content" className={styles.main}>
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
