@@ -15,6 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   configureAuth,
+  isAuthConfigured,
   signIn as authSignIn,
   signOut as authSignOut,
   completeNewPassword as authCompleteNewPassword,
@@ -65,6 +66,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Configure Amplify once on mount
   useEffect(() => {
     configureAuth();
+    if (!isAuthConfigured()) {
+      setIsLoading(false);
+    }
   }, []);
 
   // Check for existing session on mount

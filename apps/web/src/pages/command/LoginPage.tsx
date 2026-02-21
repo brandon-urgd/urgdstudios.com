@@ -13,6 +13,8 @@ function mapAuthError(err: unknown): string {
     const name = (err as { name: string }).name;
     const message = 'message' in err ? (err as { message: string }).message : '';
     
+    if (name === 'AuthNotConfiguredException') return `Auth is not configured. Contact support. (${message})`;
+    if (name === 'AuthUserPoolException') return `Auth service misconfigured. Contact support. (${message})`;
     if (name === 'NotAuthorizedException') return labels.errors.incorrectCredentials;
     if (name === 'UserNotFoundException') return labels.errors.incorrectCredentials;
     if (name === 'UserNotConfirmedException') return labels.errors.accountNotConfirmed;
@@ -20,7 +22,6 @@ function mapAuthError(err: unknown): string {
     if (name === 'LimitExceededException') return labels.errors.tooManyAttempts;
     if (name === 'AuthIncompleteException') return labels.errors.loadFailed;
     
-    // Fallback for other Cognito errors — include name for diagnosis
     return `${labels.errors.loadFailed} (${name}: ${message})`;
   }
   if (err instanceof TypeError && err.message.includes('fetch')) {

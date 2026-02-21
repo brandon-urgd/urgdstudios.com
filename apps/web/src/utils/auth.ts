@@ -21,18 +21,51 @@ export type SignInResult =
   | { status: 'authenticated'; user: AuthUser }
   | { status: 'newPasswordRequired' };
 
+let authConfigured = false;
+
+export function isAuthConfigured(): boolean {
+  return authConfigured;
+}
+
 export function configureAuth(): void {
-  Amplify.configure({
-    Auth: {
-      Cognito: {
-        userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID as string,
-        userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string,
+  const userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID;
+  const userPoolClientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+
+  if (userPoolId && userPoolClientId) {
+    Amplify.configure({
+      Auth: {
+        Cognito: {
+          userPoolId: userPoolId as string,
+          userPoolClientId: userPoolClientId as string,
+        },
       },
-    },
-  });
+    });
+    authConfigured = true;
+  } else {
+    console.error(
+      'Amplify Auth: VITE_COGNITO_USER_POOL_ID or VITE_COGNITO_CLIENT_ID is missing.',
+      { userPoolId: userPoolId ?? '(undefined)', userPoolClientId: userPoolClientId ?? '(undefined)' },
+    );
+    authConfigured = false;
+  }
 }
 
 export async function signIn(email: string, password: string): Promise<SignInResult> {
+  if (!authConfigured) {
+    const error = new Error('Auth is not configured. Cognito environment variables may be missing from the build.');
+    (error as any).name = 'AuthNotConfiguredException';
+    throw error;
+  }
+
+  // Clear any stale session state from a previous interrupted sign-in attempt.
+  // Without this, Amplify v6 can throw if there's a pending challenge session
+  // (e.g., user saw FORCE_CHANGE_PASSWORD form, then refreshed the page).
+  try {
+    await amplifySignOut();
+  } catch {
+    // Ignore — signOut throws if there's no session, which is fine
+  }
+
   try {
     const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password });
 
@@ -44,7 +77,7 @@ export async function signIn(email: string, password: string): Promise<SignInRes
     if (
       nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED' ||
       nextStep?.signInStep === 'RESET_PASSWORD' ||
-      (nextStep?.signInStep as any)?.includes('PASSWORD')
+      (nextStep?.signInStep as any)?.includes?.('PASSWORD')
     ) {
       return { status: 'newPasswordRequired' };
     }
@@ -53,9 +86,14 @@ export async function signIn(email: string, password: string): Promise<SignInRes
     (error as any).name = 'AuthIncompleteException';
     throw error;
   } catch (err: any) {
-    // Check if the error object itself contains the challenge (Amplify v6 masking bug)
-    if (err.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
-      return { status: 'newPasswordRequired' };
+    if (err?.name === 'AuthNotConfiguredException' || err?.name === 'AuthIncompleteException') {
+      throw err;
+    }
+    // Amplify v6 masking bug: challenge details on the error object instead of result
+    if (err && typeof err === 'object' && 'nextStep' in err) {
+      if (err.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+        return { status: 'newPasswordRequired' };
+      }
     }
     throw err;
   }
