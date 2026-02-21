@@ -11,11 +11,17 @@ type Step = 'credentials' | 'newPassword';
 function mapAuthError(err: unknown): string {
   if (err && typeof err === 'object' && 'name' in err) {
     const name = (err as { name: string }).name;
+    const message = 'message' in err ? (err as { message: string }).message : '';
+    
     if (name === 'NotAuthorizedException') return labels.errors.incorrectCredentials;
     if (name === 'UserNotFoundException') return labels.errors.incorrectCredentials;
     if (name === 'UserNotConfirmedException') return labels.errors.accountNotConfirmed;
     if (name === 'PasswordResetRequiredException') return labels.errors.passwordResetRequired;
     if (name === 'LimitExceededException') return labels.errors.tooManyAttempts;
+    if (name === 'AuthIncompleteException') return labels.errors.loadFailed;
+    
+    // Fallback for other Cognito errors — include name for diagnosis
+    return `${labels.errors.loadFailed} (${name}: ${message})`;
   }
   if (err instanceof TypeError && err.message.includes('fetch')) {
     return labels.errors.unableToConnect;
@@ -61,6 +67,10 @@ export default function LoginPage() {
   }
 
   async function handleSubmit() {
+    if (!email || !password) {
+      setErrorMsg(labels.errors.incorrectCredentials);
+      return;
+    }
     setErrorMsg(null);
     setIsLoading(true);
     try {

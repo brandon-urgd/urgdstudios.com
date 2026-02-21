@@ -27,23 +27,39 @@ export function configureAuth(): void {
       Cognito: {
         userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID as string,
         userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string,
+        userPoolRegion: 'us-west-2',
       },
     },
   });
 }
 
 export async function signIn(email: string, password: string): Promise<SignInResult> {
-  const result = await amplifySignIn({ username: email, password });
+  try {
+    const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password });
 
-  if (
-    !result.isSignedIn &&
-    result.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED'
-  ) {
-    return { status: 'newPasswordRequired' };
+    if (isSignedIn) {
+      const user = await amplifyGetCurrentUser();
+      return { status: 'authenticated', user };
+    }
+
+    if (
+      nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED' ||
+      nextStep?.signInStep === 'RESET_PASSWORD' ||
+      (nextStep?.signInStep as any)?.includes('PASSWORD')
+    ) {
+      return { status: 'newPasswordRequired' };
+    }
+
+    const error = new Error(`Auth incomplete: ${nextStep?.signInStep || 'Unknown'}`);
+    (error as any).name = 'AuthIncompleteException';
+    throw error;
+  } catch (err: any) {
+    // Check if the error object itself contains the challenge (Amplify v6 masking bug)
+    if (err.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+      return { status: 'newPasswordRequired' };
+    }
+    throw err;
   }
-
-  const user = await amplifyGetCurrentUser();
-  return { status: 'authenticated', user };
 }
 
 export async function completeNewPassword(newPassword: string): Promise<AuthUser> {
