@@ -443,6 +443,48 @@ jobs:
           
           echo "✅ S3 Bucket Name: $S3_BUCKET"
           echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV
+          
+          # Get Cognito User Pool ID (needed for Vite build)
+          USER_POOL_ID=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`UserPoolId`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$USER_POOL_ID" ] || [ "$USER_POOL_ID" = "None" ]; then
+            echo "❌ FATAL: UserPoolId not found in stack outputs"
+            exit 1
+          fi
+          echo "✅ Cognito User Pool ID: $USER_POOL_ID"
+          echo "VITE_COGNITO_USER_POOL_ID=$USER_POOL_ID" >> $GITHUB_ENV
+          
+          # Get Cognito App Client ID (needed for Vite build)
+          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`UserPoolClientId`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$USER_POOL_CLIENT_ID" ] || [ "$USER_POOL_CLIENT_ID" = "None" ]; then
+            echo "❌ FATAL: UserPoolClientId not found in stack outputs"
+            exit 1
+          fi
+          echo "✅ Cognito App Client ID: $USER_POOL_CLIENT_ID"
+          echo "VITE_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID" >> $GITHUB_ENV
+          
+          # Get API Gateway URL (needed for Vite build)
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`ApiBaseUrl`].OutputValue' \
+            --output text \
+            --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            echo "❌ FATAL: ApiBaseUrl not found in stack outputs"
+            exit 1
+          fi
+          echo "✅ API URL: $API_URL"
+          echo "VITE_API_BASE_URL=$API_URL" >> $GITHUB_ENV
 
       - name: Deploy HTTP API changes
         run: |
@@ -503,6 +545,14 @@ jobs:
 
       - name: Build frontend with Vite
         working-directory: apps/web
+        env:
+          VITE_COGNITO_USER_POOL_ID: ${{ env.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID: ${{ env.VITE_COGNITO_CLIENT_ID }}
+          VITE_COGNITO_REGION: ${{ env.AWS_REGION }}
+          VITE_API_BASE_URL: ${{ env.VITE_API_BASE_URL }}
+          VITE_COMMAND_CENTER: "true"
+          VITE_COMMAND_CENTER_REPLY: "true"
+          VITE_COMMAND_CENTER_AUTO_RESPONSE: "true"
         run: |
           echo "🔨 Building frontend with Vite..."
           npm run build
