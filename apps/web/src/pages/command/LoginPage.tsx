@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { labels } from '../../utils/labels';
 import GlassButton from '../../components/command/GlassButton';
@@ -138,9 +138,9 @@ export default function LoginPage() {
           </GlassButton>
 
           {isExpanded && (
-            <a href="/command/forgot-password" className={styles.forgotLink}>
+            <Link to="/command/forgot-password" className={styles.forgotLink}>
               {labels.login.forgotPassword}
-            </a>
+            </Link>
           )}
 
           {errorMsg && (

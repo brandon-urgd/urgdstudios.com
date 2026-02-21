@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
 import SectionReveal from '../components/SectionReveal';
@@ -16,16 +17,15 @@ interface Application {
 
 const APPLICATIONS: Application[] = [
   {
-    name: 'Command Center',
-    description:
-      'Admin dashboard for urgdstudios.com. Manage contact form submissions, update status, and reply via email.',
-    status: 'Active',
-    url: '/command/dashboard',
-  },
-  {
     name: 'Broadcast',
     description: 'SMS and MMS broadcasting for communities and organizations.',
     status: 'In Development',
+  },
+  {
+    name: 'Command Center',
+    description: 'Admin dashboard for urgdstudios.com.',
+    status: 'Active',
+    url: '/command/dashboard',
   },
   {
     name: 'Stitch',
@@ -66,18 +66,30 @@ export default function ApplicationsPage() {
             );
 
             if (isActive && app.url) {
+              if (app.isExternal) {
+                return (
+                  <a
+                    key={app.name}
+                    href={app.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${app.name} — ${app.description}. Opens in a new tab.`}
+                    className={styles.cardLink}
+                  >
+                    {cardContent}
+                  </a>
+                );
+              }
+
               return (
-                <a
+                <Link
                   key={app.name}
-                  href={app.url}
-                  {...(app.isExternal
-                    ? { target: '_blank', rel: 'noopener noreferrer' }
-                    : {})}
-                  aria-label={`${app.name} — ${app.description}${app.isExternal ? '. Opens in a new tab.' : ''}`}
+                  to={app.url}
+                  aria-label={`${app.name} — ${app.description}`}
                   className={styles.cardLink}
                 >
                   {cardContent}
-                </a>
+                </Link>
               );
             }
 

@@ -101,7 +101,6 @@ export default function App() {
           <Route path="/privacy/" element={<PrivacyPage />} />
           <Route path="/terms/" element={<TermsPage />} />
           <Route path="/legal/" element={<LegalPage />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         {/* Command Center auth pages — no layout shell */}
@@ -151,6 +150,11 @@ export default function App() {
               }
             />
           </Route>
+        </Route>
+
+        {/* 404 catch-all — inside Layout shell, evaluated after all specific routes */}
+        <Route element={<Layout />}>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </>
