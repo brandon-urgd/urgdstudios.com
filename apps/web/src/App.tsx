@@ -16,6 +16,12 @@ const ForgotPasswordPage = lazy(() => import('./pages/command/ForgotPasswordPage
 const MessageDashboard = lazy(() => import('./pages/command/MessageDashboard'));
 const CommandLayout = lazy(() => import('./layouts/CommandLayout'));
 
+// Shown while any Command Center chunk is loading — prevents a blank flash
+// between createRoot clearing the home-page SSG HTML and the lazy chunk arriving.
+function CommandFallback() {
+  return <div style={{ background: 'var(--color-bg-base)', minHeight: '100dvh' }} />;
+}
+
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'ur/gd Studios',
   '/applications/': 'Applications — ur/gd Studios',
@@ -107,7 +113,7 @@ export default function App() {
         <Route
           path="/command/login"
           element={
-            <Suspense>
+            <Suspense fallback={<CommandFallback />}>
               <LoginPage />
             </Suspense>
           }
@@ -115,7 +121,7 @@ export default function App() {
         <Route
           path="/command/forgot-password"
           element={
-            <Suspense>
+            <Suspense fallback={<CommandFallback />}>
               <ForgotPasswordPage />
             </Suspense>
           }
@@ -128,7 +134,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route
             element={
-              <Suspense>
+              <Suspense fallback={<CommandFallback />}>
                 <CommandLayout />
               </Suspense>
             }
@@ -136,7 +142,7 @@ export default function App() {
             <Route
               path="/command/dashboard"
               element={
-                <Suspense>
+                <Suspense fallback={<CommandFallback />}>
                   <MessageDashboard />
                 </Suspense>
               }
@@ -144,7 +150,7 @@ export default function App() {
             <Route
               path="/command/dashboard/messages/:id"
               element={
-                <Suspense>
+                <Suspense fallback={<CommandFallback />}>
                   <MessageDashboard />
                 </Suspense>
               }

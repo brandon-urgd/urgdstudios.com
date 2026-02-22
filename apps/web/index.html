@@ -26,6 +26,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // CloudFront serves this file (the home-page pre-render) for all routes.
+      // Command Center routes have no pre-rendered HTML — clear the injected
+      // home-page content immediately so it never flashes before React renders.
+      if (window.location.pathname.startsWith('/command')) {
+        var r = document.getElementById('root');
+        if (r) r.innerHTML = '';
+      }
+    </script>
     <noscript>
       <div style="background:#0a0a14;color:rgba(255,255,255,0.92);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:2rem;text-align:center;">
         <div>
