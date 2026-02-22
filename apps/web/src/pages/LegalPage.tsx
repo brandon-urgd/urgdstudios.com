@@ -25,17 +25,6 @@ export default function LegalPage() {
           <a href="/privacy/">Privacy Policy</a>.
         </p>
 
-        <nav aria-label="Legal documents" className={styles.legalNav}>
-          <ul className={styles.policyList}>
-            <li>
-              <a href="/privacy/">Privacy Policy</a>
-            </li>
-            <li>
-              <a href="/terms/">Terms of Use</a>
-            </li>
-          </ul>
-        </nav>
-
         <ContentSection heading="1. Intellectual Property Notice">
           <p>
             All ur/gd names, logos, designs, branding elements, and proprietary
