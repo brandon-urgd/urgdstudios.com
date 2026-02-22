@@ -54,6 +54,12 @@
   display: block;
 }
 
+.mobileLogoLink {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  outline-offset: 4px;
+}
+
 .mobileLogo {
   width: 36px;
   height: 36px;

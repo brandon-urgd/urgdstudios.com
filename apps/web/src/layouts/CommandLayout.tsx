@@ -32,11 +32,13 @@ export default function CommandLayout() {
             <span className={styles.hamburgerBar} />
             <span className={styles.hamburgerBar} />
           </button>
-          <div
-            className={styles.mobileLogo}
-            role="img"
+          <a
+            href="https://urgdstudios.com"
+            className={styles.mobileLogoLink}
             aria-label={labels.sidebar.logoAlt}
-          />
+          >
+            <div className={styles.mobileLogo} role="img" aria-hidden="true" />
+          </a>
         </div>
 
         <main id="main-content" className={styles.main}>

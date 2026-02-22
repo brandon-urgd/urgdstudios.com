@@ -32,11 +32,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
     >
       <div className={styles.top}>
-        <div
-          className={styles.logo}
-          role="img"
+        <a
+          href="https://urgdstudios.com"
+          className={styles.logoLink}
           aria-label={labels.sidebar.logoAlt}
-        />
+        >
+          <div className={styles.logo} role="img" aria-hidden="true" />
+        </a>
       </div>
 
       <ul className={styles.nav} role="list">
