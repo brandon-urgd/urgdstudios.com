@@ -133,6 +133,16 @@ export function useUpdateStatus(): UseMutationResult<
 
       return { previousMessages, previousDetail };
     },
+    onSuccess: (updatedMessage, { id }) => {
+      // Write the server response directly into the cache — avoids a round-trip
+      // re-fetch and keeps list + detail consistent without a race-condition window.
+      queryClient.setQueryData<Message[]>(messageKeys.all, (old) =>
+        old?.map((m) => (m.submissionId === id ? { ...m, ...updatedMessage } : m)) ?? old,
+      );
+      queryClient.setQueryData<MessageDetail>(messageKeys.detail(id), (old) =>
+        old ? { ...old, ...updatedMessage } : old,
+      );
+    },
     onError: (_err, { id }, context) => {
       if (context?.previousMessages) {
         queryClient.setQueryData(messageKeys.all, context.previousMessages);
@@ -140,10 +150,6 @@ export function useUpdateStatus(): UseMutationResult<
       if (context?.previousDetail) {
         queryClient.setQueryData(messageKeys.detail(id), context.previousDetail);
       }
-    },
-    onSettled: (_data, _err, { id }) => {
-      void queryClient.invalidateQueries({ queryKey: messageKeys.all });
-      void queryClient.invalidateQueries({ queryKey: messageKeys.detail(id) });
     },
   });
 }
@@ -182,7 +188,11 @@ export function useReplyToMessage(): UseMutationResult<Reply, Error, ReplyPayloa
       return data.reply;
     },
     onSuccess: (_data, { id }) => {
+      // The Lambda sets status → in_progress on every reply, so both the detail
+      // and the list need to reflect the new status. Without invalidating the list,
+      // the status in the table would remain stale until a manual refresh.
       void queryClient.invalidateQueries({ queryKey: messageKeys.detail(id) });
+      void queryClient.invalidateQueries({ queryKey: messageKeys.all });
     },
   });
 }
