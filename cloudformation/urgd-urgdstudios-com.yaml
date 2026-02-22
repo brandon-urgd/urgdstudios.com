@@ -399,22 +399,12 @@ Resources:
           AttributeType: S
         - AttributeName: ipHash
           AttributeType: S
-        - AttributeName: submittedAt
-          AttributeType: S
         - AttributeName: timestamp
           AttributeType: S
       KeySchema:
         - AttributeName: submissionId
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: ipHash-submittedAt-index
-          KeySchema:
-            - AttributeName: ipHash
-              KeyType: HASH
-            - AttributeName: submittedAt
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
         - IndexName: ipHash-timestamp-index
           KeySchema:
             - AttributeName: ipHash
