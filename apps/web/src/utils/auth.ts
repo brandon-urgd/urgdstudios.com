@@ -3,7 +3,7 @@
  * Configures Amplify from Vite build-time environment variables.
  */
 
-import { Amplify } from '@aws-amplify/core';
+import { Amplify } from 'aws-amplify';
 import {
   signIn as amplifySignIn,
   signOut as amplifySignOut,
@@ -13,7 +13,7 @@ import {
   resetPassword,
   confirmResetPassword,
   type AuthUser,
-} from '@aws-amplify/auth';
+} from 'aws-amplify/auth';
 
 export type { AuthUser };
 
