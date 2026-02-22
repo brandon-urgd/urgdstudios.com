@@ -229,28 +229,40 @@ export function getStatusLabel(status: string): string {
   return labels.filters.statuses[status] ?? status;
 }
 
-export function formatDateShort(timestamp: string): string {
+function toValidDate(timestamp: string | null | undefined): Date | null {
+  if (!timestamp) return null;
+  const d = new Date(timestamp);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export function formatDateShort(timestamp: string | null | undefined): string {
+  const d = toValidDate(timestamp);
+  if (!d) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(timestamp));
+  }).format(d);
 }
 
-export function formatDateLong(timestamp: string): string {
+export function formatDateLong(timestamp: string | null | undefined): string {
+  const d = toValidDate(timestamp);
+  if (!d) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(timestamp));
+  }).format(d);
 }
 
-export function formatDateWithTime(timestamp: string): string {
+export function formatDateWithTime(timestamp: string | null | undefined): string {
+  const d = toValidDate(timestamp);
+  if (!d) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  }).format(new Date(timestamp));
+  }).format(d);
 }
