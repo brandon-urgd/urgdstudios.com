@@ -1,7 +1,6 @@
 import { Link } from 'react-router';
 import GlassPanel from '../components/GlassPanel';
 import SectionReveal from '../components/SectionReveal';
-import PullQuote from '../components/PullQuote';
 import { useMeta } from '../utils/useMeta';
 import styles from './HomePage.module.css';
 

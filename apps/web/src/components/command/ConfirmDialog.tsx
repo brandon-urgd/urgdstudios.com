@@ -13,16 +13,37 @@ interface ConfirmDialogProps {
 
 export default function ConfirmDialog({ onConfirm, onCancel, isLoading = false, errorMessage }: ConfirmDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Focus Cancel button on open (safe default — not the destructive action)
   useEffect(() => {
     cancelRef.current?.focus();
   }, []);
 
-  // Escape key cancels
+  // Escape cancels + Tab traps focus inside the dialog
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !isLoading) onCancel();
+      if (e.key === 'Escape' && !isLoading) {
+        onCancel();
+        return;
+      }
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          ),
+        );
+        if (focusable.length === 0) { e.preventDefault(); return; }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     }
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
@@ -31,6 +52,7 @@ export default function ConfirmDialog({ onConfirm, onCancel, isLoading = false, 
   return (
     <div className={styles.overlay} onClick={isLoading ? undefined : onCancel}>
       <div
+        ref={dialogRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-heading"

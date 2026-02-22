@@ -13,6 +13,9 @@ export default function CommandLayout() {
 
   return (
     <div className={styles.layout}>
+      <a href="#main-content" className={styles.skipLink}>
+        {labels.a11y.skipToContent}
+      </a>
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       {sidebarOpen && <MobileMenuOverlay onClose={closeSidebar} />}
