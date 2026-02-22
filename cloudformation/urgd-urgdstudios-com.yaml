@@ -448,6 +448,20 @@ Resources:
       Name: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
       Description: 'Intake API for urgdstudios.com contact form'
       ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref CorsAllowedOrigins
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+        MaxAge: 86400
       Tags:
         Environment: !Ref Environment
         Application: urgdstudios-com
