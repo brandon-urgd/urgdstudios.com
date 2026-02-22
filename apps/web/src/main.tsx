@@ -43,8 +43,10 @@ const app = (
   </StrictMode>
 );
 
-// Use hydrateRoot when pre-rendered HTML is present (SSG), createRoot otherwise.
-if (rootElement.hasChildNodes()) {
+// Command Center routes have no pre-rendered HTML — always use createRoot there.
+// Public site routes use hydrateRoot to attach to the SSG-rendered HTML.
+const isCommandCenter = window.location.pathname.startsWith('/command');
+if (rootElement.hasChildNodes() && !isCommandCenter) {
   hydrateRoot(rootElement, app);
 } else {
   createRoot(rootElement).render(app);

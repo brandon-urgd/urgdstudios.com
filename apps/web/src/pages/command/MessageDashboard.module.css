@@ -8,7 +8,7 @@
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-md);
   flex-wrap: wrap;
 }
@@ -34,6 +34,47 @@
 .content {
   flex: 1;
   min-height: 0;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast) var(--easing-default),
+    border-color var(--transition-fast) var(--easing-default);
+  flex-shrink: 0;
+}
+
+.refreshButton:hover:not(:disabled) {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.refreshButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.refreshButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 0.7s linear infinite;
 }
 
 .retryButton {
