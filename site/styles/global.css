@@ -725,6 +725,59 @@ li a {
   margin-bottom: 0;
 }
 
+/* Legal Content */
+.legal-date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-block-end: var(--space-2xl);
+}
+
+.legal-content {
+  color: var(--color-text-secondary);
+}
+
+.legal-content h2 {
+  margin-block-start: var(--space-2xl);
+}
+
+.legal-content h3 {
+  margin-block-start: var(--space-xl);
+}
+
+.legal-content h4 {
+  margin-block-start: var(--space-lg);
+}
+
+.legal-content ul {
+  padding-inline-start: var(--space-xl);
+  list-style: disc;
+}
+
+.legal-content li {
+  margin-block-end: var(--space-xs);
+}
+
+.legal-content li:last-child {
+  margin-block-end: 0;
+}
+
+.legal-nav {
+  list-style: none;
+  margin-block-end: var(--space-xl);
+}
+
+.legal-nav li {
+  margin-block-end: var(--space-md);
+}
+
+.legal-nav li:last-child {
+  margin-block-end: 0;
+}
+
+.legal-nav a {
+  font-weight: var(--font-weight-semibold);
+}
+
 /* ============================================================================
    Reduced Motion Support (WCAG 2.2 AA)
    ============================================================================ */

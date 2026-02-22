@@ -38,3 +38,12 @@
   outline-offset: var(--focus-ring-offset);
   border-radius: var(--radius-sm);
 }
+
+.legalIntro {
+  color: var(--color-text-secondary);
+  margin-block-end: var(--space-lg);
+}
+
+.legalNav {
+  margin-block-end: var(--space-xl);
+}

@@ -72,3 +72,11 @@
   outline-offset: var(--focus-ring-offset);
   border-radius: var(--radius-sm);
 }
+
+.content h3 {
+  margin-block-start: var(--space-xl);
+}
+
+.content h4 {
+  margin-block-start: var(--space-lg);
+}
