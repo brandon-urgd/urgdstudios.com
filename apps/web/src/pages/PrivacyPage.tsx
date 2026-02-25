@@ -222,7 +222,7 @@ export default function PrivacyPage() {
 
         <ContentSection heading="5. Data Retention">
           <p>
-            .We retain personal information only for as long as necessary to
+            We retain personal information only for as long as necessary to
             provide the Services, fulfill the purposes described in this Privacy
             Policy, and comply with legal obligations.
           </p>
