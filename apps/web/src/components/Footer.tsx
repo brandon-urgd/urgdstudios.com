@@ -14,7 +14,7 @@ export default function Footer() {
         <p className={styles.tagline}>
           Your data. Your privacy. Your experience. You're good.
         </p>
-        <p className={styles.address}>ur/gd Studios LLC · Seattle, WA</p>
+        <p className={styles.address}>&copy; {new Date().getFullYear()} ur/gd Studios LLC · Seattle, WA</p>
         <nav aria-label="Legal links" className={styles.legalNav}>
           {LEGAL_LINKS.map(({ to, label }, index) => (
             <span key={to}>
