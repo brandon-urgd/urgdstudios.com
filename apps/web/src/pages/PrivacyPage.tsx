@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <p className={styles.effectiveDate}>Last updated: 02/21/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 02/24/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -53,8 +53,14 @@ export default function PrivacyPage() {
             <li>
               Content you upload (e.g., photos, messages, files, codes)
             </li>
-            <li>Communications with us</li>
+            <li>Communications with us, including contact form submissions</li>
           </ul>
+          <p>
+            When you submit a contact form, we store your name, email address,
+            message category, and message content. We may send you an acknowledgment
+            email confirming receipt and, if appropriate, a reply email in response
+            to your inquiry.
+          </p>
           <p>You control what content you choose to submit.</p>
 
           <h3>2.2 Information Collected Automatically</h3>
@@ -94,7 +100,35 @@ export default function PrivacyPage() {
             to be proportional to the feature being provided.
           </p>
 
-          <h4>Stitch (SVG-to-PES Converter)</h4>
+          <h4>Broadcast (Multi-Tenant SMS/MMS Platform):</h4>
+          <p>
+            Broadcast is a one-to-many communication platform. When you use or
+            interact with Broadcast:
+          </p>
+          <ul>
+            <li>
+              If you are a Listener (Subscriber), we collect your phone number
+              (Personally Identifiable Information - PII) when you explicitly
+              opt-in (e.g., text &ldquo;JOIN&rdquo;).
+            </li>
+            <li>
+              Phone numbers and message histories are securely stored using
+              encryption at rest.
+            </li>
+            <li>
+              We delegate the processing and transmission of SMS/MMS messages to
+              Twilio, our third-party messaging gateway. Twilio processes this
+              data in accordance with their own privacy and security policies to
+              successfully deliver the messages.
+            </li>
+            <li>
+              We strictly honor opt-out commands (e.g., &ldquo;STOP&rdquo;,
+              &ldquo;QUIET&rdquo;). When you opt-out, we immediately update your
+              record and cease sending broadcasts to your number.
+            </li>
+          </ul>
+
+          <h4>Stitch (SVG-to-PES Converter):</h4>
           <p>
             Stitch is a file conversion tool that does not require an account,
             authentication, or any personally identifying information. When you
@@ -188,7 +222,7 @@ export default function PrivacyPage() {
 
         <ContentSection heading="5. Data Retention">
           <p>
-            We retain personal information only for as long as necessary to
+            .We retain personal information only for as long as necessary to
             provide the Services, fulfill the purposes described in this Privacy
             Policy, and comply with legal obligations.
           </p>
@@ -249,11 +283,10 @@ export default function PrivacyPage() {
             <li>Request data portability</li>
           </ul>
           <p>
-            Requests may be submitted to{' '}
+            Requests may be submitted to:{' '}
             <a href="mailto:privacy@urgdstudios.com">
               privacy@urgdstudios.com
             </a>
-            .
           </p>
           <p>
             We will respond to verifiable requests within forty-five (45) days,

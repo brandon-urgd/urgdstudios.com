@@ -60,6 +60,19 @@ export default function LegalPage() {
             Each ur/gd application reflects the same design principles, with
             functionality-specific data practices.
           </p>
+
+          <h4>Broadcast Philosophy:</h4>
+          <p>
+            Broadcast is built on the principle of &ldquo;One voice, many
+            listeners.&rdquo; We believe in respectful broadcasting that gives
+            everyone control. It is designed to eliminate the noise of group
+            chats by allowing senders to speak once, while giving listeners the
+            absolute power to pause (&ldquo;QUIET&rdquo;) or step back
+            (&ldquo;STOP&rdquo;) without social friction, drama, or guilt. We
+            do not support two-way chat or complex marketing automations that
+            treat listeners as data points rather than people.
+          </p>
+
           <p>
             Future applications may describe their specific data practices
             within the app interface or supporting documentation, where

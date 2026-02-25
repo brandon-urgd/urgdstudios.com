@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Terms of Use" />
-      <p className={styles.effectiveDate}>Last updated: 02/21/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 02/24/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -79,17 +79,55 @@ export default function TermsPage() {
           </p>
         </ContentSection>
 
-        <ContentSection heading="3. SMS Communications (Where Applicable)">
+        <ContentSection heading="3. Broadcast Acceptable Use Policy (AUP) and SMS Communications">
           <p>
-            Certain Services may involve SMS or messaging functionality. By
-            subscribing to such features, you represent that you have provided
-            the required consent under applicable law to receive communications.
+            Certain Services (like Broadcast) involve SMS or messaging
+            functionality.
+          </p>
+
+          <h4>For Senders (Admins):</h4>
+          <p>
+            If you use the Broadcast platform as a Sender, you must adhere to
+            this strict Acceptable Use Policy to ensure compliance with the
+            Telephone Consumer Protection Act (TCPA) and to prevent spam. You
+            agree that:
+          </p>
+          <ul>
+            <li>
+              You will only send messages to Listeners who have provided
+              explicit, verifiable opt-in consent to receive communications from
+              your specific channel.
+            </li>
+            <li>
+              You will not send spam, unsolicited marketing, phishing attempts,
+              or illegal content.
+            </li>
+            <li>
+              You will not attempt to bypass or interfere with our automated
+              opt-out mechanisms (e.g., &ldquo;STOP&rdquo; or
+              &ldquo;QUIET&rdquo; commands).
+            </li>
+            <li>
+              We reserve the right to immediately suspend or terminate your
+              Broadcast channel and account if we determine, in our sole
+              discretion, that you are violating this AUP, generating excessive
+              spam complaints, or violating any applicable telecommunications
+              laws.
+            </li>
+          </ul>
+
+          <h4>For Listeners (Subscribers):</h4>
+          <p>
+            By subscribing to a Broadcast channel, you represent that you have
+            provided the required consent under applicable law to receive
+            communications from that specific Sender.
           </p>
           <p>
-            You may opt out of SMS communications at any time by following the
-            instructions provided in the message.
+            You may opt out of SMS communications at any time by replying
+            &ldquo;STOP&rdquo; or &ldquo;QUIET&rdquo; to the message, or by
+            following the instructions provided in the message. Message and data
+            rates may apply.
           </p>
-          <p>Message and data rates may apply.</p>
         </ContentSection>
 
         <ContentSection heading="4. Accounts & Security">
