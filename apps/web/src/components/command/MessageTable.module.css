@@ -61,4 +61,5 @@
 
 @media (max-width: 767px) {
   .thStatus { display: none; }
+  .table { min-width: 0; }
 }
