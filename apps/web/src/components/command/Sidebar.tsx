@@ -67,6 +67,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         >
           {labels.sidebar.signOut}
         </button>
+        <p className={styles.copyright}>
+          &copy; {new Date().getFullYear()} ur/gd Studios LLC
+        </p>
       </div>
     </nav>
   );

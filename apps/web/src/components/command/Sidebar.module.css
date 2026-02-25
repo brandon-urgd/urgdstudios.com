@@ -106,6 +106,13 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+.copyright {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  padding: var(--space-xs) var(--space-sm);
+}
+
 /* Mobile: hidden by default, slides in when open */
 @media (max-width: 767px) {
   .sidebar {
@@ -113,6 +120,8 @@
     top: 0;
     left: 0;
     height: 100vh;
+    overflow-y: auto;
+    padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
     transform: translateX(-100%);
     transition: transform var(--transition-slow) var(--easing-default);
   }
