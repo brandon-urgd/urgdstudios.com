@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <p className={styles.effectiveDate}>Last updated: 02/24/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 03/06/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -125,6 +125,14 @@ export default function PrivacyPage() {
               We strictly honor opt-out commands (e.g., &ldquo;STOP&rdquo;,
               &ldquo;QUIET&rdquo;). When you opt-out, we immediately update your
               record and cease sending broadcasts to your number.
+            </li>
+            <li>
+              Phone numbers and SMS opt-in consent collected through Broadcast
+              are used solely to deliver messages from the channel the subscriber
+              opted into. This information is never sold, rented, or shared with
+              third parties for marketing purposes, and is never used to contact
+              subscribers on behalf of any entity other than the channel they
+              explicitly joined.
             </li>
           </ul>
 

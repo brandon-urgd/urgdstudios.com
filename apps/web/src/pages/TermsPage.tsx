@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Terms of Use" />
-      <p className={styles.effectiveDate}>Last updated: 02/24/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 03/06/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -114,6 +114,15 @@ export default function TermsPage() {
               spam complaints, or violating any applicable telecommunications
               laws.
             </li>
+            <li>
+              Senders are solely responsible for compliance with all applicable
+              telecommunications laws and consent requirements.
+            </li>
+            <li>
+              Broadcast is available only to approved Senders at the discretion
+              of ur/gd. ur/gd reserves the right to refuse access for any
+              reason.
+            </li>
           </ul>
 
           <h4>For Listeners (Subscribers):</h4>
@@ -123,10 +132,11 @@ export default function TermsPage() {
             communications from that specific Sender.
           </p>
           <p>
-            You may opt out of SMS communications at any time by replying
-            &ldquo;STOP&rdquo; or &ldquo;QUIET&rdquo; to the message, or by
-            following the instructions provided in the message. Message and data
-            rates may apply.
+            You may opt out of SMS communications at any time by replying{' '}
+            <strong>STOP</strong> or <strong>QUIET</strong> to the message, or
+            by following the instructions provided in the message. Reply{' '}
+            <strong>HELP</strong> for help. Message and data rates may apply.
+            Message frequency varies by channel.
           </p>
         </ContentSection>
 
