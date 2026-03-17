@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Terms of Use" />
-      <p className={styles.effectiveDate}>Last updated: 03/06/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 03/16/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -135,8 +135,14 @@ export default function TermsPage() {
             You may opt out of SMS communications at any time by replying{' '}
             <strong>STOP</strong> or <strong>QUIET</strong> to the message, or
             by following the instructions provided in the message. Reply{' '}
-            <strong>HELP</strong> for help. Message and data rates may apply.
-            Message frequency varies by channel.
+            <strong>HELP</strong> for help.{' '}
+            <strong>Message and data rates may apply.</strong> Message frequency
+            varies by channel. Carriers are not liable for any delayed or
+            undelivered messages.
+          </p>
+          <p>
+            For details on how we handle your data, see our{' '}
+            <a href="/privacy/">Privacy Policy</a>.
           </p>
         </ContentSection>
 

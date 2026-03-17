@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <p className={styles.effectiveDate}>Last updated: 03/06/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 03/16/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -135,6 +135,11 @@ export default function PrivacyPage() {
               explicitly joined.
             </li>
           </ul>
+          <p>
+            All the above categories exclude text messaging originator opt-in
+            data and consent; this information will not be shared with any
+            third parties or affiliates for marketing or promotional purposes.
+          </p>
 
           <h4>Stitch (SVG-to-PES Converter):</h4>
           <p>
