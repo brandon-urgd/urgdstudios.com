@@ -509,6 +509,10 @@ Resources:
                   - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/urgdstudios.com'
               - Effect: Allow
                 Action:
+                  - ses:GetSendQuota
+                Resource: '*'
+              - Effect: Allow
+                Action:
                   - kms:Decrypt
                   - kms:GenerateDataKey
                 Resource:
@@ -751,6 +755,10 @@ Resources:
                   - ses:SendRawEmail
                 Resource:
                   - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/urgdstudios.com'
+              - Effect: Allow
+                Action:
+                  - ses:GetSendQuota
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - sqs:SendMessage
