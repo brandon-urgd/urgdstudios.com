@@ -1,6 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { randomUUID } from 'crypto';
 import crypto from 'crypto';
@@ -11,19 +10,21 @@ import { handleHealthCheck } from './shared/healthCheck.mjs';
 // Initialize AWS SDK clients
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-west-2' });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
-const snsClient = new SNSClient({ region: process.env.AWS_REGION || 'us-west-2' });
 const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-west-2' });
 
 // Environment variables
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
-const INTAKE_TOPIC_ARN = process.env.INTAKE_TOPIC_ARN;
+const NOTIFICATION_TO_ADDRESS = process.env.NOTIFICATION_TO_ADDRESS || 'admin@urgdstudios.com';
 const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
 const VERSION = process.env.VERSION || '3.0.0';
 const POW_DIFFICULTY = parseInt(process.env.POW_DIFFICULTY || '4', 10);
-const SES_FROM_ADDRESS = process.env.SES_FROM_ADDRESS || 'admin@urgdstudios.com';
+const SES_FROM_ADDRESS = process.env.SES_FROM_ADDRESS || 'command@urgdstudios.com';
+const SES_FROM_DISPLAY_NAME = process.env.SES_FROM_DISPLAY_NAME || 'ur/gd Command';
+const SES_REPLY_TO = process.env.SES_REPLY_TO || 'admin@urgdstudios.com';
 const SITE_URL = process.env.SITE_URL || 'https://urgdstudios.com';
 // Default to enabled if env var is missing (prevent silent disablement of auto-ack)
 const COMMAND_CENTER_AUTO_RESPONSE = process.env.COMMAND_CENTER_AUTO_RESPONSE !== 'false';
+const COMMAND_API_KEY = process.env.COMMAND_API_KEY;
 
 // Valid submission types
 const VALID_TYPES = [
@@ -34,13 +35,13 @@ const VALID_TYPES = [
   'report-abuse'
 ];
 
-// Type display labels for SNS notifications
+// Type display labels for notifications
 const TYPE_LABELS = {
-  'general-inquiry': 'General inquiry',
-  'bug-report': 'Bug report',
-  'feature-request': 'Feature request',
-  'privacy-question': 'Privacy question',
-  'report-abuse': 'Abuse report'
+  'general-inquiry': 'General Inquiry',
+  'bug-report': 'Bug Report',
+  'feature-request': 'Feature Request',
+  'privacy-question': 'Privacy Question',
+  'report-abuse': 'Abuse Report'
 };
 
 /**
@@ -72,14 +73,18 @@ export async function handler(event) {
     if (method === 'GET' && path === '/v1/intake/health') {
       return await handleHealthCheck(event, requestId, {
         tableName: SUBMISSIONS_TABLE,
-        topicArn: INTAKE_TOPIC_ARN,
-        requiredEnvVars: ['SUBMISSIONS_TABLE', 'INTAKE_TOPIC_ARN', 'CORS_ALLOWED_ORIGINS', 'POW_DIFFICULTY']
+        requiredEnvVars: ['SUBMISSIONS_TABLE', 'NOTIFICATION_TO_ADDRESS', 'CORS_ALLOWED_ORIGINS', 'POW_DIFFICULTY']
       });
     }
     
     // Route: POST /v1/intake
     if (method === 'POST' && path === '/v1/intake') {
       return await handleIntakeSubmission(event, requestId);
+    }
+    
+    // Route: POST /v1/intake/report (app-to-app reporting — no honeypot/PoW)
+    if (method === 'POST' && path === '/v1/intake/report') {
+      return await handleAppReport(event, requestId);
     }
     
     // Unknown route
@@ -207,7 +212,7 @@ async function handleIntakeSubmission(event, requestId) {
       try {
         await sendAutoAck({ name, email, requestId });
       } catch (sesError) {
-        log('error', 'Auto-ack email failed — submission saved, SNS will still notify admin', {
+        log('error', 'Auto-ack email failed — submission saved, command notification will still be sent', {
           requestId,
           submissionId,
           error: sesError.message,
@@ -215,21 +220,19 @@ async function handleIntakeSubmission(event, requestId) {
       }
     }
     
-    // STEP 9: Publish SNS notification (enhanced with direct Command Center link)
+    // STEP 9: Send SES notification to admin (heads-up only — no PII, no message content)
     try {
-      await publishNotification({
+      await sendCommandNotification({
         submissionId,
         timestamp,
-        name,
-        email,
         type,
-        message: sanitizedMessage
+        appName: 'urgdstudios.com'
       });
-    } catch (snsError) {
-      log('error', 'SNS publish failed — submission saved, auto-ack may have been sent', {
+    } catch (sesError) {
+      log('error', 'Command notification email failed — submission saved, auto-ack may have been sent', {
         requestId,
         submissionId,
-        error: snsError.message,
+        error: sesError.message,
       });
     }
     
@@ -259,6 +262,138 @@ async function handleIntakeSubmission(event, requestId) {
       null,
       event
     );
+  }
+}
+
+/**
+ * Handles app-to-app report submissions from other ur/gd apps.
+ * No honeypot or proof-of-work — server-to-server only.
+ * Authenticated via X-Api-Key header.
+ * Rate limited by app name (50/min per app).
+ */
+async function handleAppReport(event, requestId) {
+  try {
+    // Validate API key
+    const apiKey = event.headers?.['x-api-key'] || event.headers?.['X-Api-Key'];
+    if (!COMMAND_API_KEY || !apiKey || apiKey !== COMMAND_API_KEY) {
+      log('warn', 'App report: invalid API key', { requestId });
+      return errorResponse(401, 'Unauthorized', null, event);
+    }
+
+    // Parse body
+    let body;
+    try {
+      body = JSON.parse(event.body || '{}');
+    } catch {
+      return errorResponse(400, 'Invalid request format', null, event);
+    }
+
+    // Validate required fields
+    const { app, type, name, email, message, metadata } = body;
+
+    if (!app || typeof app !== 'string' || app.trim().length === 0) {
+      return errorResponse(400, 'app is required', null, event);
+    }
+    if (!type || !VALID_TYPES.includes(type)) {
+      return errorResponse(400, 'Invalid type', null, event);
+    }
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return errorResponse(400, 'message is required', null, event);
+    }
+    if (message.trim().length > 5000) {
+      return errorResponse(400, 'message must be 5000 characters or fewer', null, event);
+    }
+
+    const appName = app.trim().substring(0, 50);
+
+    // Rate limit by app name (50/min per app)
+    const isRateLimited = await checkAppRateLimit(appName, requestId);
+    if (isRateLimited) {
+      log('warn', 'App report: rate limit exceeded', { requestId, app: appName });
+      return errorResponse(429, 'Too many requests. Please try again later.', null, event);
+    }
+
+    // Sanitize message
+    const sanitizedMessage = sanitizeHtml(message.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+      disallowedTagsMode: 'discard'
+    });
+
+    // Store submission
+    const submissionId = randomUUID();
+    const timestamp = new Date().toISOString();
+    const ttl = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days
+
+    await storeSubmission({
+      submissionId,
+      timestamp,
+      name: name?.trim().substring(0, 200) || '',
+      email: email?.trim().substring(0, 200) || '',
+      type,
+      message: sanitizedMessage,
+      source: appName,
+      status: 'new',
+      ipHash: '',
+      honeypot: '',
+      proofOfWork: null,
+      ttl
+    });
+
+    // Send SES notification with app name in subject
+    try {
+      await sendCommandNotification({
+        submissionId,
+        timestamp,
+        type,
+        appName: appName.charAt(0).toUpperCase() + appName.slice(1)
+      });
+    } catch (sesError) {
+      log('error', 'App report: notification email failed — submission saved', {
+        requestId,
+        submissionId,
+        error: sesError.message,
+      });
+    }
+
+    log('info', 'App report received', { requestId, submissionId, type, app: appName });
+
+    return createResponse(200, { submissionId }, event);
+
+  } catch (error) {
+    log('error', 'App report processing failed', {
+      requestId,
+      error: error.message,
+      stack: error.stack
+    });
+    return errorResponse(500, 'An unexpected error occurred.', null, event);
+  }
+}
+
+/**
+ * Rate limit check by app name — 50 submissions per minute per app
+ */
+async function checkAppRateLimit(appName, requestId) {
+  try {
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+
+    const command = new QueryCommand({
+      TableName: SUBMISSIONS_TABLE,
+      IndexName: 'ipHash-timestamp-index',
+      KeyConditionExpression: 'ipHash = :appKey AND #ts > :timestamp',
+      ExpressionAttributeNames: { '#ts': 'timestamp' },
+      ExpressionAttributeValues: {
+        ':appKey': `app:${appName}`,
+        ':timestamp': oneMinuteAgo
+      },
+      Select: 'COUNT'
+    });
+
+    const response = await docClient.send(command);
+    return (response.Count || 0) >= 50;
+  } catch (error) {
+    log('error', 'App rate limit check failed', { requestId, error: error.message });
+    return false; // Fail open
   }
 }
 
@@ -479,14 +614,14 @@ Thanks for reaching out.
 
 — ur/gd Studios
 
-ur/gd Studios LLC
-The Cloud Room
-1424 11th Ave STE 400
-Seattle, WA 98122`;
+---
+Sent by ur/gd Command, powered by ur/gd Studios (https://www.urgdstudios.com)
+ur/gd Studios LLC · The Cloud Room · 1424 11th Ave STE 400 · Seattle, WA 98122-4271
+Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstudios.com/terms`;
 
   await sesClient.send(new SendEmailCommand({
-    Source: SES_FROM_ADDRESS,
-    ReplyToAddresses: [SES_FROM_ADDRESS],
+    Source: `"${SES_FROM_DISPLAY_NAME}" <${SES_FROM_ADDRESS}>`,
+    ReplyToAddresses: [SES_REPLY_TO],
     Destination: { ToAddresses: [email] },
     Message: {
       Subject: { Data: 'We received your message — ur/gd Studios', Charset: 'UTF-8' },
@@ -502,47 +637,84 @@ Seattle, WA 98122`;
 }
 
 /**
- * Publishes notification to SNS with full submission details and Command Center direct link.
- * Uses MessageAttributes for type-based routing via SNS filter policies.
+ * Sends a branded SES notification to the admin when a new submission arrives.
+ * Contains NO PII — heads-up only. Admin reads the full message in Command Center.
+ * See ur/gd Email Standards for layout/color spec.
  */
-async function publishNotification({ submissionId, timestamp, name, email, type, message }) {
+async function sendCommandNotification({ submissionId, timestamp, type, appName }) {
   const categoryLabel = TYPE_LABELS[type] || type;
-  const formattedDatetime = formatSnsDatetime(timestamp);
+  const formattedDate = formatEmailDatetime(timestamp);
+  const commandUrl = `${SITE_URL}/command/dashboard/messages/${submissionId}`;
 
-  const messageBody = `New ${categoryLabel} submitted on urgdstudios.com.
+  const textBody = `New ${categoryLabel} received via ${appName}.
 
-From: ${name}
-Email: ${email}
-Category: ${categoryLabel}
-Submitted: ${formattedDatetime}
+Submitted: ${formattedDate}
 
-Message:
-${message}
+View in Command Center:
+${commandUrl}
 
 ---
-View in Command Center:
-${SITE_URL}/command/dashboard/messages/${submissionId}`;
+Sent by ur/gd Command, powered by ur/gd Studios (https://www.urgdstudios.com)
+ur/gd Studios LLC · The Cloud Room · 1424 11th Ave STE 400 · Seattle, WA 98122-4271
+Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstudios.com/terms`;
 
-  const command = new PublishCommand({
-    TopicArn: INTAKE_TOPIC_ARN,
-    Message: messageBody,
-    Subject: `[ur/gd] New ${categoryLabel} from ${name}`,
-    MessageAttributes: {
-      type: {
-        DataType: 'String',
-        StringValue: type
-      }
-    }
-  });
-  
-  await snsClient.send(command);
+  const htmlBody = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700&family=Rubik&display=swap');
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;">
+  <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
+    <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">${appName}: ${categoryLabel}</h2>
+    <p style="font-size:16px;margin-top:0;">A new submission has been received.</p>
+    <p style="font-size:14px;color:#4b5563;margin-top:0;">Submitted: ${formattedDate}</p>
+
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;">
+      <tr>
+        <td style="background-color:#4f46e5;border-radius:8px;padding:12px 24px;">
+          <a href="${commandUrl}" style="color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;font-family:'Rubik',sans-serif;">
+            View in Command Center
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 16px;">
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      Sent by Command, powered by <a href="https://www.urgdstudios.com" style="color:#6b7280;">ur/gd Studios</a>
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      ur/gd Studios LLC &middot; The Cloud Room &middot; 1424 11th Ave STE 400 &middot; Seattle, WA 98122-4271
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      <a href="https://www.urgdstudios.com/privacy" style="color:#6b7280;">Privacy Policy</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.urgdstudios.com/terms" style="color:#6b7280;">Terms of Use</a>
+    </p>
+  </div>
+</body>
+</html>`;
+
+  await sesClient.send(new SendEmailCommand({
+    Source: `"${SES_FROM_DISPLAY_NAME}" <${SES_FROM_ADDRESS}>`,
+    ReplyToAddresses: [SES_REPLY_TO],
+    Destination: { ToAddresses: [NOTIFICATION_TO_ADDRESS] },
+    Message: {
+      Subject: { Data: `${appName}: ${categoryLabel}`, Charset: 'UTF-8' },
+      Body: {
+        Text: { Data: textBody, Charset: 'UTF-8' },
+        Html: { Data: htmlBody, Charset: 'UTF-8' },
+      },
+    },
+  }));
 }
 
 /**
  * Formats an ISO 8601 timestamp as "Month Day, Year at H:MM AM/PM UTC"
- * per SLICE_00_UX.md §4.3 SNS copy spec.
  */
-function formatSnsDatetime(isoTimestamp) {
+function formatEmailDatetime(isoTimestamp) {
   if (!isoTimestamp) return 'unknown';
   try {
     const date = new Date(isoTimestamp);

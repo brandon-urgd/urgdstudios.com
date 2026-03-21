@@ -47,6 +47,7 @@ export default function MessageRow({ message, isSelected = false, onOpen, onDele
   return (
     <tr
       className={`${styles.row} ${isSelected ? styles.selected : ''}`}
+      data-status={message.status}
       tabIndex={0}
       role="button"
       aria-label={labels.table.rowAriaLabel(message.name, categoryLabel, statusLabel)}

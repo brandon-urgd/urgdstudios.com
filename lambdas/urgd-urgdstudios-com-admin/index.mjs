@@ -7,12 +7,14 @@ import { createResponse, errorResponse, getCorsHeaders, log, createAdminError, i
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
 const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
 const VERSION = process.env.VERSION || '3.0.0';
-const SES_FROM_ADDRESS = process.env.SES_FROM_ADDRESS || 'admin@urgdstudios.com';
+const SES_FROM_ADDRESS = process.env.SES_FROM_ADDRESS || 'command@urgdstudios.com';
+const SES_FROM_DISPLAY_NAME = process.env.SES_FROM_DISPLAY_NAME || 'ur/gd Command';
+const SES_REPLY_TO = process.env.SES_REPLY_TO || 'admin@urgdstudios.com';
 const SITE_URL = process.env.SITE_URL || 'https://urgdstudios.com';
 // Feature flags default to 'true' if env var is missing (prevent silent disablement).
 const COMMAND_CENTER_REPLY = process.env.COMMAND_CENTER_REPLY !== 'false';
 
-const REQUIRED_VARS = { SUBMISSIONS_TABLE, SES_FROM_ADDRESS, SITE_URL };
+const REQUIRED_VARS = { SUBMISSIONS_TABLE, SES_FROM_ADDRESS, SITE_URL, SES_REPLY_TO };
 for (const [name, value] of Object.entries(REQUIRED_VARS)) {
   if (!value) throw new Error(`Missing required environment variable: ${name}`);
 }
@@ -426,16 +428,19 @@ async function replyToMessage(event, requestId, id) {
   const formattedDate = formatDate(item.timestamp);
 
   // 2. Send email via SES (before DynamoDB write — per SLICE_00_UX.md §2.8)
-  const emailBody = buildReplyEmailBody(recipientName, replyText, categoryLabel, formattedDate);
+  const { text: replyTextBody, html: replyHtmlBody } = buildReplyEmailBody(recipientName, replyText, categoryLabel, formattedDate);
 
   try {
     await sesClient.send(new SendEmailCommand({
-      Source: SES_FROM_ADDRESS,
-      ReplyToAddresses: [SES_FROM_ADDRESS],
+      Source: `"${SES_FROM_DISPLAY_NAME}" <${SES_FROM_ADDRESS}>`,
+      ReplyToAddresses: [SES_REPLY_TO],
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: { Data: 'Re: Your message to ur/gd Studios', Charset: 'UTF-8' },
-        Body: { Text: { Data: emailBody, Charset: 'UTF-8' } },
+        Body: {
+          Text: { Data: replyTextBody, Charset: 'UTF-8' },
+          Html: { Data: replyHtmlBody, Charset: 'UTF-8' },
+        },
       },
     }));
   } catch (error) {
@@ -496,7 +501,7 @@ async function replyToMessage(event, requestId, id) {
 
 // ── Email builders ────────────────────────────────────────────────────────────
 function buildReplyEmailBody(name, replyText, categoryLabel, formattedDate) {
-  return `Hi ${name},
+  const text = `Hi ${name},
 
 ${replyText}
 
@@ -505,10 +510,41 @@ ${replyText}
 ---
 In response to your ${categoryLabel} submitted on ${formattedDate}.
 
-ur/gd Studios LLC
-The Cloud Room
-1424 11th Ave STE 400
-Seattle, WA 98122`;
+Sent by ur/gd Command, powered by ur/gd Studios (https://www.urgdstudios.com)
+ur/gd Studios LLC · The Cloud Room · 1424 11th Ave STE 400 · Seattle, WA 98122-4271
+Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstudios.com/terms`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700&family=Rubik&display=swap');
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;">
+  <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
+    <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">Re: Your ${categoryLabel}</h2>
+    <p style="font-size:16px;margin-top:0;">Hi ${name},</p>
+    <p style="font-size:16px;">${replyText.replace(/\n/g, '<br>')}</p>
+    <p style="font-size:14px;color:#4b5563;">In response to your ${categoryLabel} submitted on ${formattedDate}.</p>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 16px;">
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      Sent by Command, powered by <a href="https://www.urgdstudios.com" style="color:#6b7280;">ur/gd Studios</a>
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      ur/gd Studios LLC &middot; The Cloud Room &middot; 1424 11th Ave STE 400 &middot; Seattle, WA 98122-4271
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      <a href="https://www.urgdstudios.com/privacy" style="color:#6b7280;">Privacy Policy</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.urgdstudios.com/terms" style="color:#6b7280;">Terms of Use</a>
+    </p>
+  </div>
+</body>
+</html>`;
+
+  return { text, html };
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

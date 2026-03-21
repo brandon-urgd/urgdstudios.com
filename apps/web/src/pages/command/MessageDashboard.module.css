@@ -13,6 +13,18 @@
   flex-wrap: wrap;
 }
 
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.greeting {
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--space-2xs);
+}
+
 .title {
   font-family: var(--font-heading);
   font-size: var(--font-size-title);

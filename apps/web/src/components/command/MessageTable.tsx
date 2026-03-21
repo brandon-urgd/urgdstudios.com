@@ -25,16 +25,22 @@ export default function MessageTable({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          message={labels.dashboard.noResults}
+          heading={labels.emptyState.noFilterResultsHeading}
+          message={labels.emptyState.noFilterResultsDescription}
           action={
             <button type="button" onClick={onClearFilters} className={styles.clearLink}>
-              {labels.dashboard.clearFilters}
+              {labels.emptyState.clearFiltersAction}
             </button>
           }
         />
       );
     }
-    return <EmptyState message={labels.dashboard.noMessages} />;
+    return (
+      <EmptyState
+        heading={labels.emptyState.noMessagesHeading}
+        message={labels.emptyState.noMessagesDescription}
+      />
+    );
   }
 
   return (

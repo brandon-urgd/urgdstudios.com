@@ -151,13 +151,18 @@ export default function MessageDetailModal({
                 isPending={isStatusPending}
               />
               <div className={styles.actionButtons}>
-                {isFeatureEnabled('commandCenterReply') && (
+                {isFeatureEnabled('commandCenterReply') && message.status !== 'closed' && (
                   <ReplyCompose
                     messageId={message.submissionId}
                     recipientName={message.name}
                     recipientEmail={message.email}
                     onSuccess={onReplySuccess}
                   />
+                )}
+                {isFeatureEnabled('commandCenterReply') && message.status === 'closed' && (
+                  <div className={styles.closedNotice}>
+                    This message is closed. Reopen it to reply.
+                  </div>
                 )}
                 <GlassButton variant="destructive" onClick={onDelete}>
                   {labels.detail.deleteButton}

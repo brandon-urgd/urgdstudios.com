@@ -42,26 +42,6 @@ Parameters:
     Description: 'Email address for operational alerts'
     Default: 'alerts@urgd.dev'
 
-  AdminEmail:
-    Type: String
-    Description: 'Email for general inquiries and feature requests'
-    Default: 'admin@urgdstudios.com'
-
-  CriticalEmail:
-    Type: String
-    Description: 'Email for bug reports (urgent/critical issues)'
-    Default: 'critical@urgd.dev'
-
-  PrivacyEmail:
-    Type: String
-    Description: 'Email for privacy questions'
-    Default: 'privacy@urgdstudios.com'
-
-  AbuseEmail:
-    Type: String
-    Description: 'Email for abuse reports'
-    Default: 'abuse@urgdstudios.com'
-
   PowDifficulty:
     Type: Number
     Description: 'Proof-of-work difficulty (number of leading zeros required in hash)'
@@ -418,6 +398,7 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: ttl
         Enabled: true
+      DeletionProtectionEnabled: true
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
@@ -465,6 +446,7 @@ Resources:
       - IntakeHealthRoute
       - IntakeSubmitRoute
       - IntakeOptionsRoute
+      - IntakeReportRoute
       - IntakeIntegration
       - AdminListRoute
       - AdminGetRoute
@@ -481,6 +463,33 @@ Resources:
       DefaultRouteSettings:
         ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50
+      Tags:
+        Environment: !Ref Environment
+        Application: urgdstudios-com
+        Owner: ur/gd Studios
+
+  # SSM Parameter — Command API key for app-to-app reporting
+  # Value must be set manually in SSM after stack creation (SecureString)
+  CommandApiKeyParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /urgd/command/api_key
+      Type: String
+      Value: 'PLACEHOLDER-set-manually-after-deploy'
+      Description: 'Shared API key for app-to-app reporting to Command Center'
+      Tags:
+        Environment: !Ref Environment
+        Application: urgdstudios-com
+        Owner: ur/gd Studios
+
+  # SSM Parameter — Command intake URL (consumed by other apps in CI/CD)
+  CommandIntakeUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /urgd/command/intake_url
+      Type: String
+      Value: 'https://urgdstudios.com/v1/intake/report'
+      Description: 'App-to-app reporting endpoint for Command Center'
       Tags:
         Environment: !Ref Environment
         Application: urgdstudios-com
@@ -516,12 +525,6 @@ Resources:
                   - !Sub '${IntakeSubmissionsTable.Arn}/index/*'
               - Effect: Allow
                 Action:
-                  - sns:Publish
-                  - sns:GetTopicAttributes  # Health check
-                Resource:
-                  - !Ref IntakeTopic
-              - Effect: Allow
-                Action:
                   - sqs:SendMessage
                 Resource:
                   - !GetAtt IntakeDLQ.Arn
@@ -537,6 +540,11 @@ Resources:
                   - kms:GenerateDataKey
                 Resource:
                   - !GetAtt IntakeKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/urgd/command/api_key'
               - Effect: Allow
                 Action:
                   - xray:PutTraceSegments
@@ -606,7 +614,6 @@ Resources:
       Environment:
         Variables:
           SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
-          INTAKE_TOPIC_ARN: !Ref IntakeTopic
           CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
           CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
@@ -614,8 +621,12 @@ Resources:
           VERSION: '3.0.0'
           POW_DIFFICULTY: !Ref PowDifficulty
           COMMAND_CENTER_AUTO_RESPONSE: !Ref CommandCenterAutoResponse
-          SES_FROM_ADDRESS: 'admin@urgdstudios.com'
+          SES_FROM_ADDRESS: 'command@urgdstudios.com'
+          SES_FROM_DISPLAY_NAME: 'ur/gd Command'
+          SES_REPLY_TO: 'admin@urgdstudios.com'
+          NOTIFICATION_TO_ADDRESS: 'admin@urgdstudios.com'
           SITE_URL: 'https://urgdstudios.com'
+          COMMAND_API_KEY: '{{resolve:ssm:/urgd/command/api_key}}'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -655,6 +666,15 @@ Resources:
       RouteKey: 'OPTIONS /v1/intake'
       Target: !Sub 'integrations/${IntakeIntegration}'
 
+  # App-to-app reporting route (no JWT auth — uses X-Api-Key header)
+  IntakeReportRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'POST /v1/intake/report'
+      AuthorizationType: NONE
+      Target: !Sub 'integrations/${IntakeIntegration}'
+
   # API Gateway Integration
   IntakeIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -663,64 +683,6 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IntakeFunction.Arn}/invocations'
       PayloadFormatVersion: '2.0'
-
-  # SNS Topic - Intake Notifications
-  IntakeTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub 'urgd-urgdstudios-com-contact-intake-${Environment}'
-      DisplayName: 'urgdstudios.com Contact Intake'
-      KmsMasterKeyId: !Ref IntakeKmsKey
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Application
-          Value: urgdstudios-com
-
-  # SNS Subscriptions with Filter Policies
-  # Category-based routing per ARCHITECTURE.md and SLICE_00_UX.md §4.3
-  # Each subscription endpoint must confirm the AWS confirmation email before notifications flow.
-
-  AdminEmailSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref AdminEmail
-      FilterPolicy:
-        type:
-          - general-inquiry
-          - feature-request
-
-  CriticalEmailSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref CriticalEmail
-      FilterPolicy:
-        type:
-          - bug-report
-
-  PrivacyEmailSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref PrivacyEmail
-      FilterPolicy:
-        type:
-          - privacy-question
-
-  AbuseEmailSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref IntakeTopic
-      Protocol: email
-      Endpoint: !Ref AbuseEmail
-      FilterPolicy:
-        type:
-          - report-abuse
 
   # ========================================
   # Slice 4: Command Center — Auth, IAM, Log Group
@@ -893,7 +855,9 @@ Resources:
           ENVIRONMENT: !Ref Environment
           VERSION: '3.0.0'
           COMMAND_CENTER_REPLY: !Ref CommandCenterReply
-          SES_FROM_ADDRESS: 'admin@urgdstudios.com'
+          SES_FROM_ADDRESS: 'command@urgdstudios.com'
+          SES_FROM_DISPLAY_NAME: 'ur/gd Command'
+          SES_REPLY_TO: 'admin@urgdstudios.com'
           SITE_URL: 'https://urgdstudios.com'
       Tags:
         - Key: Environment
@@ -1268,20 +1232,6 @@ Resources:
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "title": "DynamoDB Consumption",
-                "period": 300
-              }
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/SNS", "NumberOfMessagesPublished", "TopicName", "${IntakeTopic.TopicName}", {"stat": "Sum"}],
-                  [".", "NumberOfNotificationsFailed", ".", ".", {"stat": "Sum"}]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "title": "SNS Notifications",
                 "period": 300
               }
             }

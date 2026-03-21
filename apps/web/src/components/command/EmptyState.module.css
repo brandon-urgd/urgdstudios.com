@@ -7,6 +7,14 @@
   text-align: center;
 }
 
+.heading {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-xs);
+}
+
 .message {
   font-size: var(--font-size-intro);
   color: var(--color-text-tertiary);
@@ -14,5 +22,5 @@
 }
 
 .action {
-  margin-top: var(--space-md);
+  margin-top: var(--space-lg);
 }

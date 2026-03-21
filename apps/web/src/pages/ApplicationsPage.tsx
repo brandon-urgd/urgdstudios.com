@@ -17,8 +17,13 @@ interface Application {
 
 const APPLICATIONS: Application[] = [
   {
+    name: 'Away',
+    description: 'Trip planning and group travel coordination.',
+    status: 'In Development',
+  },
+  {
     name: 'Broadcast',
-    description: 'SMS and MMS broadcasting for communities and organizations.',
+    description: 'Our internal tool that consolidates SMS efforts across apps.',
     status: 'In Development',
   },
   {
@@ -26,6 +31,16 @@ const APPLICATIONS: Application[] = [
     description: 'Admin dashboard for urgdstudios.com.',
     status: 'Active',
     url: '/command/dashboard',
+  },
+  {
+    name: 'Gather',
+    description: 'Private forms and order collection for small businesses.',
+    status: 'In Development',
+  },
+  {
+    name: 'Pulse',
+    description: 'Structured feedback and peer review for creative work.',
+    status: 'In Development',
   },
   {
     name: 'Stitch',

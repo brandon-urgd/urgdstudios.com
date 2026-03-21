@@ -2,6 +2,7 @@
   cursor: pointer;
   transition: background var(--transition-fast) var(--easing-default);
   min-height: 56px;
+  border-left: 3px solid transparent;
 }
 
 .row:hover {
@@ -14,7 +15,16 @@
 }
 
 .row.selected {
-  border-left: 3px solid var(--color-accent);
+  border-left-color: var(--color-accent);
+}
+
+/* Status accent — scan the list at a glance */
+.row[data-status='in-progress'] {
+  border-left-color: rgba(251, 191, 36, 0.6);
+}
+
+.row[data-status='closed'] {
+  border-left-color: rgba(4, 120, 87, 0.4);
 }
 
 .row td {
