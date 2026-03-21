@@ -39,6 +39,8 @@ export default function CommandLayout() {
             href="https://urgdstudios.com"
             className={styles.mobileLogoLink}
             aria-label={labels.sidebar.logoAlt}
+            target="_top"
+            rel="noopener"
           >
             <div className={styles.mobileLogo} role="img" aria-hidden="true" />
           </a>

@@ -36,6 +36,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           href="https://urgdstudios.com"
           className={styles.logoLink}
           aria-label={labels.sidebar.logoAlt}
+          target="_top"
+          rel="noopener"
         >
           <div className={styles.logo} role="img" aria-hidden="true" />
         </a>

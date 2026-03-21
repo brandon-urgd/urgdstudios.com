@@ -606,7 +606,7 @@ async function storeSubmission(submission) {
  * Failures are logged and non-blocking — submission is already saved.
  */
 async function sendAutoAck({ name, email, requestId }) {
-  const body = `Hi ${name},
+  const textBody = `Hi ${name},
 
 We received your message. Someone from our team will follow up with you directly.
 
@@ -615,23 +615,56 @@ Thanks for reaching out.
 — ur/gd Studios
 
 ---
-Sent by ur/gd Command, powered by ur/gd Studios (https://www.urgdstudios.com)
+Sent by ur/gd Studios (https://www.urgdstudios.com)
 ur/gd Studios LLC · The Cloud Room · 1424 11th Ave STE 400 · Seattle, WA 98122-4271
 Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstudios.com/terms`;
 
+  const htmlBody = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700&family=Rubik&display=swap');
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;">
+  <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
+    <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">We got your message.</h2>
+    <p style="font-size:16px;margin-top:0;">Hi ${name},</p>
+    <p style="font-size:16px;">We received your message. Someone from our team will follow up with you directly.</p>
+    <p style="font-size:16px;">Thanks for reaching out.</p>
+    <p style="font-size:16px;">— ur/gd Studios</p>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 16px;">
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      Sent by <a href="https://www.urgdstudios.com" style="color:#6b7280;">ur/gd Studios</a>
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      ur/gd Studios LLC &middot; The Cloud Room &middot; 1424 11th Ave STE 400 &middot; Seattle, WA 98122-4271
+    </p>
+    <p style="font-size:11px;color:#6b7280;margin:4px 0;">
+      <a href="https://www.urgdstudios.com/privacy" style="color:#6b7280;">Privacy Policy</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.urgdstudios.com/terms" style="color:#6b7280;">Terms of Use</a>
+    </p>
+  </div>
+</body>
+</html>`;
+
   await sesClient.send(new SendEmailCommand({
-    Source: `"${SES_FROM_DISPLAY_NAME}" <${SES_FROM_ADDRESS}>`,
-    ReplyToAddresses: [SES_REPLY_TO],
+    Source: `"ur/gd Studios" <admin@urgdstudios.com>`,
+    ReplyToAddresses: ['admin@urgdstudios.com'],
     Destination: { ToAddresses: [email] },
     Message: {
       Subject: { Data: 'We received your message — ur/gd Studios', Charset: 'UTF-8' },
-      Body: { Text: { Data: body, Charset: 'UTF-8' } },
+      Body: {
+        Text: { Data: textBody, Charset: 'UTF-8' },
+        Html: { Data: htmlBody, Charset: 'UTF-8' },
+      },
     },
   }));
 
   log('info', 'Auto-ack email sent', {
     requestId,
-    // Redact full address — log domain only
     recipientDomain: email.split('@')[1],
   });
 }

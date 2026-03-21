@@ -125,15 +125,7 @@ export default function MessageDashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.titleGroup}>
-          <p className={styles.greeting}>Here's what came in.</p>
-          <h1 className={styles.title}>{labels.dashboard.pageTitle}</h1>
-        </div>
-        {!isLoading && !isError && (allMessages?.length ?? 0) > 0 && (
-          <p className={styles.count} aria-live="polite">
-            {labels.dashboard.messageCount(messages.length)}
-          </p>
-        )}
+        <h1 className={styles.title}>{labels.dashboard.pageTitle}</h1>
         <button
           type="button"
           className={styles.refreshButton}

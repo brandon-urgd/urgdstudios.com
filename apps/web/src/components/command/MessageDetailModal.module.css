@@ -142,9 +142,9 @@
 
 .actionButtons {
   display: flex;
+  flex-direction: column;
   gap: var(--space-md);
-  flex-wrap: wrap;
-  align-items: flex-start;
+  width: 100%;
 }
 
 .closedNotice {
