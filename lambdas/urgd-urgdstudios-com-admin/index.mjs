@@ -432,7 +432,7 @@ async function replyToMessage(event, requestId, id) {
 
   try {
     await sesClient.send(new SendEmailCommand({
-      Source: `"${SES_FROM_DISPLAY_NAME}" <${SES_FROM_ADDRESS}>`,
+      Source: `"ur/gd Studios" <${SES_FROM_ADDRESS}>`,
       ReplyToAddresses: [SES_REPLY_TO],
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
