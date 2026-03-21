@@ -468,33 +468,6 @@ Resources:
         Application: urgdstudios-com
         Owner: ur/gd Studios
 
-  # SSM Parameter — Command API key for app-to-app reporting
-  # Value must be set manually in SSM after stack creation (SecureString)
-  CommandApiKeyParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /urgd/command/api_key
-      Type: String
-      Value: 'PLACEHOLDER-set-manually-after-deploy'
-      Description: 'Shared API key for app-to-app reporting to Command Center'
-      Tags:
-        Environment: !Ref Environment
-        Application: urgdstudios-com
-        Owner: ur/gd Studios
-
-  # SSM Parameter — Command intake URL (consumed by other apps in CI/CD)
-  CommandIntakeUrlParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /urgd/command/intake_url
-      Type: String
-      Value: 'https://urgdstudios.com/v1/intake/report'
-      Description: 'App-to-app reporting endpoint for Command Center'
-      Tags:
-        Environment: !Ref Environment
-        Application: urgdstudios-com
-        Owner: ur/gd Studios
-
   # Lambda IAM Role
   IntakeLambdaRole:
     Type: AWS::IAM::Role
