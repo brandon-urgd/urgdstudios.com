@@ -291,10 +291,6 @@ jobs:
             {"ParameterKey": "AdminCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-admin-${{ env.VERSION }}.zip"},
             {"ParameterKey": "CorsAllowedOrigins", "ParameterValue": "https://urgdstudios.com"},
             {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"},
-            {"ParameterKey": "AdminEmail", "ParameterValue": "admin@urgdstudios.com"},
-            {"ParameterKey": "CriticalEmail", "ParameterValue": "critical@urgd.dev"},
-            {"ParameterKey": "PrivacyEmail", "ParameterValue": "privacy@urgdstudios.com"},
-            {"ParameterKey": "AbuseEmail", "ParameterValue": "abuse@urgdstudios.com"},
             {"ParameterKey": "PowDifficulty", "ParameterValue": "4"},
             {"ParameterKey": "CommandCenterReply", "ParameterValue": "true"},
             {"ParameterKey": "CommandCenterAutoResponse", "ParameterValue": "true"}
