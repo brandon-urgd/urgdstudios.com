@@ -134,6 +134,22 @@ export default function MessageDetailModal({
               {message.message}
             </div>
 
+            {message.metadata && Object.keys(message.metadata).length > 0 && (
+              <div className={styles.metadataSection}>
+                <h3 className={styles.metadataSectionHeading}>Context</h3>
+                <dl className={styles.metadataList}>
+                  {Object.entries(message.metadata).map(([key, value]) =>
+                    value ? (
+                      <div key={key} className={styles.metadataRow}>
+                        <dt className={styles.metadataKey}>{key}</dt>
+                        <dd className={styles.metadataValue}>{value}</dd>
+                      </div>
+                    ) : null
+                  )}
+                </dl>
+              </div>
+            )}
+
             {message.replies && message.replies.length > 0 && (
               <div className={styles.replyHistory}>
                 <h3 className={styles.replyHistoryHeading}>

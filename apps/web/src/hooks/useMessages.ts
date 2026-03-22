@@ -34,6 +34,7 @@ export interface Reply {
 export interface MessageDetail extends Message {
   message: string;
   replies?: Reply[];
+  metadata?: Record<string, string | null>;
 }
 
 export interface MessageFilters {

@@ -157,7 +157,7 @@ async function listMessages(event, requestId) {
   try {
     const result = await docClient.send(new ScanCommand({
       TableName: SUBMISSIONS_TABLE,
-      ProjectionExpression: 'submissionId, #n, email, #t, #msg, #s, #ts, #src',
+      ProjectionExpression: 'submissionId, #n, email, #t, #msg, #s, #ts, #src, metadata',
       ExpressionAttributeNames: {
         '#n': 'name',
         '#t': 'type',
@@ -242,6 +242,7 @@ async function getMessage(event, requestId, id) {
       status: item.status || 'new',
       timestamp: item.timestamp,
       ...(item.source ? { source: item.source } : {}),
+      ...(item.metadata ? { metadata: item.metadata } : {}),
     };
     if (item.replies) message.replies = item.replies;
 

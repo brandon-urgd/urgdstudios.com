@@ -338,6 +338,7 @@ async function handleAppReport(event, requestId) {
       ipHash: `app:${appName}`,
       honeypot: '',
       proofOfWork: null,
+      ...(metadata && typeof metadata === 'object' ? { metadata } : {}),
       ttl
     });
 
