@@ -44,6 +44,12 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.app {
+  font-size: var(--font-size-small) !important;
+  color: var(--color-text-secondary) !important;
+  white-space: nowrap;
+}
+
 .preview {
   color: var(--color-text-secondary) !important;
   max-width: 260px;
@@ -92,7 +98,7 @@
 .categoryDesktop { display: inline-flex; }
 
 @media (max-width: 1023px) {
-  .date, .preview { display: none; }
+  .date, .preview, .app { display: none; }
   .categoryMobile { display: inline-flex; }
   .categoryDesktop { display: none; }
 }

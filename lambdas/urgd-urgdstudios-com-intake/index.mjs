@@ -200,6 +200,7 @@ async function handleIntakeSubmission(event, requestId) {
       email,
       type,
       message: sanitizedMessage,
+      source: 'urgdstudios.com',
       status: 'new',
       ipHash,
       honeypot: body.honeypot || '',

@@ -63,6 +63,7 @@ export default function MessageRow({ message, isSelected = false, onOpen, onDele
           <CategoryBadge type={message.type} iconOnly />
         </span>
       </td>
+      <td className={styles.app}>{message.source ?? '—'}</td>
       <td className={styles.name}>{message.name}</td>
       <td className={styles.preview}>{message.preview}</td>
       <td className={styles.status}>

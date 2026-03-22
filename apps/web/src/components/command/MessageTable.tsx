@@ -51,6 +51,7 @@ export default function MessageTable({
           <tr>
             <th scope="col" className={styles.thDate}>{labels.table.colDate}</th>
             <th scope="col" className={styles.thCategory}>{labels.table.colCategory}</th>
+            <th scope="col" className={styles.thApp}>{labels.table.colApp}</th>
             <th scope="col" className={styles.thFrom}>{labels.table.colFrom}</th>
             <th scope="col" className={styles.thPreview}>{labels.table.colPreview}</th>
             <th scope="col" className={styles.thStatus}>{labels.table.colStatus}</th>

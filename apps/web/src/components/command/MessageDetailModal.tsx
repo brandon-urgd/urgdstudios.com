@@ -116,6 +116,11 @@ export default function MessageDetailModal({
             </div>
 
             <div className={styles.meta}>
+              {message.source && (
+                <span>
+                  <strong>{labels.detail.appLabel}</strong> {message.source}
+                </span>
+              )}
               <span>
                 <strong>{labels.detail.fromLabel}</strong> {message.email}
               </span>

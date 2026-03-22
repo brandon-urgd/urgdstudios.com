@@ -52,11 +52,12 @@
 }
 
 /* Column widths */
-.thDate, .thCategory, .thStatus, .thActions { white-space: nowrap; }
+.thDate, .thCategory, .thApp, .thStatus, .thActions { white-space: nowrap; }
+.thApp { min-width: 80px; }
 .thPreview { width: 100%; }
 
 @media (max-width: 1023px) {
-  .thDate, .thPreview { display: none; }
+  .thDate, .thPreview, .thApp { display: none; }
 }
 
 @media (max-width: 767px) {

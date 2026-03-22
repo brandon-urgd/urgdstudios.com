@@ -157,13 +157,14 @@ async function listMessages(event, requestId) {
   try {
     const result = await docClient.send(new ScanCommand({
       TableName: SUBMISSIONS_TABLE,
-      ProjectionExpression: 'submissionId, #n, email, #t, #msg, #s, #ts',
+      ProjectionExpression: 'submissionId, #n, email, #t, #msg, #s, #ts, #src',
       ExpressionAttributeNames: {
         '#n': 'name',
         '#t': 'type',
         '#msg': 'message',
         '#s': 'status',
         '#ts': 'timestamp',
+        '#src': 'source',
       },
     }));
 
@@ -181,6 +182,7 @@ async function listMessages(event, requestId) {
           preview,
           status: item.status || 'new',
           timestamp: item.timestamp,
+          ...(item.source ? { source: item.source } : {}),
         };
       })
       .sort((a, b) => {
@@ -239,6 +241,7 @@ async function getMessage(event, requestId, id) {
       message: item.message,
       status: item.status || 'new',
       timestamp: item.timestamp,
+      ...(item.source ? { source: item.source } : {}),
     };
     if (item.replies) message.replies = item.replies;
 

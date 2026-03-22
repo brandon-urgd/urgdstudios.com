@@ -100,6 +100,7 @@ export const labels = {
     caption: 'Contact form messages',
     colDate: 'Date',
     colCategory: 'Category',
+    colApp: 'App',
     colFrom: 'From',
     colPreview: 'Preview',
     colStatus: 'Status',
@@ -112,6 +113,7 @@ export const labels = {
   // ── Message Detail Modal ───────────────────────────────────────────────────
   detail: {
     closeButton: 'Close',
+    appLabel: 'App:',
     fromLabel: 'From:',
     submittedLabel: 'Submitted:',
     replyHistoryHeading: 'Reply History',

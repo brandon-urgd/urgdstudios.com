@@ -22,6 +22,7 @@ export interface Message {
   preview: string;
   status: 'new' | 'in-progress' | 'closed';
   timestamp: string;
+  source?: string;
 }
 
 export interface Reply {
