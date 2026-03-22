@@ -334,7 +334,7 @@ async function handleAppReport(event, requestId) {
       message: sanitizedMessage,
       source: appName,
       status: 'new',
-      ipHash: '',
+      ipHash: `app:${appName}`,
       honeypot: '',
       proofOfWork: null,
       ttl
