@@ -45,7 +45,7 @@ export default function Header() {
         <div className={styles.inner}>
           <Link to="/" className={styles.logo} aria-label="ur/gd Studios home">
             <img
-              src="/assets/logo.svg"
+              src="/assets/logo-studios.png"
               alt="ur/gd Studios"
               className={styles.logoImg}
               loading="eager"

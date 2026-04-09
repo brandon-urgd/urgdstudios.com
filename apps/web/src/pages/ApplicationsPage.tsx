@@ -22,11 +22,6 @@ const APPLICATIONS: Application[] = [
     status: 'In Development',
   },
   {
-    name: 'Broadcast',
-    description: 'Our internal tool that consolidates SMS efforts across apps.',
-    status: 'In Development',
-  },
-  {
     name: 'Command Center',
     description: 'Admin dashboard for urgdstudios.com.',
     status: 'Active',

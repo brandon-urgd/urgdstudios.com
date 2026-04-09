@@ -15,6 +15,7 @@ export default function LegalPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Legal" />
+      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -61,20 +62,51 @@ export default function LegalPage() {
             functionality-specific data practices.
           </p>
 
-          <h4>Broadcast Philosophy:</h4>
+          <h4>Pulse Philosophy:</h4>
           <p>
-            Broadcast is built on the principle of &ldquo;One voice, many
-            listeners.&rdquo; We believe in respectful broadcasting that gives
-            everyone control. It is designed to eliminate the noise of group
-            chats by allowing senders to speak once, while giving listeners the
-            absolute power to pause (&ldquo;QUIET&rdquo;) or step back
-            (&ldquo;STOP&rdquo;) without social friction, drama, or guilt. We
-            do not support two-way chat or complex marketing automations that
-            treat listeners as data points rather than people.
+            Pulse is built on the principle that good feedback makes good
+            products. We believe the best feedback comes from real
+            conversations &mdash; not surveys, not star ratings, not comment
+            boxes.
+          </p>
+          <p>
+            Pulse uses AI to guide reviewers through structured, thoughtful
+            feedback sessions. The AI asks follow-up questions, keeps the
+            conversation focused, and helps reviewers articulate what they
+            actually think. It then helps product builders make sense of that
+            feedback through aggregated analysis and AI-generated reports.
+          </p>
+          <p>We are transparent about how AI is used in Pulse:</p>
+          <ul>
+            <li>
+              AI guides conversations but does not fabricate reviewer opinions.
+              Every insight in a Pulse report traces back to what reviewers
+              actually said.
+            </li>
+            <li>
+              Reviewer feedback and Tenant-uploaded content are processed
+              through third-party AI services (Amazon Bedrock) solely to deliver
+              the features described above. This content is not used to train AI
+              models.
+            </li>
+            <li>
+              AI-generated outputs &mdash; including summaries, reports, and
+              revisions &mdash; are tools to assist decision-making. They are
+              not professional advice and may contain errors or omissions.
+            </li>
+            <li>
+              Session transcripts are automatically deleted 30 days after the
+              associated Pulse Check is generated. We believe in collecting what
+              we need and letting go of what we don&rsquo;t.
+            </li>
+          </ul>
+          <p>
+            Pulse does not use AI to make decisions about people. It uses AI to
+            help people make better decisions about products.
           </p>
 
           <p>
-            Future applications may describe their specific data practices
+            Additional applications may describe their specific data practices
             within the app interface or supporting documentation, where
             applicable.
           </p>
@@ -85,6 +117,13 @@ export default function LegalPage() {
           <p>
             They are not substitutes for professional medical, legal, financial,
             or other licensed advice.
+          </p>
+          <p>
+            Where our Services incorporate artificial intelligence, AI-generated
+            outputs &mdash; including reports, summaries, and analysis &mdash;
+            are provided as informational tools only. They may contain errors,
+            inaccuracies, or omissions and should not be relied upon as a
+            substitute for independent judgment or professional consultation.
           </p>
         </ContentSection>
       </SectionReveal>

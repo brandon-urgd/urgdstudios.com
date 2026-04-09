@@ -17,7 +17,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className={styles.hero} aria-labelledby="hero-heading">
         <img
-          src="/assets/logo.svg"
+          src="/assets/logo-studios.png"
           alt="ur/gd Studios"
           className={styles.heroLogo}
           loading="eager"
@@ -67,8 +67,8 @@ export default function HomePage() {
               <GlassPanel className={styles.studioCard}>
                 <h3 className={styles.studioName}>Orbit</h3>
                 <p className={styles.studioDescription}>
-                  Orbit is where we build our own applications — Broadcast,
-                  Memento, Stitch, and more.
+                  Orbit is where we build our own applications — Pulse,
+                  Gather, Stitch, and more.
                 </p>
               </GlassPanel>
             </div>
@@ -163,7 +163,11 @@ export default function HomePage() {
                   <span className={styles.badgeLive}>Live</span>
                 </span>
                 <span className={styles.appName}>
-                  Broadcast
+                  Pulse
+                  <span className={styles.badgeSoon}>Coming Soon</span>
+                </span>
+                <span className={styles.appName}>
+                  Gather
                   <span className={styles.badgeSoon}>Coming Soon</span>
                 </span>
               </p>

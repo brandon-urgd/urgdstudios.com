@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Terms of Use" />
-      <p className={styles.effectiveDate}>Last updated: 03/16/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -79,70 +79,183 @@ export default function TermsPage() {
           </p>
         </ContentSection>
 
-        <ContentSection heading="3. Broadcast Acceptable Use Policy (AUP) and SMS Communications">
+        <ContentSection heading="3. Pulse — AI-Powered Feedback Platform">
           <p>
-            Certain Services (like Broadcast) involve SMS or messaging
-            functionality.
+            Certain provisions in this Section apply specifically to Pulse,
+            ur/gd&rsquo;s AI-powered feedback and review platform, available at
+            pulse.urgdstudios.com.
           </p>
 
-          <h4>For Senders (Admins):</h4>
+          <h4>3.1 Description of Service</h4>
           <p>
-            If you use the Broadcast platform as a Sender, you must adhere to
-            this strict Acceptable Use Policy to ensure compliance with the
-            Telephone Consumer Protection Act (TCPA) and to prevent spam. You
-            agree that:
+            Pulse enables product builders (&ldquo;Tenants&rdquo;) to collect
+            structured feedback from reviewers (&ldquo;Reviewers&rdquo;)
+            through AI-guided conversational sessions. Tenants create items for
+            review, invite Reviewers, and receive AI-generated analysis,
+            reports, and revisions based on collected feedback.
+          </p>
+
+          <h4>3.2 Tenant Responsibilities</h4>
+          <p>
+            If you use Pulse as a Tenant, you agree that:
           </p>
           <ul>
             <li>
-              You will only send messages to Listeners who have provided
-              explicit, verifiable opt-in consent to receive communications from
-              your specific channel.
+              You are responsible for the content you upload to Pulse, including
+              text descriptions, documents, and images submitted for review.
             </li>
             <li>
-              You will not send spam, unsolicited marketing, phishing attempts,
-              or illegal content.
+              You will not upload content that is unlawful, defamatory, obscene,
+              or that infringes third-party intellectual property rights.
             </li>
             <li>
-              You will not attempt to bypass or interfere with our automated
-              opt-out mechanisms (e.g., &ldquo;STOP&rdquo; or
-              &ldquo;QUIET&rdquo; commands).
+              You are responsible for ensuring that you have the right to share
+              any content you submit for review, including any confidential or
+              proprietary materials.
             </li>
             <li>
-              We reserve the right to immediately suspend or terminate your
-              Broadcast channel and account if we determine, in our sole
-              discretion, that you are violating this AUP, generating excessive
-              spam complaints, or violating any applicable telecommunications
-              laws.
+              You are responsible for how you use, distribute, or rely upon
+              AI-generated reports, summaries, pulse checks, and revisions
+              produced by the Service.
             </li>
             <li>
-              Senders are solely responsible for compliance with all applicable
-              telecommunications laws and consent requirements.
-            </li>
-            <li>
-              Broadcast is available only to approved Senders at the discretion
-              of ur/gd. ur/gd reserves the right to refuse access for any
-              reason.
+              If you use the organizations feature, you are responsible for
+              managing member access and roles within your organization.
             </li>
           </ul>
 
-          <h4>For Listeners (Subscribers):</h4>
+          <h4>3.3 Reviewer Participation</h4>
           <p>
-            By subscribing to a Broadcast channel, you represent that you have
-            provided the required consent under applicable law to receive
-            communications from that specific Sender.
+            Reviewers access Pulse sessions via invitation links or direct
+            invitations from Tenants. Reviewers do not create Pulse accounts.
+            Reviewer sessions are authenticated using session-specific tokens.
           </p>
           <p>
-            You may opt out of SMS communications at any time by replying{' '}
-            <strong>STOP</strong> or <strong>QUIET</strong> to the message, or
-            by following the instructions provided in the message. Reply{' '}
-            <strong>HELP</strong> for help.{' '}
-            <strong>Message and data rates may apply.</strong> Message frequency
-            varies by channel. Carriers are not liable for any delayed or
-            undelivered messages.
+            By participating in a Pulse session, Reviewers agree to these Terms
+            and acknowledge that their feedback &mdash; including all messages
+            exchanged during the session &mdash; will be collected, processed by
+            AI, and made available to the Tenant who created the review item.
+          </p>
+
+          <h4>3.4 Artificial Intelligence Disclosure</h4>
+          <p>
+            Pulse uses artificial intelligence services provided by third-party
+            AI model providers to power its core functionality, including but
+            not limited to:
+          </p>
+          <ul>
+            <li>
+              Guiding Reviewers through structured feedback conversations
+            </li>
+            <li>Generating session summaries</li>
+            <li>
+              Producing aggregated analysis (&ldquo;Pulse Checks&rdquo;) across
+              multiple sessions
+            </li>
+            <li>
+              Generating reports and content revisions based on collected
+              feedback
+            </li>
+            <li>Analyzing uploaded documents and images</li>
+          </ul>
+          <p>
+            <strong>
+              AI-generated content is produced by automated systems and may
+              contain errors, inaccuracies, or omissions.
+            </strong>{' '}
+            AI-generated outputs are provided as tools to assist your
+            decision-making. They do not constitute professional advice of any
+            kind, and ur/gd makes no representations or warranties regarding the
+            accuracy, completeness, or fitness for purpose of any AI-generated
+            content.
           </p>
           <p>
-            For details on how we handle your data, see our{' '}
+            You are solely responsible for reviewing, verifying, and determining
+            how to use any AI-generated content produced by the Service.
+          </p>
+          <p>
+            ur/gd does not guarantee that AI-generated outputs will be free from
+            bias, factual errors, or unintended content. The underlying AI
+            models are provided by third-party providers and may change over
+            time.
+          </p>
+          <p>
+            User content submitted to Pulse &mdash; including reviewer feedback,
+            uploaded documents, and images &mdash; is processed through
+            third-party AI inference services to provide the functionality
+            described above. For details on how this data is handled, see our{' '}
             <a href="/privacy/">Privacy Policy</a>.
+          </p>
+
+          <h4>3.5 Subscription Billing</h4>
+          <p>
+            Access to certain Pulse features is governed by subscription tiers.
+            Subscriptions are billed on a recurring basis through our
+            third-party payment processor, Stripe.
+          </p>
+          <p>
+            By subscribing to a paid Pulse plan, you agree that:
+          </p>
+          <ul>
+            <li>
+              You authorize recurring charges to your selected payment method at
+              the applicable subscription rate.
+            </li>
+            <li>
+              Subscription fees are billed in advance for each billing period.
+            </li>
+            <li>
+              You may manage your subscription, update payment methods, or
+              cancel through the Stripe customer portal accessible within Pulse.
+            </li>
+            <li>
+              Cancellation takes effect at the end of the current billing
+              period. You will retain access to paid features until the end of
+              the period for which you have already paid.
+            </li>
+            <li>
+              ur/gd reserves the right to change subscription pricing with
+              reasonable advance notice. Continued use after a price change
+              constitutes acceptance of the new pricing.
+            </li>
+            <li>
+              Refunds are handled in accordance with applicable law. Unless
+              otherwise required by law, subscription fees are non-refundable.
+            </li>
+          </ul>
+          <p>
+            ur/gd does not store your payment card details. Payment processing
+            is handled entirely by Stripe in accordance with Stripe&rsquo;s
+            terms of service and privacy policy.
+          </p>
+
+          <h4>3.6 Data Retention and Deletion</h4>
+          <p>
+            Pulse applies automated data retention policies to certain
+            categories of data. Session transcripts (messages exchanged between
+            Reviewers and the AI during feedback sessions) are subject to
+            automatic deletion thirty (30) days after the associated Pulse Check
+            is generated. Transcripts are retained while an item remains open
+            and no Pulse Check has been generated.
+          </p>
+          <p>
+            Tenants may export reports and analysis before transcript data is
+            purged.
+          </p>
+          <p>
+            For additional details on data retention, see our{' '}
+            <a href="/privacy/">Privacy Policy</a>.
+          </p>
+
+          <h4>3.7 Exported Content</h4>
+          <p>
+            Pulse allows Tenants to export AI-generated reports and analysis in
+            PDF and Markdown formats. Exported content is generated at the time
+            of export and reflects the data available at that time.
+          </p>
+          <p>
+            ur/gd is not responsible for how exported content is used,
+            distributed, or relied upon after export.
           </p>
         </ContentSection>
 
@@ -193,6 +306,13 @@ export default function TermsPage() {
             scan uploaded content for security purposes, process files for
             format conversion, and temporarily store content as necessary to
             deliver the requested functionality.
+          </p>
+          <p>
+            For Services that incorporate artificial intelligence features, this
+            license also includes the right to process your content through
+            third-party AI inference services to generate responses, summaries,
+            analysis, and other AI-powered outputs as part of the requested
+            functionality. Your content is not used to train AI models.
           </p>
           <p>
             Uploaded content is processed and automatically deleted after use.
@@ -314,6 +434,51 @@ export default function TermsPage() {
             If you have entered into a separate written agreement with ur/gd
             governing specific Services, that agreement will control in the
             event of a conflict with these Terms.
+          </p>
+        </ContentSection>
+
+        <ContentSection heading="15. Subscription Billing">
+          <p>
+            Certain Services may offer paid subscription tiers. Where
+            applicable, the following terms govern subscription billing:
+          </p>
+          <ul>
+            <li>
+              Subscriptions are billed on a recurring basis through our
+              third-party payment processor. You authorize recurring charges to
+              your selected payment method at the applicable subscription rate.
+            </li>
+            <li>
+              Subscription fees are billed in advance for each billing period.
+            </li>
+            <li>
+              You may manage your subscription, update payment methods, or
+              cancel through the billing management portal accessible within the
+              applicable Service.
+            </li>
+            <li>
+              Cancellation takes effect at the end of the current billing
+              period. You will retain access to paid features until the end of
+              the period for which you have already paid.
+            </li>
+            <li>
+              ur/gd reserves the right to change subscription pricing with
+              reasonable advance notice. Continued use after a price change
+              constitutes acceptance of the new pricing.
+            </li>
+            <li>
+              Refunds are handled in accordance with applicable law. Unless
+              otherwise required by law, subscription fees are non-refundable.
+            </li>
+            <li>
+              ur/gd does not store your payment card details. Payment processing
+              is handled entirely by our third-party payment processor in
+              accordance with their terms of service and privacy policy.
+            </li>
+          </ul>
+          <p>
+            Application-specific billing details (such as tier definitions and
+            pricing) are described within the applicable Service.
           </p>
         </ContentSection>
       </SectionReveal>

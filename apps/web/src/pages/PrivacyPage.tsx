@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <p className={styles.effectiveDate}>Last updated: 03/16/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
 
       <SectionReveal>
         <p className={styles.legalIntro}>
@@ -62,6 +62,15 @@ export default function PrivacyPage() {
             to your inquiry.
           </p>
           <p>You control what content you choose to submit.</p>
+          <p>
+            Where our Services offer sign-in through third-party authentication
+            providers (such as Apple or Google), we receive limited profile
+            information &mdash; typically your name and email address &mdash;
+            from the provider when you choose to sign in. We do not receive or
+            store your third-party account password. The information shared with
+            us is governed by the authentication provider&rsquo;s privacy policy
+            and the permissions you grant during sign-in.
+          </p>
 
           <h3>2.2 Information Collected Automatically</h3>
           <p>
@@ -100,46 +109,104 @@ export default function PrivacyPage() {
             to be proportional to the feature being provided.
           </p>
 
-          <h4>Broadcast (Multi-Tenant SMS/MMS Platform):</h4>
+          <h4>Pulse (AI-Powered Feedback and Review Platform):</h4>
           <p>
-            Broadcast is a one-to-many communication platform. When you use or
-            interact with Broadcast:
+            Pulse enables product builders (&ldquo;Tenants&rdquo;) to collect
+            structured feedback from Reviewers through AI-guided conversational
+            sessions. When you use or interact with Pulse:
           </p>
+
+          <p><strong>Tenant Data:</strong></p>
           <ul>
             <li>
-              If you are a Listener (Subscriber), we collect your phone number
-              (Personally Identifiable Information - PII) when you explicitly
-              opt-in (e.g., text &ldquo;JOIN&rdquo;).
+              We collect your name, email address, and account credentials when
+              you create a Pulse account.
             </li>
             <li>
-              Phone numbers and message histories are securely stored using
-              encryption at rest.
+              If you sign in using Apple or Google, we receive limited profile
+              information (such as your name and email address) from the
+              authentication provider in accordance with their privacy policies.
+              We do not receive or store your Apple or Google account password.
             </li>
             <li>
-              We delegate the processing and transmission of SMS/MMS messages to
-              Twilio, our third-party messaging gateway. Twilio processes this
-              data in accordance with their own privacy and security policies to
-              successfully deliver the messages.
+              If you use the organizations feature, we collect organization
+              names and member role assignments.
             </li>
             <li>
-              We strictly honor opt-out commands (e.g., &ldquo;STOP&rdquo;,
-              &ldquo;QUIET&rdquo;). When you opt-out, we immediately update your
-              record and cease sending broadcasts to your number.
-            </li>
-            <li>
-              Phone numbers and SMS opt-in consent collected through Broadcast
-              are used solely to deliver messages from the channel the subscriber
-              opted into. This information is never sold, rented, or shared with
-              third parties for marketing purposes, and is never used to contact
-              subscribers on behalf of any entity other than the channel they
-              explicitly joined.
+              We store a Stripe customer identifier to manage your subscription.
+              We do not store payment card numbers, expiration dates, or
+              security codes. Payment information is collected and processed
+              directly by Stripe in accordance with Stripe&rsquo;s privacy
+              policy.
             </li>
           </ul>
-          <p>
-            All the above categories exclude text messaging originator opt-in
-            data and consent; this information will not be shared with any
-            third parties or affiliates for marketing or promotional purposes.
-          </p>
+
+          <p><strong>Reviewer Data:</strong></p>
+          <ul>
+            <li>
+              Reviewers access Pulse sessions via invitation links or direct
+              email invitations and do not create Pulse accounts.
+            </li>
+            <li>
+              We collect session transcripts &mdash; the messages exchanged
+              between the Reviewer and the AI assistant during feedback
+              sessions.
+            </li>
+            <li>
+              Session transcripts are used to generate summaries and aggregated
+              analysis for the Tenant.
+            </li>
+            <li>
+              Session transcripts are subject to automatic deletion thirty (30)
+              days after the associated Pulse Check is generated. Transcripts
+              are retained while an item remains open and no Pulse Check has
+              been generated.
+            </li>
+          </ul>
+
+          <p><strong>Content Processed by AI:</strong></p>
+          <ul>
+            <li>
+              Tenant-uploaded content (text descriptions, documents, and images)
+              and Reviewer session transcripts are processed through Amazon
+              Bedrock, a third-party AI inference service provided by Amazon Web
+              Services, to deliver Pulse&rsquo;s core functionality &mdash;
+              including AI-guided conversations, session summaries, aggregated
+              analysis (&ldquo;Pulse Checks&rdquo;), reports, and content
+              revisions.
+            </li>
+            <li>
+              Your content is processed for the sole purpose of providing the
+              requested functionality. It is not used to train AI models.
+            </li>
+            <li>
+              AI-generated outputs (summaries, reports, pulse checks, revisions)
+              are derived from your content and are stored as part of the
+              Service.
+            </li>
+          </ul>
+
+          <p><strong>Uploaded Files:</strong></p>
+          <ul>
+            <li>
+              Documents uploaded for text extraction and images uploaded for
+              visual feedback are scanned for malware, processed, and retained
+              while the associated item remains active.
+            </li>
+            <li>
+              When an item is deleted, associated uploaded files are deleted.
+            </li>
+          </ul>
+
+          <p><strong>Transactional Email:</strong></p>
+          <ul>
+            <li>
+              We use Amazon Simple Email Service (SES) to send transactional
+              emails, including session invitations, reminders, and completion
+              notifications. Email addresses used for these communications are
+              processed solely for delivery purposes.
+            </li>
+          </ul>
 
           <h4>Stitch (SVG-to-PES Converter):</h4>
           <p>
@@ -189,6 +256,12 @@ export default function PrivacyPage() {
             </li>
             <li>Prevent fraud, misuse, or abuse</li>
             <li>Comply with legal obligations</li>
+            <li>
+              Process user content through third-party AI inference services to
+              generate AI-powered responses, summaries, analysis, and reports as
+              part of the requested Service functionality (your content is not
+              used to train AI models)
+            </li>
           </ul>
           <p>
             We do not use personal information for profiling or behavioral
@@ -211,13 +284,22 @@ export default function PrivacyPage() {
             hosting providers):
           </p>
           <ul>
-            <li>Cloud infrastructure providers</li>
+            <li>Cloud infrastructure providers (Amazon Web Services)</li>
             <li>Hosting services</li>
-            <li>Payment processors</li>
+            <li>Payment processors (Stripe)</li>
             <li>
               Security and monitoring providers, including malware detection
               services
             </li>
+            <li>
+              AI inference providers (Amazon Bedrock) &mdash; for processing
+              user content to deliver AI-powered features
+            </li>
+            <li>
+              Authentication providers (Amazon Cognito, including Apple and
+              Google sign-in integrations)
+            </li>
+            <li>Transactional email services (Amazon SES)</li>
           </ul>
           <p>
             These providers are contractually obligated to safeguard information
@@ -267,6 +349,35 @@ export default function PrivacyPage() {
             <li>
               <strong>Security scan metadata:</strong> Retained temporarily for
               operational purposes and automatically deleted
+            </li>
+          </ul>
+          <p>For Pulse, the following retention periods apply:</p>
+          <ul>
+            <li>
+              <strong>Session transcripts:</strong> Automatically deleted 30
+              days after the associated Pulse Check is generated; retained while
+              the item remains open and no Pulse Check has been generated
+            </li>
+            <li>
+              <strong>AI-generated outputs (summaries, reports, pulse checks):</strong>{' '}
+              Retained while the associated item or Tenant account remains
+              active
+            </li>
+            <li>
+              <strong>Uploaded documents and images:</strong> Retained while the
+              associated item remains active; deleted when the item is deleted
+            </li>
+            <li>
+              <strong>Tenant account data:</strong> Retained while the account
+              is active; deleted upon account deletion request
+            </li>
+            <li>
+              <strong>Billing records (Stripe customer identifiers):</strong>{' '}
+              Retained as required for legal and accounting purposes
+            </li>
+            <li>
+              <strong>Organization data:</strong> Retained while the
+              organization remains active
             </li>
           </ul>
           <p>
