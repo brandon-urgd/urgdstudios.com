@@ -34,13 +34,9 @@
 }
 
 .logoImg {
-  height: 56px;
-  /* Explicit width prevents width collapse during Safari's brief img
-     re-evaluation on navigation. Value matches natural SVG aspect ratio. */
+  height: 40px;
   width: auto;
-  min-width: 80px;
-  margin-top: -1rem;
-  margin-bottom: -1rem;
+  object-fit: contain;
   /* Prevent any alt text or placeholder from rendering visibly */
   color: transparent;
 }

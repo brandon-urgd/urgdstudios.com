@@ -16,10 +16,9 @@
 }
 
 .heroLogo {
-  width: clamp(225px, 37.5vw, 375px);
+  width: clamp(180px, 30vw, 300px);
   height: auto;
-  margin-top: -13rem;
-  margin-bottom: -2rem;
+  object-fit: contain;
   color: transparent;
 }
 
