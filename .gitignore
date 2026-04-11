@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+apps/*/dist/
+apps/*/build/
+
+# Lambda artifacts
+lambdas/**/*.zip
+lambdas/**/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage & test results
+coverage/
+test-results/
+
+# Security scan results
+checkov-*.json
+checkov-results/
+semgrep-results*
+cfn-lint-results/
+
+# Temp
+tmp/
+temp/
+*.tmp
