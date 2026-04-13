@@ -24,6 +24,7 @@ export default function BetaDashboard() {
   const [isError, setIsError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
   const { toasts, addToast, removeToast } = useToast();
 
   const fetchSignups = useCallback(async (showRefresh = false) => {
@@ -35,7 +36,6 @@ export default function BetaDashboard() {
       const res = await authedFetch('/v1/admin/beta/signups');
       if (!res.ok) throw new Error('Failed to load beta signups');
       const data = (await res.json()) as { signups: BetaSignup[] };
-      // Sort by signupTimestamp descending
       const sorted = [...data.signups].sort(
         (a, b) => new Date(b.signupTimestamp).getTime() - new Date(a.signupTimestamp).getTime(),
       );
@@ -51,6 +51,20 @@ export default function BetaDashboard() {
   useEffect(() => {
     void fetchSignups();
   }, [fetchSignups]);
+
+  // Client-side search filter
+  const filtered = signups.filter((s) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      s.name.toLowerCase().includes(q) ||
+      s.email.toLowerCase().includes(q) ||
+      s.app.toLowerCase().includes(q)
+    );
+  });
+
+  const surveyCount = signups.filter((s) => s.hasSurvey).length;
+  const sentCount = signups.filter((s) => s.sessionsSent).length;
 
   async function handleToggleSent(signupId: string, current: boolean) {
     setTogglingIds((prev) => new Set(prev).add(signupId));
@@ -84,32 +98,53 @@ export default function BetaDashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Beta Signups</h1>
-        <button
-          type="button"
-          className={styles.refreshButton}
-          onClick={() => void fetchSignups(true)}
-          disabled={isRefreshing}
-          aria-label="Refresh beta signups"
-          title="Refresh beta signups"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            className={isRefreshing ? styles.spinning : undefined}
+        <div className={styles.headerTop}>
+          <h1 className={styles.title}>Beta Signups</h1>
+          <button
+            type="button"
+            className={styles.refreshButton}
+            onClick={() => void fetchSignups(true)}
+            disabled={isRefreshing}
+            aria-label="Refresh beta signups"
+            title="Refresh beta signups"
           >
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-            <path d="M21 3v5h-5" />
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-            <path d="M8 16H3v5" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className={isRefreshing ? styles.spinning : undefined}
+            >
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+          </button>
+        </div>
+        {!isLoading && signups.length > 0 && (
+          <>
+            <div className={styles.stats}>
+              <span>{signups.length} signup{signups.length !== 1 ? 's' : ''}</span>
+              <span className={styles.statDot}>·</span>
+              <span>{sentCount} sent</span>
+              <span className={styles.statDot}>·</span>
+              <span>{surveyCount} surveyed</span>
+            </div>
+            <input
+              type="search"
+              className={styles.searchInput}
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search beta signups"
+            />
+          </>
+        )}
       </header>
 
       <div className={styles.content}>
@@ -130,6 +165,8 @@ export default function BetaDashboard() {
           />
         ) : signups.length === 0 ? (
           <EmptyState message="No beta signups yet." />
+        ) : filtered.length === 0 ? (
+          <EmptyState message="No signups match your search." />
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
@@ -144,7 +181,7 @@ export default function BetaDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {signups.map((signup) => (
+                {filtered.map((signup) => (
                   <tr key={signup.signupId}>
                     <td className={styles.nameCell}>{signup.name}</td>
                     <td className={styles.emailCell}>{signup.email}</td>

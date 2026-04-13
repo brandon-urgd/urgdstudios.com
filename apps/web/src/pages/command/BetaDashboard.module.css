@@ -8,9 +8,14 @@
 
 .header {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.headerTop {
+  display: flex;
   align-items: center;
   gap: var(--space-md);
-  flex-wrap: wrap;
 }
 
 .title {
@@ -19,6 +24,47 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-body);
+}
+
+.statDot {
+  color: var(--glass-border);
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 320px;
+  min-height: var(--input-min-height);
+  padding: var(--input-padding);
+  font-size: var(--font-size-small);
+  font-family: var(--font-body);
+  color: var(--input-text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  transition: border-color var(--transition-fast) var(--easing-default);
+}
+
+.searchInput::placeholder {
+  color: var(--input-placeholder);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+}
+
+.searchInput:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .refreshButton {

@@ -577,7 +577,9 @@ async function updateBetaSignup(event, requestId, signupId) {
     return errorResponse(503, 'Beta signups service is not configured', {}, event);
   }
 
-  if (!UUID_REGEX.test(signupId)) {
+  // General UUID pattern (not restricted to v4 — randomUUID produces v4 but no reason to reject others)
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidPattern.test(signupId)) {
     throw createAdminError(400, 'Invalid signup ID');
   }
 
