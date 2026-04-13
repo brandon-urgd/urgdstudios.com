@@ -207,59 +207,8 @@ jobs:
       - name: Build Lambda functions
         run: |
           set -euo pipefail
-
-          build_lambda() {
-            local FUNCTION_NAME="$1"
-            echo "🔨 Building Lambda function: $FUNCTION_NAME"
-
-            BUILD_DIR=$(mktemp -d)
-            FUNCTION_DIR="$BUILD_DIR/$FUNCTION_NAME"
-            mkdir -p "$FUNCTION_DIR"
-
-            cp -r "lambdas/$FUNCTION_NAME/"* "$FUNCTION_DIR/"
-
-            mkdir -p "$FUNCTION_DIR/shared"
-            cp -r lambdas/shared/* "$FUNCTION_DIR/shared/"
-
-            if [ -f "$FUNCTION_DIR/package.json" ]; then
-              echo "📦 Installing dependencies for $FUNCTION_NAME..."
-              cd "$FUNCTION_DIR"
-              npm install --production
-              cd -
-            fi
-
-            ARTIFACT_NAME="$FUNCTION_NAME-${{ env.VERSION }}.zip"
-            echo "📦 Creating artifact: $ARTIFACT_NAME"
-            cd "$FUNCTION_DIR"
-            zip -r "/tmp/$ARTIFACT_NAME" . -x "*.git*" "*.DS_Store*" "node_modules/.cache/*"
-            cd -
-
-            echo "🔍 Verifying ZIP contents for $FUNCTION_NAME..."
-            if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/utils.mjs"; then
-              echo "❌ FATAL: shared/utils.mjs missing from $FUNCTION_NAME artifact"
-              unzip -l "/tmp/$ARTIFACT_NAME"
-              exit 1
-            fi
-            if ! unzip -l "/tmp/$ARTIFACT_NAME" | grep -q "shared/healthCheck.mjs"; then
-              echo "❌ FATAL: shared/healthCheck.mjs missing from $FUNCTION_NAME artifact"
-              unzip -l "/tmp/$ARTIFACT_NAME"
-              exit 1
-            fi
-            echo "✅ Artifact verified — shared utilities present"
-
-            S3_KEY="${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/$ARTIFACT_NAME"
-            echo "📦 Uploading to S3: s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY"
-            aws s3 cp "/tmp/$ARTIFACT_NAME" \
-              "s3://${{ env.ARTIFACT_BUCKET }}/$S3_KEY" \
-              --region ${{ env.AWS_REGION }}
-
-            echo "✅ $FUNCTION_NAME built and uploaded"
-            rm -rf "$BUILD_DIR" "/tmp/$ARTIFACT_NAME"
-          }
-
-          build_lambda "urgd-${{ env.APP_NAME }}-intake"
-          build_lambda "urgd-${{ env.APP_NAME }}-admin"
-          build_lambda "urgd-${{ env.APP_NAME }}-beta"
+          chmod +x scripts/build-lambdas.sh
+          ./scripts/build-lambdas.sh "${{ env.VERSION }}"
 
       - name: Generate parameter files
         run: |
@@ -282,22 +231,53 @@ jobs:
           
           echo "✅ WAF ARN: $WAF_ARN"
           
-          # Generate prod parameter file
-          cat > parameter-files/prod.json << EOF
-          [
-            {"ParameterKey": "Environment", "ParameterValue": "prod"},
-            {"ParameterKey": "WafWebAclArn", "ParameterValue": "$WAF_ARN"},
-            {"ParameterKey": "ArtifactBucket", "ParameterValue": "${{ env.ARTIFACT_BUCKET }}"},
-            {"ParameterKey": "IntakeCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-intake-${{ env.VERSION }}.zip"},
-            {"ParameterKey": "AdminCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-admin-${{ env.VERSION }}.zip"},
-            {"ParameterKey": "BetaCodeKey", "ParameterValue": "${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/urgd-${{ env.APP_NAME }}-beta-${{ env.VERSION }}.zip"},
-            {"ParameterKey": "CorsAllowedOrigins", "ParameterValue": "https://urgdstudios.com"},
-            {"ParameterKey": "AlertsEmail", "ParameterValue": "alerts@urgd.dev"},
-            {"ParameterKey": "PowDifficulty", "ParameterValue": "4"},
-            {"ParameterKey": "CommandCenterReply", "ParameterValue": "true"},
-            {"ParameterKey": "CommandCenterAutoResponse", "ParameterValue": "true"}
+          # Download the manifest written by build-lambdas.sh
+          aws s3 cp \
+            "s3://${{ env.ARTIFACT_BUCKET }}/${{ env.APP_NAME }}/artifacts/${{ env.VERSION }}/lambda-manifest.json" \
+            /tmp/lambda-manifest.json \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "📋 Lambda manifest:"
+          cat /tmp/lambda-manifest.json
+          
+          # Build parameter file: static params + manifest-derived CodeKey params
+          # CodeKey derivation: strip "urgd-urgdstudios-com-" prefix, capitalize, append "CodeKey"
+          # e.g. urgd-urgdstudios-com-intake -> IntakeCodeKey
+          python3 -c "
+          import json, re
+          
+          with open('/tmp/lambda-manifest.json') as f:
+              manifest = json.load(f)
+          
+          static_params = [
+              {'ParameterKey': 'Environment', 'ParameterValue': 'prod'},
+              {'ParameterKey': 'WafWebAclArn', 'ParameterValue': '$WAF_ARN'},
+              {'ParameterKey': 'ArtifactBucket', 'ParameterValue': '${{ env.ARTIFACT_BUCKET }}'},
+              {'ParameterKey': 'CorsAllowedOrigins', 'ParameterValue': 'https://urgdstudios.com'},
+              {'ParameterKey': 'AlertsEmail', 'ParameterValue': 'alerts@urgd.dev'},
+              {'ParameterKey': 'PowDifficulty', 'ParameterValue': '4'},
+              {'ParameterKey': 'CommandCenterReply', 'ParameterValue': 'true'},
+              {'ParameterKey': 'CommandCenterAutoResponse', 'ParameterValue': 'true'},
           ]
-          EOF
+          
+          # Derive CodeKey params from manifest
+          code_params = []
+          for fn in manifest['functions']:
+              # Strip 'urgd-urgdstudios-com-' prefix to get the short name
+              short = re.sub(r'^urgd-urgdstudios-com-', '', fn)
+              param_key = short[0].upper() + short[1:] + 'CodeKey'
+              s3_key = manifest['s3_keys'][fn]
+              code_params.append({'ParameterKey': param_key, 'ParameterValue': s3_key})
+          
+          all_params = static_params + code_params
+          
+          with open('parameter-files/prod.json', 'w') as f:
+              json.dump(all_params, f, indent=2)
+          
+          print(f'✅ prod.json — {len(code_params)} Lambda code keys derived from manifest')
+          for p in code_params:
+              print(f'   {p[\"ParameterKey\"]} = {p[\"ParameterValue\"]}')
+          "
           
           echo "✅ Parameter file generated"
           cat parameter-files/prod.json
