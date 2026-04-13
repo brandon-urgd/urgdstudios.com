@@ -137,6 +137,15 @@
   user-select: none;
 }
 
+.sortable {
+  cursor: pointer;
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.sortable:hover {
+  color: var(--color-text-primary);
+}
+
 .table td {
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text-secondary);

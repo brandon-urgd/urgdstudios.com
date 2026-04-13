@@ -18,6 +18,9 @@ interface BetaSignup {
   surveyTimestamp?: string;
 }
 
+type SortKey = 'name' | 'email' | 'app' | 'signupTimestamp' | 'sessionsSent' | 'hasSurvey';
+type SortDir = 'asc' | 'desc';
+
 export default function BetaDashboard() {
   const [signups, setSignups] = useState<BetaSignup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +28,8 @@ export default function BetaDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('signupTimestamp');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const { toasts, addToast, removeToast } = useToast();
 
   const fetchSignups = useCallback(async (showRefresh = false) => {
@@ -62,6 +67,39 @@ export default function BetaDashboard() {
       s.app.toLowerCase().includes(q)
     );
   });
+
+  // Client-side column sort
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    switch (sortKey) {
+      case 'name':
+      case 'email':
+      case 'app':
+        return dir * a[sortKey].localeCompare(b[sortKey]);
+      case 'signupTimestamp':
+        return dir * (new Date(a.signupTimestamp).getTime() - new Date(b.signupTimestamp).getTime());
+      case 'sessionsSent':
+        return dir * (Number(a.sessionsSent) - Number(b.sessionsSent));
+      case 'hasSurvey':
+        return dir * (Number(a.hasSurvey) - Number(b.hasSurvey));
+      default:
+        return 0;
+    }
+  });
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
+  function sortIndicator(key: SortKey) {
+    if (sortKey !== key) return '';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
 
   const surveyCount = signups.filter((s) => s.hasSurvey).length;
   const sentCount = signups.filter((s) => s.sessionsSent).length;
@@ -172,16 +210,16 @@ export default function BetaDashboard() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>App</th>
-                  <th>Signed Up</th>
-                  <th>Sessions Sent</th>
-                  <th>Survey</th>
+                  <th className={styles.sortable} onClick={() => handleSort('name')}>Name{sortIndicator('name')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('email')}>Email{sortIndicator('email')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('app')}>App{sortIndicator('app')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('signupTimestamp')}>Signed Up{sortIndicator('signupTimestamp')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('sessionsSent')}>Sessions Sent{sortIndicator('sessionsSent')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('hasSurvey')}>Survey{sortIndicator('hasSurvey')}</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((signup) => (
+                {sorted.map((signup) => (
                   <tr key={signup.signupId}>
                     <td className={styles.nameCell}>{signup.name}</td>
                     <td className={styles.emailCell}>{signup.email}</td>
