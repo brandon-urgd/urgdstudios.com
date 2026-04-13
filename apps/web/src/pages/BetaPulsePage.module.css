@@ -221,12 +221,12 @@
 }
 
 .actionButton button.primary {
-  background: var(--button-bg-primary);
-  color: var(--button-text-primary);
+  background: var(--color-pulse-accent);
+  color: var(--base-bg);
 }
 
 .actionButton button.primary:hover:not(:disabled) {
-  background: var(--button-bg-primary-hover);
+  background: var(--color-pulse-accent-glow);
 }
 
 .actionButton button.primary:focus-visible {

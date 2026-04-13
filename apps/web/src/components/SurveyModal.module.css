@@ -299,8 +299,8 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-body);
-  color: var(--button-text-primary);
-  background: var(--button-bg-primary);
+  color: var(--base-bg);
+  background: var(--color-pulse-accent);
   border: none;
   border-radius: var(--button-radius);
   cursor: pointer;
@@ -310,7 +310,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: var(--button-bg-primary-hover);
+  background: var(--color-pulse-accent-glow);
 }
 
 .submitButton:active:not(:disabled) {
@@ -376,8 +376,8 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-body);
-  color: var(--button-text-primary);
-  background: var(--button-bg-primary);
+  color: var(--base-bg);
+  background: var(--color-pulse-accent);
   border: none;
   border-radius: var(--button-radius);
   cursor: pointer;
@@ -385,7 +385,7 @@
 }
 
 .doneButton:hover {
-  background: var(--button-bg-primary-hover);
+  background: var(--color-pulse-accent-glow);
 }
 
 .doneButton:active {
