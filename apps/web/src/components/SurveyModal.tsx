@@ -59,12 +59,12 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
   // Survey responses
   const [responses, setResponses] = useState<SurveyResponses>({
-    overallExperience: null,
-    aiNaturalness: null,
+    deviceUsed: null,
+    aiConversationQuality: null,
+    aiAccuracy: null,
     sessionPreference: null,
-    usefulness: null,
-    bestPart: null,
-    whatToChange: null,
+    biggestFriction: null,
+    wouldUseAgain: null,
     anythingElse: null,
   });
 
@@ -220,12 +220,12 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         body: JSON.stringify({
           signupId,
           responses: {
-            overallExperience: responses.overallExperience,
-            aiNaturalness: responses.aiNaturalness,
+            deviceUsed: responses.deviceUsed,
+            aiConversationQuality: responses.aiConversationQuality,
+            aiAccuracy: responses.aiAccuracy,
             sessionPreference: responses.sessionPreference,
-            usefulness: responses.usefulness,
-            bestPart: responses.bestPart?.trim() ?? '',
-            whatToChange: responses.whatToChange?.trim() ?? '',
+            biggestFriction: responses.biggestFriction?.trim() ?? '',
+            wouldUseAgain: responses.wouldUseAgain,
             anythingElse: responses.anythingElse?.trim() || undefined,
           },
         }),
@@ -253,11 +253,11 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   /* ---------------------------------------------------------------
      Response helpers
      --------------------------------------------------------------- */
-  const setRating = (key: 'overallExperience' | 'aiNaturalness' | 'usefulness', value: number) => {
+  const setRating = (key: 'aiConversationQuality', value: number) => {
     setResponses((prev) => ({ ...prev, [key]: value }));
   };
 
-  const setText = (key: 'bestPart' | 'whatToChange' | 'anythingElse', value: string) => {
+  const setText = (key: 'biggestFriction' | 'anythingElse', value: string) => {
     if (value.length <= MAX_TEXT_LENGTH) {
       setResponses((prev) => ({ ...prev, [key]: value || null }));
     }
@@ -436,30 +436,46 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         )}
 
         <form className={styles.form} noValidate onSubmit={handleSurveySubmit}>
-          {/* Q1 — Overall experience */}
-          <RatingScale
-            name="overallExperience"
-            label="1. Overall, how was your experience?"
-            lowAnchor="Poor"
-            highAnchor="Excellent"
-            value={responses.overallExperience}
-            onChange={(v) => setRating('overallExperience', v)}
+          {/* Q1 — Device used */}
+          <PillSelect
+            name="deviceUsed"
+            label="1. Which device did you use for your sessions?"
+            options={[
+              { value: 'mobile', label: 'Phone' },
+              { value: 'desktop', label: 'Computer' },
+              { value: 'both', label: 'Both' },
+            ]}
+            value={responses.deviceUsed}
+            onChange={(v) => setResponses((prev) => ({ ...prev, deviceUsed: v }))}
           />
 
-          {/* Q2 — AI conversation naturalness */}
+          {/* Q2 — AI conversation quality */}
           <RatingScale
-            name="aiNaturalness"
-            label="2. How natural did the AI conversation feel?"
-            lowAnchor="Unnatural"
-            highAnchor="Very natural"
-            value={responses.aiNaturalness}
-            onChange={(v) => setRating('aiNaturalness', v)}
+            name="aiConversationQuality"
+            label="2. How well did the AI guide the conversation?"
+            lowAnchor="Got in the way"
+            highAnchor="Really helpful"
+            value={responses.aiConversationQuality}
+            onChange={(v) => setRating('aiConversationQuality', v)}
           />
 
-          {/* Q3 — Document vs. photo preference */}
+          {/* Q3 — AI accuracy (hallucination detection) */}
+          <PillSelect
+            name="aiAccuracy"
+            label="3. Did the AI ever say something about the image or document that wasn't accurate — like describing details that weren't there, or putting words in your mouth?"
+            options={[
+              { value: 'no', label: 'No, it was accurate' },
+              { value: 'minor', label: 'Minor stuff' },
+              { value: 'yes', label: 'Yes, noticeably' },
+            ]}
+            value={responses.aiAccuracy}
+            onChange={(v) => setResponses((prev) => ({ ...prev, aiAccuracy: v }))}
+          />
+
+          {/* Q4 — Session type preference */}
           <PillSelect
             name="sessionPreference"
-            label="3. Which session type did you prefer?"
+            label="4. Which session type worked better for giving feedback?"
             options={[
               { value: 'document', label: 'Document' },
               { value: 'photo', label: 'Photo' },
@@ -469,56 +485,41 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
             onChange={(v) => setResponses((prev) => ({ ...prev, sessionPreference: v }))}
           />
 
-          {/* Q4 — Usefulness for own work */}
-          <RatingScale
-            name="usefulness"
-            label="4. How useful would Pulse be for your own work?"
-            lowAnchor="Not useful"
-            highAnchor="Very useful"
-            value={responses.usefulness}
-            onChange={(v) => setRating('usefulness', v)}
+          {/* Q5 — Biggest friction point */}
+          <div className={styles.questionGroup}>
+            <label htmlFor="survey-biggestFriction" className={styles.label}>
+              5. What was the most frustrating or confusing moment? (If nothing was, tell us what almost was.)
+            </label>
+            <textarea
+              id="survey-biggestFriction"
+              className={styles.textarea}
+              maxLength={MAX_TEXT_LENGTH}
+              value={responses.biggestFriction ?? ''}
+              onChange={(e) => setText('biggestFriction', e.target.value)}
+              disabled={surveyLoading}
+              placeholder="Even small things count..."
+              rows={3}
+            />
+            <CharacterCounter current={(responses.biggestFriction ?? '').length} max={MAX_TEXT_LENGTH} />
+          </div>
+
+          {/* Q6 — Would you use it again */}
+          <PillSelect
+            name="wouldUseAgain"
+            label="6. If you could use Pulse to get feedback on something you're working on, would you?"
+            options={[
+              { value: 'definitely', label: 'Definitely' },
+              { value: 'maybe', label: 'Maybe' },
+              { value: 'probably_not', label: 'Probably not' },
+            ]}
+            value={responses.wouldUseAgain}
+            onChange={(v) => setResponses((prev) => ({ ...prev, wouldUseAgain: v }))}
           />
-
-          {/* Q5 — Best part */}
-          <div className={styles.questionGroup}>
-            <label htmlFor="survey-bestPart" className={styles.label}>
-              5. What was the best part?
-            </label>
-            <textarea
-              id="survey-bestPart"
-              className={styles.textarea}
-              maxLength={MAX_TEXT_LENGTH}
-              value={responses.bestPart ?? ''}
-              onChange={(e) => setText('bestPart', e.target.value)}
-              disabled={surveyLoading}
-              placeholder="Tell us what stood out..."
-              rows={3}
-            />
-            <CharacterCounter current={(responses.bestPart ?? '').length} max={MAX_TEXT_LENGTH} />
-          </div>
-
-          {/* Q6 — What to change */}
-          <div className={styles.questionGroup}>
-            <label htmlFor="survey-whatToChange" className={styles.label}>
-              6. What would you change?
-            </label>
-            <textarea
-              id="survey-whatToChange"
-              className={styles.textarea}
-              maxLength={MAX_TEXT_LENGTH}
-              value={responses.whatToChange ?? ''}
-              onChange={(e) => setText('whatToChange', e.target.value)}
-              disabled={surveyLoading}
-              placeholder="Anything we could do better..."
-              rows={3}
-            />
-            <CharacterCounter current={(responses.whatToChange ?? '').length} max={MAX_TEXT_LENGTH} />
-          </div>
 
           {/* Q7 — Anything else (optional) */}
           <div className={styles.questionGroup}>
             <label htmlFor="survey-anythingElse" className={styles.label}>
-              7. Anything else? <span className={styles.optionalTag}>(optional)</span>
+              7. Anything else we should know? <span className={styles.optionalTag}>(optional)</span>
             </label>
             <textarea
               id="survey-anythingElse"
@@ -527,7 +528,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
               value={responses.anythingElse ?? ''}
               onChange={(e) => setText('anythingElse', e.target.value)}
               disabled={surveyLoading}
-              placeholder="Any other thoughts..."
+              placeholder="Totally optional — but we read every word."
               rows={3}
             />
             <CharacterCounter current={(responses.anythingElse ?? '').length} max={MAX_TEXT_LENGTH} />

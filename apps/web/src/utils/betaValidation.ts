@@ -6,12 +6,12 @@
  */
 
 export interface SurveyResponses {
-  overallExperience: number | null;
-  aiNaturalness: number | null;
+  deviceUsed: string | null;
+  aiConversationQuality: number | null;
+  aiAccuracy: string | null;
   sessionPreference: string | null;
-  usefulness: number | null;
-  bestPart: string | null;
-  whatToChange: string | null;
+  biggestFriction: string | null;
+  wouldUseAgain: string | null;
   anythingElse?: string | null;
 }
 
@@ -51,11 +51,11 @@ export function isSignupFormValid(
  */
 export function isSurveyFormValid(responses: SurveyResponses): boolean {
   return (
-    responses.overallExperience != null &&
-    responses.aiNaturalness != null &&
+    responses.deviceUsed != null &&
+    responses.aiConversationQuality != null &&
+    responses.aiAccuracy != null &&
     responses.sessionPreference != null &&
-    responses.usefulness != null &&
-    responses.bestPart != null &&
-    responses.whatToChange != null
+    responses.biggestFriction != null &&
+    responses.wouldUseAgain != null
   );
 }

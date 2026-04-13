@@ -132,33 +132,38 @@ export function validateSurveyResponses(responses) {
     return errors;
   }
 
-  // Rating fields: must be integers 1-5
-  const ratingFields = ['overallExperience', 'aiNaturalness', 'usefulness'];
-  for (const field of ratingFields) {
-    const result = validateRating(responses[field]);
-    if (!result.valid) {
-      const val = responses[field];
-      if (val === undefined || val === null) {
-        errors[field] = `${field} is required`;
-      } else {
-        errors[field] = `${field} must be an integer between 1 and 5`;
-      }
+  // Rating field: aiConversationQuality must be integer 1-5
+  const ratingResult = validateRating(responses.aiConversationQuality);
+  if (!ratingResult.valid) {
+    const val = responses.aiConversationQuality;
+    if (val === undefined || val === null) {
+      errors.aiConversationQuality = 'aiConversationQuality is required';
+    } else {
+      errors.aiConversationQuality = 'aiConversationQuality must be an integer between 1 and 5';
     }
   }
 
-  // sessionPreference validation
-  const prefResult = validateSessionPreference(responses.sessionPreference);
-  if (!prefResult.valid) {
-    errors.sessionPreference = prefResult.error;
+  // Pill-select fields: must be one of allowed values
+  const pillFields = {
+    deviceUsed: ['mobile', 'desktop', 'both'],
+    aiAccuracy: ['no', 'minor', 'yes'],
+    sessionPreference: ['document', 'photo', 'same'],
+    wouldUseAgain: ['definitely', 'maybe', 'probably_not'],
+  };
+
+  for (const [field, allowed] of Object.entries(pillFields)) {
+    const val = responses[field];
+    if (!val || typeof val !== 'string') {
+      errors[field] = `${field} is required`;
+    } else if (!allowed.includes(val)) {
+      errors[field] = `${field} must be one of: ${allowed.join(', ')}`;
+    }
   }
 
-  // Required text fields: non-empty string, max 1000 chars
-  const requiredTextFields = ['bestPart', 'whatToChange'];
-  for (const field of requiredTextFields) {
-    const result = validateTextField(responses[field], field, 1000);
-    if (!result.valid) {
-      errors[field] = result.error;
-    }
+  // Required text field: biggestFriction — non-empty string, max 1000 chars
+  const frictionResult = validateTextField(responses.biggestFriction, 'biggestFriction', 1000);
+  if (!frictionResult.valid) {
+    errors.biggestFriction = frictionResult.error;
   }
 
   // anythingElse: optional, but if provided must be string max 1000 chars

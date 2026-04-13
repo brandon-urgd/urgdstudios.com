@@ -390,12 +390,12 @@ async function handleSurvey(event, requestId) {
 
     // STEP 7: Sanitize text fields
     const sanitizedResponses = {
-      overallExperience: body.responses.overallExperience,
-      aiNaturalness: body.responses.aiNaturalness,
+      deviceUsed: body.responses.deviceUsed,
+      aiConversationQuality: body.responses.aiConversationQuality,
+      aiAccuracy: body.responses.aiAccuracy,
       sessionPreference: body.responses.sessionPreference,
-      usefulness: body.responses.usefulness,
-      bestPart: sanitizeText(body.responses.bestPart.trim()),
-      whatToChange: sanitizeText(body.responses.whatToChange.trim()),
+      biggestFriction: sanitizeText(body.responses.biggestFriction.trim()),
+      wouldUseAgain: body.responses.wouldUseAgain,
     };
 
     // anythingElse is optional — only include if provided

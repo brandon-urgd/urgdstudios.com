@@ -96,13 +96,17 @@ describe('Property 2: Signup form validation determines button state', () => {
 // **Validates: Requirements 8.3**
 
 describe('Property 10: Survey form validation determines button state', () => {
+  const validDeviceUsed = fc.constantFrom('mobile', 'desktop', 'both');
+  const validAiAccuracy = fc.constantFrom('no', 'minor', 'yes');
+  const validWouldUseAgain = fc.constantFrom('definitely', 'maybe', 'probably_not');
+
   const fullSurveyResponses = fc.record({
-    overallExperience: validRating,
-    aiNaturalness: validRating,
+    deviceUsed: validDeviceUsed,
+    aiConversationQuality: validRating,
+    aiAccuracy: validAiAccuracy,
     sessionPreference: validSessionPreference,
-    usefulness: validRating,
-    bestPart: validText,
-    whatToChange: validText,
+    biggestFriction: validText,
+    wouldUseAgain: validWouldUseAgain,
   });
 
   it('all 6 required fields answered → returns true (regardless of anythingElse)', () => {
@@ -118,19 +122,18 @@ describe('Property 10: Survey form validation determines button state', () => {
 
   it('any one of the 6 required fields is null → returns false', () => {
     const requiredKeys: (keyof Omit<SurveyResponses, 'anythingElse'>)[] = [
-      'overallExperience',
-      'aiNaturalness',
+      'deviceUsed',
+      'aiConversationQuality',
+      'aiAccuracy',
       'sessionPreference',
-      'usefulness',
-      'bestPart',
-      'whatToChange',
+      'biggestFriction',
+      'wouldUseAgain',
     ];
     const keyIndex = fc.integer({ min: 0, max: requiredKeys.length - 1 });
 
     fc.assert(
       fc.property(fullSurveyResponses, keyIndex, (base, idx) => {
         const responses: SurveyResponses = { ...base, anythingElse: null };
-        // Null out one required field
         (responses as Record<string, unknown>)[requiredKeys[idx]] = null;
         expect(isSurveyFormValid(responses)).toBe(false);
       }),

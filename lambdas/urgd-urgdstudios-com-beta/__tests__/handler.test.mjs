@@ -953,8 +953,11 @@ const invalidRating = fc.oneof(
   fc.constant(undefined)
 );
 
-/** Valid sessionPreference */
+/** Valid pill-select values */
+const validDeviceUsed = fc.constantFrom('mobile', 'desktop', 'both');
+const validAiAccuracy = fc.constantFrom('no', 'minor', 'yes');
 const validSessionPreference = fc.constantFrom('document', 'photo', 'same');
+const validWouldUseAgain = fc.constantFrom('definitely', 'maybe', 'probably_not');
 
 /** Invalid sessionPreference */
 const invalidSessionPreference = fc.string({ minLength: 1, maxLength: 50 }).filter(
@@ -972,12 +975,12 @@ const validSurveySignupId = fc.uuid().map(id => id.toLowerCase());
 
 /** Build a complete valid survey responses object */
 const validSurveyResponses = fc.record({
-  overallExperience: validRating,
-  aiNaturalness: validRating,
+  deviceUsed: validDeviceUsed,
+  aiConversationQuality: validRating,
+  aiAccuracy: validAiAccuracy,
   sessionPreference: validSessionPreference,
-  usefulness: validRating,
-  bestPart: validTextField,
-  whatToChange: validTextField,
+  biggestFriction: validTextField,
+  wouldUseAgain: validWouldUseAgain,
 });
 
 /** Optional anythingElse field */
@@ -1122,8 +1125,8 @@ describe('Property 11: Survey request validation', () => {
 
   // Test case 5: Invalid rating (not integer 1-5) → 400
   it('returns 400 when a rating field has an invalid value', async () => {
-    // Pick one of the three rating fields to make invalid
-    const ratingFieldArb = fc.constantFrom('overallExperience', 'aiNaturalness', 'usefulness');
+    // Only one rating field now: aiConversationQuality
+    const ratingFieldArb = fc.constantFrom('aiConversationQuality');
 
     await fc.assert(
       fc.asyncProperty(
@@ -1186,7 +1189,7 @@ describe('Property 11: Survey request validation', () => {
 
   // Test case 7: Empty required text field → 400
   it('returns 400 when a required text field is empty', async () => {
-    const textFieldArb = fc.constantFrom('bestPart', 'whatToChange');
+    const textFieldArb = fc.constantFrom('biggestFriction');
     const emptyTextArb = fc.constantFrom('', '   ', '\t\n');
 
     await fc.assert(
@@ -1220,7 +1223,7 @@ describe('Property 11: Survey request validation', () => {
 
   // Test case 8: Text field exceeding 1000 chars → 400
   it('returns 400 when a text field exceeds 1000 characters', async () => {
-    const textFieldArb = fc.constantFrom('bestPart', 'whatToChange');
+    const textFieldArb = fc.constantFrom('biggestFriction');
 
     await fc.assert(
       fc.asyncProperty(
@@ -1409,16 +1412,16 @@ describe('Property 12: Survey record update round-trip', () => {
           const storedResponses = updateArgs.ExpressionAttributeValues[':responses'];
 
           // All rating fields SHALL match the submitted values
-          expect(storedResponses.overallExperience).toBe(baseResponses.overallExperience);
-          expect(storedResponses.aiNaturalness).toBe(baseResponses.aiNaturalness);
-          expect(storedResponses.usefulness).toBe(baseResponses.usefulness);
+          expect(storedResponses.aiConversationQuality).toBe(baseResponses.aiConversationQuality);
 
-          // sessionPreference SHALL match
+          // Pill-select fields SHALL match
+          expect(storedResponses.deviceUsed).toBe(baseResponses.deviceUsed);
+          expect(storedResponses.aiAccuracy).toBe(baseResponses.aiAccuracy);
           expect(storedResponses.sessionPreference).toBe(baseResponses.sessionPreference);
+          expect(storedResponses.wouldUseAgain).toBe(baseResponses.wouldUseAgain);
 
           // Text fields SHALL be the trimmed versions (sanitize-html is mocked as identity)
-          expect(storedResponses.bestPart).toBe(baseResponses.bestPart.trim());
-          expect(storedResponses.whatToChange).toBe(baseResponses.whatToChange.trim());
+          expect(storedResponses.biggestFriction).toBe(baseResponses.biggestFriction.trim());
 
           // anythingElse: if provided, SHALL be present and trimmed; if not, SHALL be absent
           if (anythingElse !== undefined) {
