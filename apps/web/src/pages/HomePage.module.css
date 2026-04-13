@@ -7,7 +7,7 @@
    ---------------------------------------------------------------- */
 
 .hero {
-  padding: var(--space-3xl) var(--width-content-padding) var(--space-md) var(--width-content-padding);
+  padding: var(--space-xl) var(--width-content-padding) var(--space-md) var(--width-content-padding);
   text-align: center;
   display: flex;
   flex-direction: column;

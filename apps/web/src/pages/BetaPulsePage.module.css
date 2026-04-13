@@ -34,6 +34,11 @@
   gap: var(--space-sm);
 }
 
+.pulseIcon {
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
 .wordmark {
   font-family: var(--font-body);
   font-weight: var(--font-weight-regular);

@@ -30,21 +30,15 @@ function getConfig(): BetaPulseConfig {
 
 function PulseIcon() {
   return (
-    <svg
+    <img
+      src="/assets/pulse-icon.svg"
+      alt=""
       aria-hidden="true"
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Center dot */}
-      <circle cx="18" cy="18" r="3" fill="#7a9e87" />
-      {/* Inner ring */}
-      <circle cx="18" cy="18" r="9" stroke="#7a9e87" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
-      {/* Outer ring */}
-      <circle cx="18" cy="18" r="15" stroke="#7a9e87" strokeWidth="1.5" strokeOpacity="0.3" fill="none" />
-    </svg>
+      width={48}
+      height={48}
+      className={styles.pulseIcon}
+      draggable={false}
+    />
   );
 }
 

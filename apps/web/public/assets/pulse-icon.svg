@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    Pulse App Icon — EXPERIMENT v2
+    Best of master + experiment per UX review:
+    - Bold P strokes (42px/30px) from master
+    - Crosshairs at 30% (visible on phone screens, not competing)
+    - Outer scope ring at 20%, inner ring at 14%
+    - Radar sweep at 4 o'clock with directional gradient (sharp leading edge)
+    - All depth effects from master preserved
+  -->
+
+  <defs>
+    <filter id="markGlow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="emboss" x="-5%" y="-5%" width="110%" height="110%">
+      <feOffset in="SourceAlpha" dx="2" dy="3" result="shadowOffset"/>
+      <feGaussianBlur in="shadowOffset" stdDeviation="3" result="shadowBlur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.4" result="shadowColor"/>
+      <feComposite in="shadowColor" in2="shadowBlur" operator="in" result="shadow"/>
+      <feOffset in="SourceAlpha" dx="-1" dy="-1" result="highlightOffset"/>
+      <feGaussianBlur in="highlightOffset" stdDeviation="2" result="highlightBlur"/>
+      <feFlood flood-color="#b8d4c2" flood-opacity="0.25" result="highlightColor"/>
+      <feComposite in="highlightColor" in2="highlightBlur" operator="in" result="highlight"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="highlight"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="borderGlow" x="-2%" y="-2%" width="104%" height="104%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="noiseFilter" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="monoNoise"/>
+    </filter>
+
+    <!-- Sweep gradient — directional feel via linear gradient along the wedge.
+         Leading edge (clockwise) is brighter, trailing edge fades to nothing. -->
+    <linearGradient id="sweepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7a9e87" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7a9e87" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- LAYER 1: Background — pure black -->
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <!-- LAYER 2: Noise texture -->
+  <rect width="1024" height="1024" filter="url(#noiseFilter)" opacity="0.03"/>
+
+  <!-- LAYER 4: Crosshair grid — 30% (visible on phone screens) -->
+  <g opacity="0.35" stroke="#7a9e87" fill="none">
+    <line x1="512" y1="120" x2="512" y2="904" stroke-width="0.75"/>
+    <line x1="120" y1="512" x2="904" y2="512" stroke-width="0.75"/>
+  </g>
+
+  <!-- Inner concentric ring — 14% (softer than outer scope ring) -->
+  <circle cx="512" cy="512" r="230" fill="none" stroke="#7a9e87" stroke-opacity="0.14" stroke-width="0.75"/>
+
+  <!-- LAYER 4.5: Radar sweep — 30° wedge at 4 o'clock
+       Directional gradient: bright leading edge fading to transparent trailing edge.
+       4 o'clock clock angles:
+       105° CW from 12: x=884, y=612
+       135° CW from 12: x=784, y=784 -->
+  <path
+    d="M 512 512 L 884 612 A 385 385 0 0 1 784 784 Z"
+    fill="url(#sweepGrad)"
+    opacity="1"
+  />
+
+  <!-- LAYER 5: Outer scope ring — 20% -->
+  <circle cx="512" cy="512" r="385" fill="none" stroke="#7a9e87" stroke-opacity="0.20" stroke-width="1.25"/>
+
+  <!-- LAYER 6: Double-line border (bezel) -->
+  <rect x="16" y="16" width="992" height="992" rx="76" fill="none" stroke="#7a9e87" stroke-opacity="0.12" stroke-width="1.5"/>
+  <rect x="30" y="30" width="964" height="964" rx="64" fill="none" stroke="#7a9e87" stroke-opacity="0.20" stroke-width="2.5" filter="url(#borderGlow)"/>
+
+  <!-- LAYER 7: THE MARK — Bold P (42px) + Pulse Wave (30px) from master -->
+  <g filter="url(#emboss)">
+    <!-- P stem -->
+    <line x1="195" y1="190" x2="195" y2="810" stroke="#7a9e87" stroke-width="42" stroke-linecap="round"/>
+
+    <!-- P bowl — tighter arc -->
+    <path
+      d="M 195 190 L 380 190 C 490 190, 580 230, 580 340 C 580 450, 490 490, 380 490 L 195 490"
+      fill="none" stroke="#7a9e87" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Pulse wave — detached, at lowercase baseline -->
+    <path
+      d="M 340 650 L 400 650 L 440 680 L 510 530 L 580 800 L 650 520 L 715 790 L 770 580 L 815 650 L 940 650"
+      fill="none" stroke="#7a9e87" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- LAYER 8: Glow layer -->
+  <g opacity="0.15" filter="url(#markGlow)">
+    <line x1="195" y1="190" x2="195" y2="810" stroke="#a3c4af" stroke-width="42" stroke-linecap="round"/>
+    <path d="M 195 190 L 380 190 C 490 190, 580 230, 580 340 C 580 450, 490 490, 380 490 L 195 490" fill="none" stroke="#a3c4af" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 340 650 L 400 650 L 440 680 L 510 530 L 580 800 L 650 520 L 715 790 L 770 580 L 815 650 L 940 650" fill="none" stroke="#a3c4af" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
