@@ -1,0 +1,78 @@
+/* PillSelect.module.css */
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+.pillRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: var(--base-radius-full);
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast) var(--easing-default),
+    background var(--transition-fast) var(--easing-default),
+    color var(--transition-fast) var(--easing-default);
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.pill:hover:not(.selected) {
+  border-color: var(--glass-border-hover);
+}
+
+.pill:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--base-white);
+}
+
+.selected:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.error {
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition: none;
+  }
+}

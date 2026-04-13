@@ -164,7 +164,7 @@ export default function HomePage() {
                 </span>
                 <span className={styles.appName}>
                   Pulse
-                  <span className={styles.badgeSoon}>Coming Soon</span>
+                  <span className={styles.badgeBeta}>Beta</span>
                 </span>
                 <span className={styles.appName}>
                   Gather

@@ -1,6 +1,5 @@
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
-import SectionReveal from '../components/SectionReveal';
 import ContentSection from '../components/ContentSection';
 import { useMeta } from '../utils/useMeta';
 import styles from './LegalPages.module.css';
@@ -15,9 +14,8 @@ export default function LegalPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Legal" />
-      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 04/13/2026</p>
 
-      <SectionReveal>
         <p className={styles.legalIntro}>
           urgd studios LLC is a Washington State limited liability company. This
           page provides general legal and transparency information about our
@@ -105,6 +103,39 @@ export default function LegalPage() {
             help people make better decisions about products.
           </p>
 
+          <h4>Beta Programs Philosophy:</h4>
+          <p>
+            We run beta programs because we believe the people who use our tools
+            should help shape them. A beta is an invitation, not an obligation.
+          </p>
+          <p>When you participate in a ur/gd beta:</p>
+          <ul>
+            <li>
+              Your feedback goes directly into improving the product. We read
+              every response.
+            </li>
+            <li>
+              We are transparent about what data we collect and why. Beta signup
+              collects your name and email so we can send you session links.
+              Surveys collect your honest reactions so we can learn what works
+              and what doesn&rsquo;t.
+            </li>
+            <li>
+              Your responses may be quoted anonymously in our internal analysis,
+              but we will never share your identity or contact information
+              outside of ur/gd.
+            </li>
+            <li>
+              You can withdraw from a beta at any time. Your data will be
+              deleted at the end of the retention period regardless of whether
+              you complete the program.
+            </li>
+          </ul>
+          <p>
+            We ask for your time because we respect your perspective.
+            That&rsquo;s the deal.
+          </p>
+
           <p>
             Additional applications may describe their specific data practices
             within the app interface or supporting documentation, where
@@ -126,9 +157,7 @@ export default function LegalPage() {
             substitute for independent judgment or professional consultation.
           </p>
         </ContentSection>
-      </SectionReveal>
 
-      <SectionReveal>
         <ContentSection heading="5. Availability & Performance">
           <p>
             We design our systems for reliability and stability. However, no
@@ -167,7 +196,6 @@ export default function LegalPage() {
             <a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a>
           </p>
         </ContentSection>
-      </SectionReveal>
     </ContentContainer>
   );
 }

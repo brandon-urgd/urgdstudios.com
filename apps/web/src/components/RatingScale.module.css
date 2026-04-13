@@ -1,0 +1,99 @@
+/* RatingScale.module.css */
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+.scaleRow {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.25rem, 2vw, 0.75rem);
+  justify-content: center;
+  max-width: 100%;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--base-radius-full);
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast) var(--easing-default),
+    background var(--transition-fast) var(--easing-default),
+    color var(--transition-fast) var(--easing-default);
+  padding: 0;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.option:hover:not(.selected) {
+  border-color: var(--glass-border-hover);
+}
+
+.option:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--base-white);
+}
+
+.selected:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.anchors {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0;
+  /* Align anchors with first and last circles — responsive gap matches scaleRow */
+  width: calc(44px * 5 + clamp(0.25rem, 2vw, 0.75rem) * 4);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.anchor {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-body);
+  text-align: center;
+  max-width: 60px;
+}
+
+.error {
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+}

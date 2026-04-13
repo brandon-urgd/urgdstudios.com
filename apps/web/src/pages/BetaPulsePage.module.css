@@ -1,0 +1,329 @@
+/* BetaPulsePage — Pulse beta signup page
+ * Standalone page (no Layout shell). Dark base + sage green accents.
+ * Mobile-first with desktop enhancements at 768px.
+ */
+
+.page {
+  min-height: 100dvh;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl) var(--width-content-padding);
+  overflow-x: hidden;
+}
+
+/* ----------------------------------------------------------------
+   Header — PulseIcon + wordmark + attribution
+   ---------------------------------------------------------------- */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-top: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+}
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.wordmark {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  text-transform: lowercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.attribution {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-regular);
+}
+
+
+/* ----------------------------------------------------------------
+   Hero — heading + subheading
+   ---------------------------------------------------------------- */
+
+.hero {
+  text-align: center;
+  max-width: var(--width-narrow-max);
+  padding: var(--space-xl) 0;
+}
+
+.hero h1 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-hero);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+@keyframes betaShimmer {
+  0%, 100% { color: var(--color-pulse-accent); }
+  25% { color: var(--color-pulse-accent-glow); }
+  50% { color: rgba(255, 255, 255, 0.9); }
+  75% { color: var(--color-pulse-accent-glow); }
+}
+
+.betaShimmer {
+  animation: betaShimmer 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .betaShimmer {
+    animation: none;
+    color: var(--color-pulse-accent);
+  }
+}
+
+.subheading {
+  font-family: var(--font-body);
+  font-size: var(--font-size-intro);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   Overview — "What to expect" GlassPanel
+   ---------------------------------------------------------------- */
+
+.overview {
+  width: 100%;
+  max-width: var(--width-narrow-max);
+  padding: var(--space-lg) 0;
+}
+
+.overview h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.stepDot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-pulse-accent);
+  margin-top: 6px;
+}
+
+.step strong {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2xs);
+}
+
+.step p {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.giftCallout {
+  margin-top: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  border-left: 3px solid var(--color-pulse-accent);
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* ----------------------------------------------------------------
+   Special messages — coming-soon, concluded
+   ---------------------------------------------------------------- */
+
+.specialMessage {
+  text-align: center;
+  max-width: var(--width-narrow-max);
+  padding: var(--space-lg) 0;
+  font-family: var(--font-body);
+  font-size: var(--font-size-intro);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+
+/* ----------------------------------------------------------------
+   Actions — signup + survey buttons
+   ---------------------------------------------------------------- */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+  max-width: var(--width-narrow-max);
+  padding: var(--space-lg) 0;
+}
+
+.actionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.actionButton button {
+  width: 100%;
+  min-height: var(--button-min-height);
+  padding: var(--button-padding);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--button-radius);
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast) var(--easing-default),
+    opacity var(--transition-fast) var(--easing-default);
+}
+
+.actionButton button.primary {
+  background: var(--button-bg-primary);
+  color: var(--button-text-primary);
+}
+
+.actionButton button.primary:hover:not(:disabled) {
+  background: var(--button-bg-primary-hover);
+}
+
+.actionButton button.primary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.actionButton button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.disabledLabel {
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ----------------------------------------------------------------
+   Footer
+   ---------------------------------------------------------------- */
+
+.footer {
+  width: 100%;
+  max-width: var(--width-narrow-max);
+  margin-top: auto;
+  padding-top: var(--space-3xl);
+  text-align: center;
+}
+
+.pulseLine {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-pulse-accent) 50%,
+    transparent 100%
+  );
+  margin-bottom: var(--space-xl);
+}
+
+.footer p {
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--space-2xs) 0;
+}
+
+.footer nav {
+  margin-top: var(--space-sm);
+}
+
+.footer nav a {
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-decoration: none;
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.footer nav a:hover {
+  color: var(--color-text-secondary);
+}
+
+.footer nav a:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------
+   Desktop enhancements — 768px+
+   ---------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  .header {
+    padding-top: var(--space-3xl);
+  }
+
+  .steps {
+    flex-direction: row;
+    gap: var(--space-xl);
+  }
+
+  .step {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stepDot {
+    margin-top: 0;
+    margin-bottom: var(--space-xs);
+  }
+
+  .actions {
+    flex-direction: row;
+    gap: var(--space-lg);
+  }
+
+  .actionButton {
+    flex: 1;
+  }
+}

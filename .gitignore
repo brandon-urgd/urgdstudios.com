@@ -42,3 +42,6 @@ cfn-lint-results/
 tmp/
 temp/
 *.tmp
+
+# TypeScript incremental build cache
+*.tsbuildinfo

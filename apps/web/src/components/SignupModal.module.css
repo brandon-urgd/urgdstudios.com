@@ -1,0 +1,457 @@
+/* SignupModal.module.css
+ * Modal overlay + glassmorphism panel for beta signup.
+ * Mobile-first with desktop enhancements at 768px.
+ * Uses design tokens from tokens.css throughout.
+ */
+
+/* ----------------------------------------------------------------
+   Overlay — dark scrim, centered flex
+   ---------------------------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  animation: fadeIn var(--transition-normal) var(--easing-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ----------------------------------------------------------------
+   Panel — glassmorphism card
+   ---------------------------------------------------------------- */
+
+.panel {
+  position: relative;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-deep);
+  animation: slideUp var(--transition-normal) var(--easing-out);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .panel {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ----------------------------------------------------------------
+   Close button (X) — top-right, 44px touch target
+   ---------------------------------------------------------------- */
+
+.closeButton {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.closeButton:hover {
+  color: var(--color-text-primary);
+}
+
+.closeButton:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------
+   Heading
+   ---------------------------------------------------------------- */
+
+.heading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+}
+
+/* ----------------------------------------------------------------
+   Error banner — API errors
+   ---------------------------------------------------------------- */
+
+.errorBanner {
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-lg);
+  background: rgba(248, 113, 113, 0.04);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+}
+
+/* ----------------------------------------------------------------
+   Form
+   ---------------------------------------------------------------- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ----------------------------------------------------------------
+   Honeypot — visually hidden
+   ---------------------------------------------------------------- */
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------
+   Field container
+   ---------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* ----------------------------------------------------------------
+   Labels
+   ---------------------------------------------------------------- */
+
+.label {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+/* ----------------------------------------------------------------
+   Inputs
+   ---------------------------------------------------------------- */
+
+.input {
+  width: 100%;
+  min-height: var(--input-min-height);
+  padding: var(--input-padding);
+  font-size: var(--font-size-body);
+  font-family: var(--font-body);
+  color: var(--input-text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  transition:
+    border-color var(--transition-fast) var(--easing-default),
+    background var(--transition-fast) var(--easing-default);
+}
+
+.input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--glass-border-hover);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  background: var(--glass-bg-hover);
+}
+
+.input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ----------------------------------------------------------------
+   Input error state
+   ---------------------------------------------------------------- */
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.error {
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* ----------------------------------------------------------------
+   Consent checkbox
+   ---------------------------------------------------------------- */
+
+.consentField {
+  display: flex;
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.checkbox:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.consentText {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.link {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------
+   Submit button
+   ---------------------------------------------------------------- */
+
+.submitButton {
+  width: 100%;
+  min-height: var(--button-min-height);
+  padding: var(--button-padding);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-body);
+  color: var(--button-text-primary);
+  background: var(--button-bg-primary);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast) var(--easing-default),
+    opacity var(--transition-fast) var(--easing-default);
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--button-bg-primary-hover);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.submitButton:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------
+   Success state
+   ---------------------------------------------------------------- */
+
+.successContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn var(--transition-normal) var(--easing-out);
+}
+
+.checkmark {
+  margin-bottom: var(--space-md);
+}
+
+.successHeading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-h3);
+  color: var(--color-pulse-accent);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.successMessage {
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--space-lg) 0;
+}
+
+.instructionsList {
+  text-align: left;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  margin: 0 0 var(--space-xl) 0;
+  background: rgba(122, 158, 135, 0.06);
+  border: 1px solid rgba(122, 158, 135, 0.15);
+  border-radius: var(--radius-md);
+  list-style: decimal;
+  padding-left: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.instructionsList li {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.gotItButton {
+  width: 100%;
+  min-height: var(--button-min-height);
+  padding: var(--button-padding);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-body);
+  color: var(--button-text-primary);
+  background: var(--button-bg-primary);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: background var(--transition-fast) var(--easing-default);
+}
+
+.gotItButton:hover {
+  background: var(--button-bg-primary-hover);
+}
+
+.gotItButton:active {
+  transform: scale(0.98);
+}
+
+.gotItButton:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------
+   Mobile — near-full-screen modal
+   ---------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .panel {
+    width: calc(100% - 32px);
+    max-height: 90vh;
+    overflow-y: auto;
+    backdrop-filter: blur(var(--glass-blur-mobile));
+    -webkit-backdrop-filter: blur(var(--glass-blur-mobile));
+  }
+
+  .input,
+  .submitButton,
+  .gotItButton {
+    font-size: var(--font-size-body);
+  }
+}
+
+/* Very narrow viewports — reduce padding to prevent overflow */
+@media (max-width: 374px) {
+  .panel {
+    padding: var(--space-lg);
+  }
+}
+
+/* ----------------------------------------------------------------
+   Reduced motion
+   ---------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+
+  .panel {
+    animation: none;
+  }
+
+  .successContent {
+    animation: none;
+  }
+
+  .input,
+  .submitButton,
+  .gotItButton,
+  .closeButton,
+  .link {
+    transition: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Reduced transparency
+   ---------------------------------------------------------------- */
+
+@media (prefers-reduced-transparency: reduce) {
+  .panel {
+    background: rgba(20, 20, 35, 0.95);
+    border-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

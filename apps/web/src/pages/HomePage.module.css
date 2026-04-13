@@ -7,16 +7,17 @@
    ---------------------------------------------------------------- */
 
 .hero {
-  padding: var(--space-4xl) var(--width-content-padding) var(--space-md) var(--width-content-padding);
+  padding: var(--space-3xl) var(--width-content-padding) var(--space-md) var(--width-content-padding);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .heroLogo {
-  width: clamp(180px, 30vw, 300px);
+  width: clamp(270px, 45vw, 450px);
+  max-width: 100%;
   height: auto;
   object-fit: contain;
   color: transparent;
@@ -314,7 +315,8 @@
 
 /* Status badges */
 .badgeLive,
-.badgeSoon {
+.badgeSoon,
+.badgeBeta {
   display: inline-block;
   padding: var(--badge-padding);
   border-radius: var(--badge-radius);
@@ -332,6 +334,11 @@
 .badgeSoon {
   background: var(--badge-soon-bg);
   color: var(--badge-soon-text);
+}
+
+.badgeBeta {
+  background: var(--badge-beta-bg);
+  color: var(--badge-beta-text);
 }
 
 /* ----------------------------------------------------------------

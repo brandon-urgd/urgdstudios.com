@@ -47,6 +47,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <li>
           <NavLink
             to="/command/dashboard"
+            end
             className={({ isActive }) =>
               `${styles.navLink} ${isActive ? styles.active : ''}`
             }
@@ -55,6 +56,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             {({ isActive }) => (
               <span aria-current={isActive ? 'page' : undefined}>
                 {labels.sidebar.messagesLink}
+              </span>
+            )}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/command/dashboard/beta"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ''}`
+            }
+            aria-current={undefined}
+          >
+            {({ isActive }) => (
+              <span aria-current={isActive ? 'page' : undefined}>
+                Beta
               </span>
             )}
           </NavLink>

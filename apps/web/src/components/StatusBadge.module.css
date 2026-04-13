@@ -29,3 +29,8 @@
   background: rgba(248, 113, 113, 0.15);
   color: var(--color-error);
 }
+
+.beta {
+  background: var(--badge-beta-bg);
+  color: var(--badge-beta-text);
+}

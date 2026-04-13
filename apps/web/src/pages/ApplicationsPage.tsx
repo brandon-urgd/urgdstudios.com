@@ -10,7 +10,7 @@ import styles from './ApplicationsPage.module.css';
 interface Application {
   name: string;
   description: string;
-  status: 'Active' | 'In Development' | 'Coming Soon' | 'Sunset';
+  status: 'Active' | 'In Development' | 'Coming Soon' | 'Sunset' | 'Beta';
   url?: string;
   isExternal?: boolean;
 }
@@ -35,7 +35,8 @@ const APPLICATIONS: Application[] = [
   {
     name: 'Pulse',
     description: 'Structured feedback and peer review for creative work.',
-    status: 'In Development',
+    status: 'Beta',
+    url: '/beta/pulse',
   },
   {
     name: 'Stitch',
@@ -61,7 +62,7 @@ export default function ApplicationsPage() {
       <SectionReveal>
         <div className={styles.grid}>
           {APPLICATIONS.map((app) => {
-            const isActive = app.status === 'Active' && !!app.url;
+            const isActive = (app.status === 'Active' || app.status === 'Beta') && !!app.url;
 
             const cardContent = (
               <GlassPanel interactive={isActive}>

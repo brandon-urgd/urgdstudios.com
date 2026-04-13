@@ -1,7 +1,7 @@
 import styles from './StatusBadge.module.css';
 
 interface StatusBadgeProps {
-  status: 'Active' | 'In Development' | 'Coming Soon' | 'Sunset';
+  status: 'Active' | 'In Development' | 'Coming Soon' | 'Sunset' | 'Beta';
 }
 
 /**
@@ -12,6 +12,7 @@ interface StatusBadgeProps {
  * - In Development: blue (info)
  * - Coming Soon: muted gray
  * - Sunset: red (error)
+ * - Beta: sage green (Pulse accent)
  *
  * Rendered as a semantic span with aria-label for screen reader context.
  */

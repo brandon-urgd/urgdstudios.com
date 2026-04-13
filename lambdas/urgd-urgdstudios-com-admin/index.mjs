@@ -5,6 +5,7 @@ import { createResponse, errorResponse, getCorsHeaders, log, createAdminError, i
 
 // ── Environment validation (fail-fast at cold start) ──────────────────────────
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
+const BETA_TABLE = process.env.BETA_TABLE;
 const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
 const VERSION = process.env.VERSION || '3.0.0';
 const SES_FROM_ADDRESS = process.env.SES_FROM_ADDRESS || 'command@urgdstudios.com';
@@ -92,6 +93,16 @@ export async function handler(event) {
     const replyMatch = path.match(/^\/v1\/admin\/messages\/([^/]+)\/reply$/);
     if (replyMatch && method === 'POST') {
       return await replyToMessage(event, requestId, replyMatch[1]);
+    }
+
+    // Beta admin routes
+    if (method === 'GET' && path === '/v1/admin/beta/signups') {
+      return await listBetaSignups(event, requestId);
+    }
+
+    const betaUpdateMatch = path.match(/^\/v1\/admin\/beta\/signups\/([^/]+)$/);
+    if (betaUpdateMatch && method === 'PATCH') {
+      return await updateBetaSignup(event, requestId, betaUpdateMatch[1]);
     }
 
     log('warn', 'Unknown route', { requestId, method, path });
@@ -501,6 +512,121 @@ async function replyToMessage(event, requestId, id) {
   return createResponse(200, {
     reply: { body: replyText, sentAt, sentTo: recipientEmail },
   }, event);
+}
+
+// ── List beta signups ──────────────────────────────────────────────────────────
+async function listBetaSignups(event, requestId) {
+  const start = Date.now();
+
+  if (!BETA_TABLE) {
+    log('warn', 'BETA_TABLE not configured', { requestId });
+    return errorResponse(503, 'Beta signups service is not configured', {}, event);
+  }
+
+  try {
+    const result = await docClient.send(new ScanCommand({
+      TableName: BETA_TABLE,
+    }));
+
+    const signups = (result.Items || [])
+      .map(item => ({
+        signupId: item.signupId,
+        name: item.name,
+        email: item.email,
+        app: item.app,
+        signupTimestamp: item.signupTimestamp,
+        sessionsSent: item.sessionsSent || false,
+        hasSurvey: !!item.surveyResponses,
+        surveyTimestamp: item.surveyTimestamp || null,
+      }))
+      .sort((a, b) => {
+        if (!a.signupTimestamp) return 1;
+        if (!b.signupTimestamp) return -1;
+        return b.signupTimestamp.localeCompare(a.signupTimestamp);
+      });
+
+    log('info', 'Beta signups listed', {
+      requestId,
+      action: 'listBetaSignups',
+      outcome: 'success',
+      count: signups.length,
+      duration: Date.now() - start,
+      statusCode: 200,
+    });
+
+    return createResponse(200, { signups }, event);
+
+  } catch (error) {
+    log('error', 'listBetaSignups failed', {
+      requestId,
+      action: 'listBetaSignups',
+      outcome: 'failure',
+      error: error.message,
+      duration: Date.now() - start,
+    });
+    throw createAdminError(500, 'Failed to retrieve beta signups');
+  }
+}
+
+// ── Update beta signup ────────────────────────────────────────────────────────
+async function updateBetaSignup(event, requestId, signupId) {
+  const start = Date.now();
+
+  if (!BETA_TABLE) {
+    log('warn', 'BETA_TABLE not configured', { requestId });
+    return errorResponse(503, 'Beta signups service is not configured', {}, event);
+  }
+
+  if (!UUID_REGEX.test(signupId)) {
+    throw createAdminError(400, 'Invalid signup ID');
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch {
+    throw createAdminError(400, 'Invalid request format');
+  }
+
+  if (typeof body.sessionsSent !== 'boolean') {
+    throw createAdminError(400, 'sessionsSent must be a boolean');
+  }
+
+  try {
+    await docClient.send(new UpdateCommand({
+      TableName: BETA_TABLE,
+      Key: { signupId },
+      UpdateExpression: 'SET sessionsSent = :val',
+      ConditionExpression: 'attribute_exists(signupId)',
+      ExpressionAttributeValues: { ':val': body.sessionsSent },
+    }));
+
+    log('info', 'Beta signup updated', {
+      requestId,
+      action: 'updateBetaSignup',
+      outcome: 'success',
+      signupId,
+      sessionsSent: body.sessionsSent,
+      duration: Date.now() - start,
+      statusCode: 200,
+    });
+
+    return createResponse(200, { signupId, sessionsSent: body.sessionsSent }, event);
+
+  } catch (error) {
+    if (isAdminHttpError(error)) throw error;
+    if (error.name === 'ConditionalCheckFailedException') {
+      throw createAdminError(404, 'Signup not found');
+    }
+    log('error', 'updateBetaSignup failed', {
+      requestId,
+      action: 'updateBetaSignup',
+      outcome: 'failure',
+      error: error.message,
+      duration: Date.now() - start,
+    });
+    throw createAdminError(500, 'Failed to update beta signup');
+  }
 }
 
 // ── Email builders ────────────────────────────────────────────────────────────

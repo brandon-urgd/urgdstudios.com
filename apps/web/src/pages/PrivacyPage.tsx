@@ -1,6 +1,5 @@
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
-import SectionReveal from '../components/SectionReveal';
 import ContentSection from '../components/ContentSection';
 import { useMeta } from '../utils/useMeta';
 import styles from './LegalPages.module.css';
@@ -15,9 +14,8 @@ export default function PrivacyPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Privacy Policy" />
-      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 04/13/2026</p>
 
-      <SectionReveal>
         <p className={styles.legalIntro}>
           urgd studios LLC (&ldquo;ur/gd,&rdquo; &ldquo;we,&rdquo;
           &ldquo;our,&rdquo; or &ldquo;us&rdquo;) respects your privacy. We
@@ -240,10 +238,52 @@ export default function PrivacyPage() {
             within the application interface or supporting documentation at the
             time of release.
           </p>
-        </ContentSection>
-      </SectionReveal>
 
-      <SectionReveal>
+          <h4>Beta and Pre-Release Programs:</h4>
+          <p>
+            When you participate in a ur/gd beta or pre-release program, we
+            collect the following information:
+          </p>
+          <ul>
+            <li>
+              <strong>Signup data:</strong> Your name and email address,
+              provided when you register for the beta program.
+            </li>
+            <li>
+              <strong>Consent record:</strong> A record that you accepted the
+              beta participation terms, including the date and time of consent.
+            </li>
+            <li>
+              <strong>Survey responses:</strong> If the beta program includes a
+              feedback survey, your responses are collected and linked to your
+              signup record. Survey responses may include ratings, text
+              feedback, and preference selections.
+            </li>
+            <li>
+              <strong>Technical data:</strong> Your IP address is collected for
+              rate-limiting purposes. IP addresses are hashed immediately upon
+              receipt and are never stored or logged in raw form.
+            </li>
+            <li>
+              <strong>Administrative notifications:</strong> When you sign up or
+              complete a survey, an internal notification is sent to ur/gd
+              administrators. These notifications contain your signup
+              identifier, timestamp, and the beta program name. They do not
+              contain your name, email address, or survey responses.
+            </li>
+          </ul>
+          <p>
+            Beta program data is retained for ninety (90) days from the date of
+            signup, unless the specific beta program specifies a different
+            retention period. After the retention period, records are
+            automatically deleted.
+          </p>
+          <p>
+            Beta program data is not shared with third parties and is used
+            solely to evaluate and improve the associated Service.
+          </p>
+        </ContentSection>
+
         <ContentSection heading="3. How We Use Information">
           <p>We use information to:</p>
           <ul>
@@ -381,6 +421,24 @@ export default function PrivacyPage() {
             </li>
           </ul>
           <p>
+            For beta and pre-release programs, the following retention periods
+            apply:
+          </p>
+          <ul>
+            <li>
+              <strong>Signup records (name, email, consent):</strong>{' '}
+              Automatically deleted 90 days after signup
+            </li>
+            <li>
+              <strong>Survey responses:</strong> Retained with the signup record
+              and deleted on the same schedule
+            </li>
+            <li>
+              <strong>IP hashes:</strong> Retained with the signup record for
+              rate-limiting purposes and deleted on the same schedule
+            </li>
+          </ul>
+          <p>
             Users may request deletion of their personal information by
             contacting us at{' '}
             <a href="mailto:privacy@urgdstudios.com">
@@ -417,9 +475,7 @@ export default function PrivacyPage() {
             or as otherwise required by applicable law.
           </p>
         </ContentSection>
-      </SectionReveal>
 
-      <SectionReveal>
         <ContentSection heading="7. California Privacy Rights">
           <p>
             If you are a California resident, you may have rights under the
@@ -554,7 +610,6 @@ export default function PrivacyPage() {
             Seattle, WA 98122
           </p>
         </ContentSection>
-      </SectionReveal>
     </ContentContainer>
   );
 }

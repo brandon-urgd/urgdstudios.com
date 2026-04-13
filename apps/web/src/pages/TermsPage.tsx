@@ -1,6 +1,5 @@
 import ContentContainer from '../components/ContentContainer';
 import PageHeader from '../components/PageHeader';
-import SectionReveal from '../components/SectionReveal';
 import ContentSection from '../components/ContentSection';
 import { useMeta } from '../utils/useMeta';
 import styles from './LegalPages.module.css';
@@ -15,9 +14,8 @@ export default function TermsPage() {
   return (
     <ContentContainer narrow>
       <PageHeader title="Terms of Use" />
-      <p className={styles.effectiveDate}>Last updated: 04/09/2026</p>
+      <p className={styles.effectiveDate}>Last updated: 04/13/2026</p>
 
-      <SectionReveal>
         <p className={styles.legalIntro}>
           These Terms of Use (&ldquo;Terms&rdquo;) govern your access to and
           use of urgd studios LLC&rsquo;s (&ldquo;ur/gd,&rdquo;
@@ -272,9 +270,7 @@ export default function TermsPage() {
             safeguard account credentials.
           </p>
         </ContentSection>
-      </SectionReveal>
 
-      <SectionReveal>
         <ContentSection heading="5. Intellectual Property">
           <p>
             All ur/gd branding, design elements, software, and proprietary
@@ -360,9 +356,7 @@ export default function TermsPage() {
             applicable laws.
           </p>
         </ContentSection>
-      </SectionReveal>
 
-      <SectionReveal>
         <ContentSection heading="9. Limitation of Liability">
           <p>
             To the fullest extent permitted by law, ur/gd&rsquo;s total
@@ -481,7 +475,51 @@ export default function TermsPage() {
             pricing) are described within the applicable Service.
           </p>
         </ContentSection>
-      </SectionReveal>
+
+        <ContentSection heading="16. Beta and Pre-Release Programs">
+          <p>
+            From time to time, ur/gd may offer beta, preview, or pre-release
+            versions of Services or features (&ldquo;Beta Services&rdquo;). By
+            participating in a Beta Service, you agree that:
+          </p>
+          <ul>
+            <li>
+              Beta Services are provided &ldquo;as-is&rdquo; and &ldquo;as
+              available,&rdquo; without warranties of any kind. They may contain
+              bugs, errors, or incomplete functionality.
+            </li>
+            <li>
+              Beta Services may change, be suspended, or be discontinued at any
+              time without notice. Features available during a beta period may
+              differ from any final release.
+            </li>
+            <li>
+              ur/gd may collect your name, email address, and feedback responses
+              as part of the beta program. Data collection practices for beta
+              programs are described in our{' '}
+              <a href="/privacy/">Privacy Policy</a>.
+            </li>
+            <li>
+              Feedback, survey responses, and other input you provide during a
+              beta program may be used by ur/gd to evaluate, improve, and refine
+              the Service. Your responses may be quoted anonymously in internal
+              analysis.
+            </li>
+            <li>
+              Beta Services are not intended for production use. You should not
+              rely on Beta Services for critical workflows.
+            </li>
+            <li>
+              ur/gd&rsquo;s total liability for Beta Services is limited to $0.
+              Beta Services are provided at no cost and carry no financial
+              obligation.
+            </li>
+          </ul>
+          <p>
+            Participation in a beta program is voluntary. You may withdraw at
+            any time by contacting us.
+          </p>
+        </ContentSection>
     </ContentContainer>
   );
 }

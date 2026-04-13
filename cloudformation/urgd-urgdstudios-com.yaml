@@ -54,6 +54,11 @@ Parameters:
     Description: 'S3 key for admin Lambda ZIP (versioned) - passed by CI/CD pipeline'
     Default: 'urgdstudios-com/artifacts/PLACEHOLDER/urgd-urgdstudios-com-admin-PLACEHOLDER.zip'
 
+  BetaCodeKey:
+    Type: String
+    Description: 'S3 key for beta Lambda ZIP (versioned) - passed by CI/CD pipeline'
+    Default: 'urgdstudios-com/artifacts/PLACEHOLDER/urgd-urgdstudios-com-beta-PLACEHOLDER.zip'
+
   CommandCenterReply:
     Type: String
     Description: 'Feature flag: enable admin reply-via-email (true/false)'
@@ -172,6 +177,12 @@ Resources:
             // client-side routing from there. /command/index.html does not exist
             // in S3 — only the root index.html is the SPA shell.
             if (uri === '/command' || (uri.startsWith('/command/') && !uri.includes('.'))) {
+                request.uri = '/index.html';
+                return request;
+            }
+            
+            // Beta page SPA: rewrite all /beta/* extensionless paths to /index.html
+            if (uri === '/beta' || (uri.startsWith('/beta/') && !uri.includes('.'))) {
                 request.uri = '/index.html';
                 return request;
             }
@@ -448,12 +459,22 @@ Resources:
       - IntakeOptionsRoute
       - IntakeReportRoute
       - IntakeIntegration
+      - BetaSignupRoute
+      - BetaSurveyRoute
+      - BetaLookupRoute
+      - BetaHealthRoute
+      - BetaOptionsSignupRoute
+      - BetaOptionsSurveyRoute
+      - BetaOptionsLookupRoute
+      - BetaIntegration
       - AdminListRoute
       - AdminGetRoute
       - AdminUpdateRoute
       - AdminDeleteRoute
       - AdminReplyRoute
       - AdminHealthRoute
+      - AdminBetaListRoute
+      - AdminBetaUpdateRoute
       - AdminIntegration
     Properties:
       ApiId: !Ref IntakeApi
@@ -662,6 +683,302 @@ Resources:
       PayloadFormatVersion: '2.0'
 
   # ========================================
+  # Beta Signup Backend Infrastructure
+  # ========================================
+
+  # DynamoDB Table - Beta Signups
+  BetaSignupsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub 'urgd-urgdstudios-com-beta-signups-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: signupId
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: app
+          AttributeType: S
+        - AttributeName: ipHash
+          AttributeType: S
+        - AttributeName: signupTimestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: signupId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: email-app-index
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+            - AttributeName: app
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: ipHash-timestamp-index
+          KeySchema:
+            - AttributeName: ipHash
+              KeyType: HASH
+            - AttributeName: signupTimestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      DeletionProtectionEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Dead Letter Queue for Beta Lambda
+  BetaDLQ:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !Sub 'urgd-urgdstudios-com-beta-dlq-${Environment}'
+      MessageRetentionPeriod: 1209600  # 14 days
+      KmsMasterKeyId: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Beta Lambda IAM Role
+  BetaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'urgd-urgdstudios-com-beta-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BetaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # DynamoDB — Beta Table only, specific actions only
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                Resource:
+                  - !GetAtt BetaSignupsTable.Arn
+                  - !Sub '${BetaSignupsTable.Arn}/index/*'
+              # DynamoDB — DescribeTable for health check only
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                Resource:
+                  - !GetAtt BetaSignupsTable.Arn
+              # SES — Send notification emails only, scoped to urgdstudios.com identity
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                Resource:
+                  - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/urgdstudios.com'
+              # SES — GetSendQuota for health check
+              - Effect: Allow
+                Action:
+                  - ses:GetSendQuota
+                Resource: '*'
+              # SQS — DLQ send only
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !GetAtt BetaDLQ.Arn
+              # KMS — Decrypt and generate data keys for table encryption
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !GetAtt IntakeKmsKey.Arn
+              # CloudWatch Logs — scoped to this Lambda's log group only
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urgd-urgdstudios-com-beta-${Environment}:*'
+              # X-Ray tracing
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Beta Lambda Log Group
+  BetaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/urgd-urgdstudios-com-beta-${Environment}'
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt IntakeKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Beta Lambda Function
+  BetaFunction:
+    Type: AWS::Lambda::Function
+    # checkov:skip=CKV_AWS_117:Lambda VPC not required - no private resources accessed
+    DependsOn:
+      - BetaFunctionLogGroup
+    Properties:
+      FunctionName: !Sub 'urgd-urgdstudios-com-beta-${Environment}'
+      Runtime: nodejs22.x
+      Handler: index.handler
+      Role: !GetAtt BetaFunctionRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref BetaCodeKey
+      Timeout: 30
+      MemorySize: 256
+      ReservedConcurrentExecutions: 5
+      DeadLetterConfig:
+        TargetArn: !GetAtt BetaDLQ.Arn
+      KmsKeyArn: !GetAtt IntakeKmsKey.Arn
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref BetaSignupsTable
+          CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
+          ADMIN_EMAIL: 'admin@urgdstudios.com'
+          ENVIRONMENT: !Ref Environment
+          KMS_KEY_ID: !Ref IntakeKmsKey
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
+  # Lambda invoke permission for API Gateway → Beta Lambda
+  BetaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref BetaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IntakeApi}/*'
+
+  # API Gateway Integration for Beta Lambda
+  BetaIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref IntakeApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BetaFunction.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
+
+  # Beta API Routes — public (no auth)
+  BetaSignupRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'POST /v1/beta/signup'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaSurveyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'POST /v1/beta/survey'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaLookupRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/beta/lookup'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaHealthRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/beta/health'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaOptionsSignupRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'OPTIONS /v1/beta/signup'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaOptionsSurveyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'OPTIONS /v1/beta/survey'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  BetaOptionsLookupRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'OPTIONS /v1/beta/lookup'
+      Target: !Sub 'integrations/${BetaIntegration}'
+
+  # Admin Beta Routes — authenticated (JWT required)
+  AdminBetaListRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'GET /v1/admin/beta/signups'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  AdminBetaUpdateRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IntakeApi
+      RouteKey: 'PATCH /v1/admin/beta/signups/{id}'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref CognitoJwtAuthorizer
+      Target: !Sub 'integrations/${AdminIntegration}'
+
+  # ========================================
   # Slice 4: Command Center — Auth, IAM, Log Group
   # ========================================
 
@@ -749,6 +1066,13 @@ Resources:
                   - dynamodb:DescribeTable
                 Resource:
                   - !GetAtt IntakeSubmissionsTable.Arn
+              # Beta Table — Scan (list all signups) and UpdateItem (toggle sessionsSent)
+              - Effect: Allow
+                Action:
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !GetAtt BetaSignupsTable.Arn
               - Effect: Allow
                 Action:
                   - ses:SendEmail
@@ -830,6 +1154,7 @@ Resources:
       Environment:
         Variables:
           SUBMISSIONS_TABLE: !Ref IntakeSubmissionsTable
+          BETA_TABLE: !Ref BetaSignupsTable
           CORS_ALLOWED_ORIGINS: !Ref CorsAllowedOrigins
           CORS_ALLOWED_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'

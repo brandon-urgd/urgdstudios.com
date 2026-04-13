@@ -73,6 +73,14 @@ const ROUTES = [
     description: 'Legal information for ur/gd Studios LLC.',
     ogUrl: 'https://urgdstudios.com/legal/',
   },
+  {
+    url: '/beta/pulse/',
+    outDir: path.join(distDir, 'beta', 'pulse'),
+    title: 'Pulse Beta — ur/gd Studios',
+    description:
+      'Join the Pulse closed beta. Two sessions, one survey, about 30 minutes of your time.',
+    ogUrl: 'https://urgdstudios.com/beta/pulse/',
+  },
 ];
 
 function buildHeadMeta(route) {

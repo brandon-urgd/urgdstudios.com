@@ -1,0 +1,219 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast) var(--easing-default),
+    border-color var(--transition-fast) var(--easing-default);
+  flex-shrink: 0;
+}
+
+.refreshButton:hover:not(:disabled) {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.refreshButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.refreshButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 0.7s linear infinite;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+}
+
+.table th {
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--glass-border);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.table td {
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--glass-border);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--glass-bg-hover);
+}
+
+.nameCell {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.emailCell {
+  color: var(--color-text-secondary);
+}
+
+.appCell {
+  text-transform: capitalize;
+}
+
+.dateCell {
+  white-space: nowrap;
+}
+
+/* ── Toggle ────────────────────────────────────────────────────────────────── */
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toggleInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggleTrack {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: var(--glass-border);
+  cursor: pointer;
+  transition: background var(--transition-fast) var(--easing-default);
+}
+
+.toggleTrack::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
+  transition: transform var(--transition-fast) var(--easing-default),
+    background var(--transition-fast) var(--easing-default);
+}
+
+.toggleInput:checked + .toggleTrack {
+  background: var(--color-accent);
+}
+
+.toggleInput:checked + .toggleTrack::after {
+  transform: translateX(16px);
+  background: var(--color-bg-base);
+}
+
+.toggleInput:focus-visible + .toggleTrack {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.toggleInput:disabled + .toggleTrack {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Survey badge ──────────────────────────────────────────────────────────── */
+
+.surveyYes {
+  color: var(--color-pulse-accent);
+}
+
+.surveyNo {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Retry ─────────────────────────────────────────────────────────────────── */
+
+.retryButton {
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-md);
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: border-color var(--transition-fast) var(--easing-default);
+}
+
+.retryButton:hover {
+  border-color: var(--color-accent);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .page {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
+  .title {
+    font-size: var(--font-size-heading);
+  }
+}

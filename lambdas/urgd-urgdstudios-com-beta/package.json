@@ -1,0 +1,21 @@
+{
+  "name": "urgd-urgdstudios-com-beta",
+  "version": "1.0.0",
+  "description": "Beta signup and survey backend for urgdstudios.com",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test runner specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.713.0",
+    "@aws-sdk/lib-dynamodb": "^3.713.0",
+    "@aws-sdk/client-ses": "^3.713.0",
+    "sanitize-html": "^2.13.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "author": "ur/gd Studios",
+  "license": "UNLICENSED"
+}
