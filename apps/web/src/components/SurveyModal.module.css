@@ -135,18 +135,25 @@
 .greetingHeading {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-h2);
+  font-size: var(--font-size-h4);
   color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+}
+
+.greetingName {
+  display: block;
+  font-size: var(--font-size-h3);
+  color: var(--beta-accent);
+  margin-top: var(--space-2xs);
 }
 
 @media (max-width: 374px) {
   .greetingHeading {
-    font-size: var(--font-size-h3);
+    font-size: var(--font-size-body);
+  }
+  .greetingName {
+    font-size: var(--font-size-h4);
   }
 }
 
@@ -454,9 +461,17 @@
 .successHeading {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-h4);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.successName {
+  display: block;
   font-size: var(--font-size-h3);
   color: var(--beta-accent);
-  margin: 0;
+  margin-top: var(--space-2xs);
 }
 
 .successMessage {
