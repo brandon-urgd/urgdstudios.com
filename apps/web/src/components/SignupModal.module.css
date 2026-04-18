@@ -36,12 +36,10 @@
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  background: var(--glass-bg);
+  background: var(--base-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--shadow-deep);
   animation: slideUp var(--transition-normal) var(--easing-out);
 }
@@ -59,7 +57,7 @@
 
 @supports not (backdrop-filter: blur(1px)) {
   .panel {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--base-bg);
   }
 }
 
@@ -411,8 +409,6 @@
     width: calc(100% - 32px);
     max-height: 90vh;
     overflow-y: auto;
-    backdrop-filter: blur(var(--glass-blur-mobile));
-    -webkit-backdrop-filter: blur(var(--glass-blur-mobile));
   }
 
   .input,
@@ -464,12 +460,5 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: rgba(0, 0, 0, 0.85);
-  }
-
-  .panel {
-    background: rgba(20, 20, 35, 0.95);
-    border-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 }
