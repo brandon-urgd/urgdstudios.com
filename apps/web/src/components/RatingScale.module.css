@@ -55,14 +55,14 @@
 }
 
 .selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--beta-accent);
+  border-color: var(--beta-accent);
   color: var(--base-white);
 }
 
 .selected:hover {
-  background: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
+  background: var(--beta-accent-glow);
+  border-color: var(--beta-accent-glow);
 }
 
 .anchors {

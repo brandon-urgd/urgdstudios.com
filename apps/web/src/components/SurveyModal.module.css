@@ -1,12 +1,10 @@
 /* SurveyModal.module.css
- * Modal overlay + glassmorphism panel for beta survey.
- * Mobile-first with desktop enhancements at 768px.
- * Uses design tokens from tokens.css throughout.
- * Follows same patterns as SignupModal.module.css.
+ * Paginated survey modal — one question per page with crossfade transitions.
+ * Uses --beta-accent-* tokens throughout. Mobile-first.
  */
 
 /* ----------------------------------------------------------------
-   Overlay — dark scrim, centered flex
+   Overlay — blurred scrim
    ---------------------------------------------------------------- */
 
 .overlay {
@@ -19,22 +17,23 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  animation: fadeIn var(--transition-normal) var(--easing-out);
+  animation: overlayIn 250ms var(--easing-out);
 }
 
-@keyframes fadeIn {
+@keyframes overlayIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 /* ----------------------------------------------------------------
-   Panel — glassmorphism card
+   Panel — solid black, fixed height feel
    ---------------------------------------------------------------- */
 
 .panel {
   position: relative;
   width: calc(100% - 32px);
-  max-width: 520px;
+  max-width: 480px;
+  min-height: 340px;
   max-height: 90vh;
   overflow-y: auto;
   background: var(--base-bg);
@@ -42,28 +41,16 @@
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
   box-shadow: var(--shadow-deep);
-  animation: slideUp var(--transition-normal) var(--easing-out);
+  animation: panelIn 250ms var(--easing-out);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  .panel {
-    background: var(--base-bg);
-  }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ----------------------------------------------------------------
-   Close button (X) — top-right, 44px touch target
+   Close button
    ---------------------------------------------------------------- */
 
 .closeButton {
@@ -84,17 +71,35 @@
   transition: color var(--transition-fast) var(--easing-default);
 }
 
-.closeButton:hover {
-  color: var(--color-text-primary);
-}
-
+.closeButton:hover { color: var(--color-text-primary); }
 .closeButton:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
 }
 
 /* ----------------------------------------------------------------
-   Heading
+   Content wrapper — crossfade transitions
+   ---------------------------------------------------------------- */
+
+.content {
+  transition: opacity 250ms var(--easing-default);
+}
+
+.fadeIn { opacity: 1; }
+.fadeOut { opacity: 0; }
+
+/* ----------------------------------------------------------------
+   Phase content — shared vertical layout
+   ---------------------------------------------------------------- */
+
+.phaseContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ----------------------------------------------------------------
+   Heading + subtitle
    ---------------------------------------------------------------- */
 
 .heading {
@@ -102,16 +107,193 @@
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-h3);
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-lg) 0;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
 }
 
 /* ----------------------------------------------------------------
-   Error banner — API errors
+   Greeting phase — centered, warm
+   ---------------------------------------------------------------- */
+
+.greetingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 200px;
+  gap: var(--space-md);
+}
+
+.greetingHeading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.greetingSubtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Loading dots */
+.greetingDots {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.greetingDots span {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--beta-accent);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.greetingDots span:nth-child(2) { animation-delay: 0.2s; }
+.greetingDots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* ----------------------------------------------------------------
+   Progress bar
+   ---------------------------------------------------------------- */
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.progressLabel {
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--beta-accent);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.progressTotal {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-tertiary);
+}
+
+.progressBar {
+  width: 100%;
+  height: 3px;
+  background: var(--glass-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--beta-accent);
+  border-radius: var(--radius-full);
+  transition: width 300ms var(--easing-default);
+}
+
+/* ----------------------------------------------------------------
+   Question text
+   ---------------------------------------------------------------- */
+
+.questionText {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-intro);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.questionSubtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-style: italic;
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: calc(var(--space-xs) * -1) 0 0 0;
+}
+
+/* ----------------------------------------------------------------
+   Answer area
+   ---------------------------------------------------------------- */
+
+.answerArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ----------------------------------------------------------------
+   Textarea
+   ---------------------------------------------------------------- */
+
+.textareaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--input-padding);
+  font-size: var(--font-size-body);
+  font-family: var(--font-body);
+  color: var(--input-text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  resize: vertical;
+  transition:
+    border-color var(--transition-fast) var(--easing-default),
+    background var(--transition-fast) var(--easing-default);
+}
+
+.textarea::placeholder { color: var(--input-placeholder); }
+.textarea:hover:not(:disabled) { border-color: var(--glass-border-hover); }
+.textarea:focus {
+  outline: none;
+  border-color: var(--beta-accent);
+  background: var(--glass-bg-hover);
+}
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--beta-accent);
+  box-shadow: 0 0 0 1px var(--beta-accent-border);
+}
+.textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.counter {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-align: right;
+  font-family: var(--font-body);
+}
+
+/* ----------------------------------------------------------------
+   Error banner
    ---------------------------------------------------------------- */
 
 .errorBanner {
   padding: var(--space-sm) var(--space-md);
-  margin-bottom: var(--space-lg);
   background: rgba(248, 113, 113, 0.04);
   border: 1px solid rgba(248, 113, 113, 0.2);
   border-radius: var(--radius-md);
@@ -121,7 +303,7 @@
 }
 
 /* ----------------------------------------------------------------
-   Form
+   Form (lookup phase)
    ---------------------------------------------------------------- */
 
 .form {
@@ -130,19 +312,11 @@
   gap: var(--space-lg);
 }
 
-/* ----------------------------------------------------------------
-   Field container
-   ---------------------------------------------------------------- */
-
 .field {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
-
-/* ----------------------------------------------------------------
-   Labels
-   ---------------------------------------------------------------- */
 
 .label {
   font-size: var(--font-size-body);
@@ -150,10 +324,6 @@
   color: var(--color-text-primary);
   font-family: var(--font-body);
 }
-
-/* ----------------------------------------------------------------
-   Inputs
-   ---------------------------------------------------------------- */
 
 .input {
   width: 100%;
@@ -170,213 +340,33 @@
     background var(--transition-fast) var(--easing-default);
 }
 
-.input::placeholder {
-  color: var(--input-placeholder);
-}
-
-.input:hover:not(:disabled) {
-  border-color: var(--glass-border-hover);
-}
-
+.input::placeholder { color: var(--input-placeholder); }
+.input:hover:not(:disabled) { border-color: var(--glass-border-hover); }
 .input:focus {
   outline: none;
   border-color: var(--beta-accent);
   background: var(--glass-bg-hover);
 }
-
 .input:focus-visible {
   outline: none;
   border-color: var(--beta-accent);
   box-shadow: 0 0 0 1px var(--beta-accent-border);
 }
-
-.input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.input:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ----------------------------------------------------------------
-   Input error state
+   Navigation buttons
    ---------------------------------------------------------------- */
 
-.inputError {
-  border-color: var(--color-error);
-}
-
-.error {
-  font-size: var(--font-size-small);
-  color: var(--color-error);
+.navRow {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
 }
 
-/* ----------------------------------------------------------------
-   Textarea
-   ---------------------------------------------------------------- */
-
-.textarea {
-  width: 100%;
-  min-height: calc(var(--font-size-body) * var(--line-height-normal) * 3 + var(--space-sm) * 2);
-  padding: var(--input-padding);
-  font-size: var(--font-size-body);
-  font-family: var(--font-body);
-  color: var(--input-text);
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: var(--input-radius);
-  resize: vertical;
-  transition:
-    border-color var(--transition-fast) var(--easing-default),
-    background var(--transition-fast) var(--easing-default);
-}
-
-.textarea::placeholder {
-  color: var(--input-placeholder);
-}
-
-.textarea:hover:not(:disabled) {
-  border-color: var(--glass-border-hover);
-}
-
-.textarea:focus {
-  outline: none;
-  border-color: var(--beta-accent);
-  background: var(--glass-bg-hover);
-}
-
-.textarea:focus-visible {
-  outline: none;
-  border-color: var(--beta-accent);
-  box-shadow: 0 0 0 1px var(--beta-accent-border);
-}
-
-.textarea:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ----------------------------------------------------------------
-   Character counter
-   ---------------------------------------------------------------- */
-
-.counter {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-  text-align: right;
-  font-family: var(--font-body);
-}
-
-.counterNearLimit {
-  font-size: var(--font-size-xs);
-  color: var(--color-warning);
-  text-align: right;
-  font-family: var(--font-body);
-}
-
-/* ----------------------------------------------------------------
-   Question group — spacing between survey questions
-   ---------------------------------------------------------------- */
-
-.questionGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.optionalTag {
-  font-size: var(--font-size-small);
-  color: var(--color-text-tertiary);
-  font-weight: var(--font-weight-regular);
-}
-
-/* ----------------------------------------------------------------
-   Submit button
-   ---------------------------------------------------------------- */
-
-.submitButton {
-  width: 100%;
-  min-height: var(--button-min-height);
-  padding: var(--button-padding);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  font-family: var(--font-body);
-  color: var(--beta-accent);
-  background: transparent;
-  border: 1.5px solid var(--beta-accent);
-  border-radius: var(--button-radius);
-  cursor: pointer;
-  transition:
-    background var(--transition-fast) var(--easing-default),
-    border-color var(--transition-fast) var(--easing-default),
-    box-shadow var(--transition-fast) var(--easing-default),
-    opacity var(--transition-fast) var(--easing-default);
-}
-
-.submitButton:hover:not(:disabled) {
-  background: var(--beta-accent-hover-bg);
-  border-color: var(--beta-accent-glow);
-  box-shadow: var(--beta-accent-glow-shadow);
-}
-
-.submitButton:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.submitButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.submitButton:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
-}
-
-/* ----------------------------------------------------------------
-   Success state
-   ---------------------------------------------------------------- */
-
-.successContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  animation: fadeIn var(--transition-normal) var(--easing-out);
-}
-
-.checkmark {
-  margin-bottom: var(--space-md);
-}
-
-.successHeading {
-  font-family: var(--font-heading);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-h3);
-  color: var(--beta-accent);
-  margin: 0 0 var(--space-sm) 0;
-}
-
-.successMessage {
-  font-size: var(--font-size-body);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-normal);
-  margin: 0 0 var(--space-md) 0;
-}
-
-.giftNote {
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
-  margin: 0 0 var(--space-xl) 0;
-  padding: var(--space-sm) var(--space-md);
-  background: var(--beta-accent-tint-bg);
-  border: 1px solid var(--beta-accent-border);
-  border-radius: var(--radius-md);
-}
-
-.doneButton {
-  width: 100%;
+.navButton {
   min-height: var(--button-min-height);
   padding: var(--button-padding);
   font-size: var(--font-size-body);
@@ -393,23 +383,92 @@
     box-shadow var(--transition-fast) var(--easing-default);
 }
 
-.doneButton:hover {
+.navButton:hover:not(:disabled) {
   background: var(--beta-accent-hover-bg);
   border-color: var(--beta-accent-glow);
   box-shadow: var(--beta-accent-glow-shadow);
 }
 
-.doneButton:active {
-  transform: scale(0.98);
+.navButton:active:not(:disabled) { transform: scale(0.98); }
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
-.doneButton:focus-visible {
+.navButton:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.backButton {
+  min-height: var(--button-min-height);
+  padding: var(--button-padding);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-body);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast) var(--easing-default),
+    border-color var(--transition-fast) var(--easing-default);
+}
+
+.backButton:hover {
+  color: var(--color-text-primary);
+  border-color: var(--glass-border-hover);
+}
+
+.backButton:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
 }
 
 /* ----------------------------------------------------------------
-   Mobile — near-full-screen modal
+   Success
+   ---------------------------------------------------------------- */
+
+.successContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+}
+
+.checkmark { margin-bottom: var(--space-xs); }
+
+.successHeading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-h3);
+  color: var(--beta-accent);
+  margin: 0;
+}
+
+.successMessage {
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.giftNote {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--beta-accent-tint-bg);
+  border: 1px solid var(--beta-accent-border);
+  border-radius: var(--radius-md);
+}
+
+/* ----------------------------------------------------------------
+   Mobile
    ---------------------------------------------------------------- */
 
 @media (max-width: 767px) {
@@ -418,20 +477,10 @@
     max-height: 90vh;
     overflow-y: auto;
   }
-
-  .input,
-  .textarea,
-  .submitButton,
-  .doneButton {
-    font-size: var(--font-size-body);
-  }
 }
 
-/* Very narrow viewports — reduce padding to prevent overflow */
 @media (max-width: 374px) {
-  .panel {
-    padding: var(--space-lg);
-  }
+  .panel { padding: var(--space-lg); }
 }
 
 /* ----------------------------------------------------------------
@@ -439,25 +488,12 @@
    ---------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .overlay {
-    animation: none;
-  }
-
-  .panel {
-    animation: none;
-  }
-
-  .successContent {
-    animation: none;
-  }
-
-  .input,
-  .textarea,
-  .submitButton,
-  .doneButton,
-  .closeButton {
-    transition: none;
-  }
+  .overlay { animation: none; }
+  .panel { animation: none; }
+  .content { transition: none; }
+  .progressFill { transition: none; }
+  .greetingDots span { animation: none; opacity: 0.6; }
+  .navButton, .backButton, .closeButton, .input, .textarea { transition: none; }
 }
 
 /* ----------------------------------------------------------------
