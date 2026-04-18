@@ -234,8 +234,8 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
               viewBox="0 0 48 48"
               fill="none"
             >
-              <circle cx="24" cy="24" r="22" stroke="#7a9e87" strokeWidth="2.5" fill="rgba(122,158,135,0.1)" />
-              <path d="M15 24l6 6 12-12" stroke="#7a9e87" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <circle cx="24" cy="24" r="22" stroke="var(--beta-accent)" strokeWidth="2.5" fill="var(--beta-accent-fill)" />
+              <path d="M15 24l6 6 12-12" stroke="var(--beta-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </svg>
 
             <h2 id={headingId} className={styles.successHeading}>You're in!</h2>

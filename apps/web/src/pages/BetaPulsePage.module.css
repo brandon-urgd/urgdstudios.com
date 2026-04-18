@@ -1,6 +1,8 @@
 /* BetaPulsePage — Pulse beta signup page
- * Standalone page (no Layout shell). Dark base + sage green accents.
+ * Standalone page (no Layout shell). Uses --beta-accent-* tokens.
  * Mobile-first with desktop enhancements at 768px.
+ * To rebrand for another app's beta: override --beta-accent and
+ * --beta-accent-glow on .page (all derived tokens follow).
  */
 
 .page {
@@ -77,10 +79,10 @@
 }
 
 @keyframes betaShimmer {
-  0%, 100% { color: var(--color-pulse-accent); }
-  25% { color: var(--color-pulse-accent-glow); }
+  0%, 100% { color: var(--beta-accent); }
+  25% { color: var(--beta-accent-glow); }
   50% { color: rgba(255, 255, 255, 0.9); }
-  75% { color: var(--color-pulse-accent-glow); }
+  75% { color: var(--beta-accent-glow); }
 }
 
 .betaShimmer {
@@ -90,7 +92,11 @@
 @media (prefers-reduced-motion: reduce) {
   .betaShimmer {
     animation: none;
-    color: var(--color-pulse-accent);
+    color: var(--beta-accent);
+  }
+
+  .actionButton button:hover:not(:disabled) {
+    transform: none;
   }
 }
 
@@ -111,6 +117,10 @@
   width: 100%;
   max-width: var(--width-narrow-max);
   padding: 0 0 var(--space-lg) 0;
+}
+
+.whatIsPulsePanel {
+  border-color: var(--beta-accent);
 }
 
 .whatIsPulse h2 {
@@ -141,13 +151,13 @@
   font-family: var(--font-body);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-pulse-accent);
+  color: var(--beta-accent);
   cursor: pointer;
   transition: color var(--transition-fast) var(--easing-default);
 }
 
 .moreToggle:hover {
-  color: var(--color-pulse-accent-glow);
+  color: var(--beta-accent-glow);
 }
 
 .moreToggle:focus-visible {
@@ -231,7 +241,7 @@
   width: 10px;
   height: 10px;
   border-radius: var(--radius-full);
-  background: var(--color-pulse-accent);
+  background: var(--beta-accent);
   margin-top: 6px;
 }
 
@@ -255,7 +265,7 @@
 .giftCallout {
   margin-top: var(--space-lg);
   padding: var(--space-md) var(--space-lg);
-  border-left: 3px solid var(--color-pulse-accent);
+  border-left: 3px solid var(--beta-accent);
   font-family: var(--font-body);
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
@@ -305,23 +315,26 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   border-radius: var(--button-radius);
-  border: none;
+  background: transparent;
+  color: var(--beta-accent);
+  border: 1.5px solid var(--beta-accent);
   cursor: pointer;
   transition:
     background var(--transition-fast) var(--easing-default),
+    border-color var(--transition-fast) var(--easing-default),
+    box-shadow var(--transition-fast) var(--easing-default),
+    transform var(--transition-fast) var(--easing-default),
     opacity var(--transition-fast) var(--easing-default);
 }
 
-.actionButton button.primary {
-  background: var(--color-pulse-accent);
-  color: var(--base-bg);
+.actionButton button:hover:not(:disabled) {
+  background: var(--beta-accent-hover-bg);
+  border-color: var(--beta-accent-glow);
+  box-shadow: var(--beta-accent-glow-shadow-lg);
+  transform: translateY(-2px);
 }
 
-.actionButton button.primary:hover:not(:disabled) {
-  background: var(--color-pulse-accent-glow);
-}
-
-.actionButton button.primary:focus-visible {
+.actionButton button:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
 }
@@ -355,7 +368,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--color-pulse-accent) 50%,
+    var(--beta-accent) 50%,
     transparent 100%
   );
   margin-bottom: var(--space-xl);

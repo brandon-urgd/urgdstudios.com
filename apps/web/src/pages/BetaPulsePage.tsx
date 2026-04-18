@@ -112,7 +112,7 @@ export default function BetaPulsePage() {
 
       {/* What is Pulse — plain-speak explainer + expandable detail */}
       <section className={styles.whatIsPulse}>
-        <GlassPanel>
+        <GlassPanel className={styles.whatIsPulsePanel}>
           <h2>What is Pulse?</h2>
           <p className={styles.whatIsPulseBody}>
             Pulse is a feedback tool. You upload something you're working on and

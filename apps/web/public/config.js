@@ -2,6 +2,6 @@ window.URGD_CONFIG = {
   intakeFormEnabled: true,
   apiBaseUrl: 'https://urgdstudios.com',
   betaSignupEnabled: true,
-  betaSurveyEnabled: false,
-  betaPhase: 'signup'
+  betaSurveyEnabled: true,
+  betaPhase: 'both'
 };

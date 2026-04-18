@@ -193,10 +193,23 @@
   --badge-live-text: var(--color-success);
   --badge-soon-bg: rgba(255, 255, 255, 0.08);
   --badge-soon-text: var(--color-text-secondary);
-  --badge-beta-bg: rgba(122, 158, 135, 0.15);
-  --badge-beta-text: var(--color-pulse-accent);
+  --badge-beta-bg: var(--beta-accent-border);
+  --badge-beta-text: var(--beta-accent);
   --badge-radius: var(--radius-full);
   --badge-padding: var(--space-2xs) var(--space-sm);
+
+  /* Beta Page — Generic accent tokens
+   * Override --beta-accent and --beta-accent-glow per-app to rebrand the
+   * entire beta page, modals, and success states in one shot.
+   * Currently set to Pulse brand values. */
+  --beta-accent: var(--color-pulse-accent);
+  --beta-accent-glow: var(--color-pulse-accent-glow);
+  --beta-accent-hover-bg: rgba(122, 158, 135, 0.08);
+  --beta-accent-tint-bg: rgba(122, 158, 135, 0.06);
+  --beta-accent-border: rgba(122, 158, 135, 0.15);
+  --beta-accent-glow-shadow: 0 0 12px rgba(122, 158, 135, 0.3);
+  --beta-accent-glow-shadow-lg: 0 0 16px rgba(122, 158, 135, 0.35), 0 0 4px rgba(122, 158, 135, 0.2);
+  --beta-accent-fill: rgba(122, 158, 135, 0.1);
 
   /* Hover / Interaction States */
   --hover-lift: -2px;
