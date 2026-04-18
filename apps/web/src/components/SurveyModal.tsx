@@ -165,17 +165,23 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const triggerRef = useRef<HTMLElement | null>(null);
 
   /* ---------------------------------------------------------------
-     Crossfade helper
+     Transition helper — fade out → hold black → swap → fade in
      --------------------------------------------------------------- */
   const crossfadeTo = useCallback((next: () => void) => {
+    // Phase 1: fade out current content
     setFadeClass(styles.fadeOut);
+    // Phase 2: after fade-out completes, hide content and swap
     setTimeout(() => {
+      setFadeClass(styles.hidden); // visibility:hidden + opacity:0
+      // Phase 3: swap content while fully hidden
       next();
-      // Force a frame gap so the browser paints opacity:0 before fading in
+      // Phase 4: hold at hidden for one frame, then fade in
       requestAnimationFrame(() => {
-        setFadeClass(styles.fadeIn);
+        requestAnimationFrame(() => {
+          setFadeClass(styles.fadeIn);
+        });
       });
-    }, 280);
+    }, 300);
   }, []);
 
   /* ---------------------------------------------------------------

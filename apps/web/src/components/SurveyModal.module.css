@@ -82,11 +82,23 @@
    ---------------------------------------------------------------- */
 
 .content {
-  transition: opacity 280ms var(--easing-default);
+  transition: opacity 300ms var(--easing-default);
 }
 
-.fadeIn { opacity: 1; }
-.fadeOut { opacity: 0; }
+.fadeIn {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fadeOut {
+  opacity: 0;
+  visibility: visible;
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
 
 /* ----------------------------------------------------------------
    Phase content — shared vertical layout

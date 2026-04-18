@@ -45,3 +45,6 @@ temp/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Beta email scripts (local-only, not deployed)
+scripts/beta-email/
