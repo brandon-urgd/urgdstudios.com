@@ -182,13 +182,14 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--input-border-focus);
+  border-color: var(--beta-accent);
   background: var(--glass-bg-hover);
 }
 
 .input:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: none;
+  border-color: var(--beta-accent);
+  box-shadow: 0 0 0 1px var(--beta-accent-border);
 }
 
 .input:disabled {
@@ -242,13 +243,14 @@
 
 .textarea:focus {
   outline: none;
-  border-color: var(--input-border-focus);
+  border-color: var(--beta-accent);
   background: var(--glass-bg-hover);
 }
 
 .textarea:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: none;
+  border-color: var(--beta-accent);
+  box-shadow: 0 0 0 1px var(--beta-accent-border);
 }
 
 .textarea:disabled {
