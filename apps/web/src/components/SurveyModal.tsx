@@ -318,10 +318,12 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     crossfadeTo(async () => {
       setPhase('submitting');
 
+      const minHold = new Promise((r) => setTimeout(r, 1200));
+
       try {
         const cfg = (window as any).URGD_CONFIG ?? {};
         const apiBaseUrl: string = cfg.apiBaseUrl ?? '';
-        const res = await fetch(`${apiBaseUrl}/v1/beta/survey`, {
+        const apiCall = fetch(`${apiBaseUrl}/v1/beta/survey`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -338,6 +340,9 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
           }),
         });
 
+        // Wait for both the API and the minimum display time
+        const [res] = await Promise.all([apiCall, minHold]);
+
         if (res.ok) {
           crossfadeTo(() => setPhase('success'));
           return;
@@ -351,6 +356,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         else setSurveyError('Something went wrong. Please try again.');
         crossfadeTo(() => setPhase('questions'));
       } catch {
+        await minHold;
         setSurveyError('Something went wrong. Please try again.');
         crossfadeTo(() => setPhase('questions'));
       } finally {
