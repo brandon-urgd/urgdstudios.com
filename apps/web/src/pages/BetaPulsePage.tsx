@@ -59,6 +59,7 @@ export default function BetaPulsePage() {
     description:
       'Join the Pulse closed beta. Two sessions, one survey, about 30 minutes of your time.',
     ogUrl: 'https://urgdstudios.com/beta/pulse',
+    favicon: '/assets/pulse-favicon.svg',
   });
 
   /* ---------------------------------------------------------------

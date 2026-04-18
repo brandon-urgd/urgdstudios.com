@@ -16,6 +16,12 @@ const ForgotPasswordPage = lazy(() => import('./pages/command/ForgotPasswordPage
 const MessageDashboard = lazy(() => import('./pages/command/MessageDashboard'));
 const CommandLayout = lazy(() => import('./layouts/CommandLayout'));
 const BetaPulsePage = lazy(() => import('./pages/BetaPulsePage'));
+
+// Preload the beta page chunk immediately if we're on that route —
+// prevents flash between SSG HTML and React hydration.
+if (typeof window !== 'undefined' && window.location.pathname.startsWith('/beta/pulse')) {
+  import('./pages/BetaPulsePage');
+}
 const BetaDashboard = lazy(() => import('./pages/command/BetaDashboard'));
 
 // Shown while any Command Center chunk is loading — prevents a blank flash
@@ -132,7 +138,7 @@ export default function App() {
           }
         />
 
-        {/* Beta page — no layout shell */}
+        {/* Beta page — no layout shell, preloaded to prevent flash */}
         <Route
           path="/beta/pulse"
           element={

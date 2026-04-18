@@ -5,6 +5,8 @@ interface UseMetaProps {
   description: string;
   /** Canonical URL for this page, e.g. 'https://urgdstudios.com/applications/' */
   ogUrl?: string;
+  /** Path to a favicon SVG to use for this page (reverts on unmount) */
+  favicon?: string;
 }
 
 /**
@@ -16,7 +18,7 @@ interface UseMetaProps {
  *
  * Safe to call during SSR — all DOM access is inside useEffect (browser-only).
  */
-export function useMeta({ title, description, ogUrl }: UseMetaProps) {
+export function useMeta({ title, description, ogUrl, favicon }: UseMetaProps) {
   useEffect(() => {
     document.title = title;
     setMeta('name', 'description', description);
@@ -28,7 +30,24 @@ export function useMeta({ title, description, ogUrl }: UseMetaProps) {
     if (ogUrl) {
       setMeta('property', 'og:url', ogUrl);
     }
-  }, [title, description, ogUrl]);
+
+    // Swap favicon if provided, revert on unmount
+    let originalHref: string | null = null;
+    if (favicon) {
+      const link = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
+      if (link) {
+        originalHref = link.getAttribute('href');
+        link.setAttribute('href', favicon);
+      }
+    }
+
+    return () => {
+      if (originalHref !== null) {
+        const link = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
+        if (link) link.setAttribute('href', originalHref);
+      }
+    };
+  }, [title, description, ogUrl, favicon]);
 }
 
 /** Create or update a <meta> tag by its attribute selector. */
