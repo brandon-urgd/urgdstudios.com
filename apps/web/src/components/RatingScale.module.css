@@ -55,13 +55,13 @@
 }
 
 .selected {
-  background: var(--beta-accent);
+  background: transparent;
   border-color: var(--beta-accent);
-  color: var(--base-white);
+  color: var(--color-text-primary);
 }
 
 .selected:hover {
-  background: var(--beta-accent-glow);
+  background: var(--beta-accent-hover-bg);
   border-color: var(--beta-accent-glow);
 }
 

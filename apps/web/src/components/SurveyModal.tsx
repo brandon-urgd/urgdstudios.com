@@ -21,7 +21,7 @@ interface SurveyModalProps {
   onClose: () => void;
 }
 
-type Phase = 'lookup' | 'greeting' | 'questions' | 'submitting' | 'success';
+type Phase = 'lookup' | 'greeting' | 'questions' | 'submitting' | 'success' | 'alreadyDone';
 
 const MAX_TEXT_LENGTH = 1000;
 const TOTAL_QUESTIONS = 7;
@@ -251,11 +251,18 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         const data = await res.json();
         setSignupId(data.signupId);
         setUserName(data.name);
+
+        // Already submitted — show friendly message, don't enter survey
+        if (data.hasSurvey) {
+          crossfadeTo(() => setPhase('alreadyDone'));
+          return;
+        }
+
         crossfadeTo(() => setPhase('greeting'));
-        // Auto-advance from greeting to first question
+        // Auto-advance from greeting to first question after a pause
         setTimeout(() => {
           crossfadeTo(() => { setPhase('questions'); setQuestionIndex(0); });
-        }, GREETING_DURATION + 250);
+        }, GREETING_DURATION);
         return;
       }
 
@@ -326,13 +333,17 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         return;
       }
 
-      if (res.status === 409) setSurveyError('Survey already submitted.');
-      else if (res.status === 404) setSurveyError('Signup not found. Please try again.');
+      if (res.status === 409) {
+        // Race condition — they submitted from another tab or it was already done
+        crossfadeTo(() => setPhase('alreadyDone'));
+        return;
+      }
+      if (res.status === 404) setSurveyError('We couldn\u2019t find your signup. Please close and try again.');
       else setSurveyError('Something went wrong. Please try again.');
-      setPhase('questions');
+      crossfadeTo(() => setPhase('questions'));
     } catch {
       setSurveyError('Something went wrong. Please try again.');
-      setPhase('questions');
+      crossfadeTo(() => setPhase('questions'));
     } finally {
       setSurveyLoading(false);
     }
@@ -539,6 +550,37 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                   {isLastQuestion ? 'Submit' : 'Next'}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* --- Already Done --- */}
+          {phase === 'alreadyDone' && (
+            <div className={styles.successContent}>
+              <svg
+                aria-hidden="true"
+                className={styles.checkmark}
+                width="48"
+                height="48"
+                viewBox="0 0 48 48"
+                fill="none"
+              >
+                <circle cx="24" cy="24" r="22" stroke="var(--beta-accent)" strokeWidth="2.5" fill="var(--beta-accent-fill)" />
+                <path d="M15 24l6 6 12-12" stroke="var(--beta-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+
+              <h2 id={headingId} className={styles.successHeading}>
+                You're all set, {userName}!
+              </h2>
+              <p className={styles.successMessage}>
+                We already have your survey responses. Thanks for checking in.
+              </p>
+              <p className={styles.giftNote}>
+                You've been entered into the gift card drawing. We'll be in touch!
+              </p>
+
+              <button type="button" className={styles.navButton} onClick={onClose}>
+                Done
+              </button>
             </div>
           )}
 

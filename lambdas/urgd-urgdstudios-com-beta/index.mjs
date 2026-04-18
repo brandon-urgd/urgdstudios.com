@@ -565,7 +565,8 @@ async function handleLookup(event, requestId) {
 
     return createResponse(200, {
       signupId: record.signupId,
-      name: record.name
+      name: record.name,
+      hasSurvey: !!record.surveyResponses
     }, event);
 
   } catch (error) {
