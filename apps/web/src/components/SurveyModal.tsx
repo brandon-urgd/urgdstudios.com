@@ -171,8 +171,11 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     setFadeClass(styles.fadeOut);
     setTimeout(() => {
       next();
-      setFadeClass(styles.fadeIn);
-    }, 250);
+      // Force a frame gap so the browser paints opacity:0 before fading in
+      requestAnimationFrame(() => {
+        setFadeClass(styles.fadeIn);
+      });
+    }, 280);
   }, []);
 
   /* ---------------------------------------------------------------
@@ -306,47 +309,48 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const handleSubmit = async () => {
     setSurveyLoading(true);
     setSurveyError('');
-    setPhase('submitting');
+    crossfadeTo(async () => {
+      setPhase('submitting');
 
-    try {
-      const cfg = (window as any).URGD_CONFIG ?? {};
-      const apiBaseUrl: string = cfg.apiBaseUrl ?? '';
-      const res = await fetch(`${apiBaseUrl}/v1/beta/survey`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          signupId,
-          responses: {
-            deviceUsed: responses.deviceUsed,
-            aiConversationQuality: responses.aiConversationQuality,
-            aiAccuracy: responses.aiAccuracy,
-            sessionPreference: responses.sessionPreference,
-            biggestFriction: responses.biggestFriction?.trim() ?? '',
-            wouldUseAgain: responses.wouldUseAgain,
-            anythingElse: responses.anythingElse?.trim() || undefined,
-          },
-        }),
-      });
+      try {
+        const cfg = (window as any).URGD_CONFIG ?? {};
+        const apiBaseUrl: string = cfg.apiBaseUrl ?? '';
+        const res = await fetch(`${apiBaseUrl}/v1/beta/survey`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            signupId,
+            responses: {
+              deviceUsed: responses.deviceUsed,
+              aiConversationQuality: responses.aiConversationQuality,
+              aiAccuracy: responses.aiAccuracy,
+              sessionPreference: responses.sessionPreference,
+              biggestFriction: responses.biggestFriction?.trim() ?? '',
+              wouldUseAgain: responses.wouldUseAgain,
+              anythingElse: responses.anythingElse?.trim() || undefined,
+            },
+          }),
+        });
 
-      if (res.ok) {
-        crossfadeTo(() => setPhase('success'));
-        return;
+        if (res.ok) {
+          crossfadeTo(() => setPhase('success'));
+          return;
+        }
+
+        if (res.status === 409) {
+          crossfadeTo(() => setPhase('alreadyDone'));
+          return;
+        }
+        if (res.status === 404) setSurveyError('We couldn\u2019t find your signup. Please close and try again.');
+        else setSurveyError('Something went wrong. Please try again.');
+        crossfadeTo(() => setPhase('questions'));
+      } catch {
+        setSurveyError('Something went wrong. Please try again.');
+        crossfadeTo(() => setPhase('questions'));
+      } finally {
+        setSurveyLoading(false);
       }
-
-      if (res.status === 409) {
-        // Race condition — they submitted from another tab or it was already done
-        crossfadeTo(() => setPhase('alreadyDone'));
-        return;
-      }
-      if (res.status === 404) setSurveyError('We couldn\u2019t find your signup. Please close and try again.');
-      else setSurveyError('Something went wrong. Please try again.');
-      crossfadeTo(() => setPhase('questions'));
-    } catch {
-      setSurveyError('Something went wrong. Please try again.');
-      crossfadeTo(() => setPhase('questions'));
-    } finally {
-      setSurveyLoading(false);
-    }
+    });
   };
 
   /* ---------------------------------------------------------------

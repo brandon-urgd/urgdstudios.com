@@ -82,7 +82,7 @@
    ---------------------------------------------------------------- */
 
 .content {
-  transition: opacity 250ms var(--easing-default);
+  transition: opacity 280ms var(--easing-default);
 }
 
 .fadeIn { opacity: 1; }
