@@ -104,6 +104,98 @@
 }
 
 /* ----------------------------------------------------------------
+   What is Pulse — explainer + expandable "More" panel
+   ---------------------------------------------------------------- */
+
+.whatIsPulse {
+  width: 100%;
+  max-width: var(--width-narrow-max);
+  padding: 0 0 var(--space-lg) 0;
+}
+
+.whatIsPulse h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-h3);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.whatIsPulseBody {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.moreToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-top: var(--space-md);
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-pulse-accent);
+  cursor: pointer;
+  transition: color var(--transition-fast) var(--easing-default);
+}
+
+.moreToggle:hover {
+  color: var(--color-pulse-accent-glow);
+}
+
+.moreToggle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.moreChevron {
+  display: inline-block;
+  font-size: var(--font-size-body);
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast) var(--easing-default);
+}
+
+.moreChevronOpen {
+  transform: rotate(270deg);
+}
+
+.moreContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--easing-default);
+}
+
+.moreContentOpen {
+  /* max-height set inline via JS for accurate measurement */
+}
+
+.moreInner {
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: var(--space-md);
+}
+
+.moreInner p {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.moreInner p:last-child {
+  margin-bottom: 0;
+}
+
+/* ----------------------------------------------------------------
    Overview — "What to expect" GlassPanel
    ---------------------------------------------------------------- */
 

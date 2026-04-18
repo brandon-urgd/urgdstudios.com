@@ -97,6 +97,9 @@ Resources:
         IgnorePublicAcls: true
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogsBucket
+        LogFilePrefix: 's3/site/'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -106,6 +109,77 @@ Resources:
           Value: ur/gd Studios
         - Key: brand
           Value: urgd
+
+  # ========================================
+  # S3 Access Logs Bucket
+  # ========================================
+  AccessLogsBucket:
+    Type: AWS::S3::Bucket
+    # checkov:skip=CKV_AWS_18:Access logs bucket does not log to itself (circular dependency)
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'urgd-urgdstudios-com-access-logs-${AWS::AccountId}'
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireAccessLogs
+            Status: Enabled
+            ExpirationInDays: 90
+            Transitions:
+              - StorageClass: INTELLIGENT_TIERING
+                TransitionInDays: 30
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+        - Key: Purpose
+          Value: access-logs
+
+  AccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowS3ServerAccessLogging
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub '${AccessLogsBucket.Arn}/s3/*'
+            Condition:
+              ArnLike:
+                'aws:SourceArn': !GetAtt SiteBucket.Arn
+              StringEquals:
+                'aws:SourceAccount': !Ref 'AWS::AccountId'
+          - Sid: AllowCloudFrontLogging
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub '${AccessLogsBucket.Arn}/cloudfront/*'
+            Condition:
+              StringEquals:
+                'aws:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
 
   # ========================================
   # Origin Access Control (OAC) - Import-ready
@@ -280,6 +354,10 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
         PriceClass: PriceClass_All
+        Logging:
+          Bucket: !GetAtt AccessLogsBucket.DomainName
+          IncludeCookies: false
+          Prefix: 'cloudfront/'
         ViewerCertificate:
           AcmCertificateArn: arn:aws:acm:us-east-1:198919428218:certificate/61b3ca01-c69c-4e97-ad75-8134b6145af5
           SslSupportMethod: sni-only
@@ -425,7 +503,6 @@ Resources:
   # API Gateway HTTP API
   IntakeApi:
     Type: AWS::ApiGatewayV2::Api
-    # checkov:skip=CKV_AWS_95:Access logging not required for V1 static site contact form
     Properties:
       Name: !Sub 'urgd-urgdstudios-com-intake-${Environment}'
       Description: 'Intake API for urgdstudios.com contact form'
@@ -449,10 +526,24 @@ Resources:
         Application: urgdstudios-com
         Owner: ur/gd Studios
 
+  # API Gateway Access Log Group
+  IntakeApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/urgd-urgdstudios-com-intake-${Environment}'
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt IntakeKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+
   # API Gateway Stage
   IntakeApiStage:
     Type: AWS::ApiGatewayV2::Stage
-    # checkov:skip=CKV_AWS_95:Access logging not required for V1 static site contact form
     DependsOn:
       - IntakeHealthRoute
       - IntakeSubmitRoute
@@ -481,6 +572,9 @@ Resources:
       StageName: !Ref Environment
       Description: !Sub 'API Gateway stage for ${Environment} environment'
       AutoDeploy: false  # CI/CD handles deployments explicitly
+      AccessLogSettings:
+        DestinationArn: !GetAtt IntakeApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","routeKey":"$context.routeKey","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength","integrationError":"$context.integrationErrorMessage","errorMessage":"$context.error.message"}'
       DefaultRouteSettings:
         ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50

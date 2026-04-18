@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import GlassPanel from '../components/GlassPanel';
 import SignupModal from '../components/SignupModal';
 import SurveyModal from '../components/SurveyModal';
@@ -51,6 +51,8 @@ export default function BetaPulsePage() {
 
   const [signupModalOpen, setSignupModalOpen] = useState(false);
   const [surveyModalOpen, setSurveyModalOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreContentRef = useRef<HTMLDivElement>(null);
 
   useMeta({
     title: 'Pulse Beta — ur/gd Studios',
@@ -106,6 +108,67 @@ export default function BetaPulsePage() {
           Help us make Pulse better. Two sessions. One survey. About 30 minutes
           of your time.
         </p>
+      </section>
+
+      {/* What is Pulse — plain-speak explainer + expandable detail */}
+      <section className={styles.whatIsPulse}>
+        <GlassPanel>
+          <h2>What is Pulse?</h2>
+          <p className={styles.whatIsPulseBody}>
+            Pulse is a feedback tool. You upload something you're working on and
+            invite people to review it. Instead of getting "looks good" or
+            silence, each reviewer has a short AI-guided conversation that draws
+            out what they actually think. Pulse pulls everything together into
+            one clear view so you can make decisions, not just collect opinions.
+          </p>
+
+          <button
+            type="button"
+            className={styles.moreToggle}
+            onClick={() => setMoreOpen((prev) => !prev)}
+            aria-expanded={moreOpen}
+            aria-controls="pulse-more-detail"
+          >
+            {moreOpen ? 'Less' : 'More'}
+            <span className={`${styles.moreChevron} ${moreOpen ? styles.moreChevronOpen : ''}`} aria-hidden="true">
+              ›
+            </span>
+          </button>
+
+          <div
+            id="pulse-more-detail"
+            className={`${styles.moreContent} ${moreOpen ? styles.moreContentOpen : ''}`}
+            ref={moreContentRef}
+            style={{
+              maxHeight: moreOpen
+                ? `${moreContentRef.current?.scrollHeight ?? 0}px`
+                : '0px',
+            }}
+          >
+            <div className={styles.moreInner}>
+              <p>
+                Pulse reads your document and tailors the conversation to what
+                you're sharing. Reviewers don't fill out forms. They talk through
+                their reactions naturally, and the AI asks follow-up questions to
+                get past surface-level responses.
+              </p>
+              <p>
+                After everyone's weighed in, Pulse consolidates the feedback into
+                a Pulse Check. What landed. What didn't. Specific revision
+                proposals you can accept, adjust, or dismiss.
+              </p>
+              <p>
+                Reviewers don't need an account. Share a link, send an email
+                invite, or print a QR code. They accept a confidentiality
+                agreement and start talking. That's it.
+              </p>
+              <p>
+                Your work stays yours. Transcripts are auto-deleted after 30
+                days, and your content never trains AI models.
+              </p>
+            </div>
+          </div>
+        </GlassPanel>
       </section>
 
       {/* Overview — "What to expect" */}

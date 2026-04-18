@@ -134,7 +134,7 @@ describe('Property 10: Survey form validation determines button state', () => {
     fc.assert(
       fc.property(fullSurveyResponses, keyIndex, (base, idx) => {
         const responses: SurveyResponses = { ...base, anythingElse: null };
-        (responses as Record<string, unknown>)[requiredKeys[idx]] = null;
+        (responses as unknown as Record<string, unknown>)[requiredKeys[idx]] = null;
         expect(isSurveyFormValid(responses)).toBe(false);
       }),
       { numRuns: 100 },
