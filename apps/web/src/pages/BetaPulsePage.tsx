@@ -181,7 +181,7 @@ export default function BetaPulsePage() {
               <span className={styles.stepDot} />
               <div>
                 <strong>Sign up</strong>
-                <p>Enter your name and email to join the beta.</p>
+                <p>Enter your name and email. In the coming days, you'll receive three emails — one with instructions and two session invites.</p>
               </div>
             </div>
             <div className={styles.step}>
@@ -189,8 +189,7 @@ export default function BetaPulsePage() {
               <div>
                 <strong>Two sessions</strong>
                 <p>
-                  Complete two short AI-guided feedback sessions — about 10
-                  minutes each.
+                  Read a short essay (~5 min) and have an AI-guided conversation about it (~10 min). Then review a photo from the perspective of someone considering an Airbnb rental (~5 min).
                 </p>
               </div>
             </div>
@@ -199,7 +198,7 @@ export default function BetaPulsePage() {
               <div>
                 <strong>Quick survey</strong>
                 <p>
-                  Share your thoughts in a brief survey after your sessions.
+                  Share your thoughts on the experience in a brief survey after your sessions.
                 </p>
               </div>
             </div>

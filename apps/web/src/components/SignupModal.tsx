@@ -244,10 +244,10 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
             </p>
 
             <ol className={styles.instructionsList}>
-              <li>Check your email for session links</li>
-              <li>Each session takes about 10 minutes</li>
+              <li>You'll receive three emails in the coming days — one with instructions and two session invites</li>
+              <li>Read the essay before starting your first session (~5 min read)</li>
+              <li>The whole thing takes about 30 minutes</li>
               <li>Come back here for the survey after your sessions</li>
-              <li>Complete everything to be entered in the gift card drawing</li>
             </ol>
 
             <button
