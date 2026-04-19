@@ -16,7 +16,7 @@ interface BetaPulseConfig {
 }
 
 function getConfig(): BetaPulseConfig {
-  const cfg = (window as any).URGD_CONFIG ?? {};
+  const cfg = (typeof window !== 'undefined' ? (window as any).URGD_CONFIG : null) ?? {};
   return {
     betaSignupEnabled: cfg.betaSignupEnabled ?? false,
     betaSurveyEnabled: cfg.betaSurveyEnabled ?? false,
