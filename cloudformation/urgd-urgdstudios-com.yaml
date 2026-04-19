@@ -255,12 +255,6 @@ Resources:
                 return request;
             }
             
-            // Beta page SPA: rewrite all /beta/* extensionless paths to /index.html
-            if (uri === '/beta' || (uri.startsWith('/beta/') && !uri.includes('.'))) {
-                request.uri = '/index.html';
-                return request;
-            }
-            
             // Static site: if URI ends with '/', append 'index.html'
             if (uri.endsWith('/')) {
                 request.uri += 'index.html';
