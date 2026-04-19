@@ -31,20 +31,34 @@ export function useMeta({ title, description, ogUrl, favicon }: UseMetaProps) {
       setMeta('property', 'og:url', ogUrl);
     }
 
-    // Swap favicon if provided, revert on unmount
+    // Swap favicon if provided, revert on unmount.
+    // Hide competing ICO/PNG links so the browser uses the SVG.
     let originalHref: string | null = null;
+    const hiddenLinks: { el: HTMLLinkElement; display: string }[] = [];
     if (favicon) {
-      const link = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
-      if (link) {
-        originalHref = link.getAttribute('href');
-        link.setAttribute('href', favicon);
+      const svgLink = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
+      if (svgLink) {
+        originalHref = svgLink.getAttribute('href');
+        svgLink.setAttribute('href', favicon);
       }
+
+      // Hide non-SVG favicon links so the browser doesn't prefer them
+      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]:not([type="image/svg+xml"])').forEach((el) => {
+        hiddenLinks.push({ el, display: el.style.display });
+        el.setAttribute('data-hidden-by-meta', '');
+        el.remove();
+      });
     }
 
     return () => {
       if (originalHref !== null) {
-        const link = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
-        if (link) link.setAttribute('href', originalHref);
+        const svgLink = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
+        if (svgLink) svgLink.setAttribute('href', originalHref);
+      }
+      // Restore removed favicon links
+      for (const { el } of hiddenLinks) {
+        el.removeAttribute('data-hidden-by-meta');
+        document.head.appendChild(el);
       }
     };
   }, [title, description, ogUrl, favicon]);

@@ -2,9 +2,9 @@
  * urgdstudios.com — Survey Modal Component
  *
  * Paginated survey for Pulse beta:
- *   1. Email lookup → crossfade to "Welcome back, [Name]"
+ *   1. Email lookup → "Welcome back, [Name]"
  *   2. One question per page with Next/Back navigation
- *   3. Submit on final question → crossfade to thank-you
+ *   3. Submit on final question → thank-you
  *
  * Focus-trapped, keyboard-accessible, screen-reader-friendly.
  * Closing mid-survey discards progress but does not lock the user out.
@@ -133,7 +133,6 @@ const QUESTIONS: QuestionDef[] = [
 export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const [phase, setPhase] = useState<Phase>('lookup');
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [fadeClass, setFadeClass] = useState<string>(styles.fadeIn);
 
   // Lookup
   const [lookupEmail, setLookupEmail] = useState('');
@@ -165,23 +164,10 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const triggerRef = useRef<HTMLElement | null>(null);
 
   /* ---------------------------------------------------------------
-     Transition helper — fade out → hold black → swap → fade in
+     Transition helper — instant cut (no crossfade)
      --------------------------------------------------------------- */
-  const crossfadeTo = useCallback((next: () => void) => {
-    // Phase 1: fade out current content
-    setFadeClass(styles.fadeOut);
-    // Phase 2: after fade-out completes, hide content and swap
-    setTimeout(() => {
-      setFadeClass(styles.hidden); // visibility:hidden + opacity:0
-      // Phase 3: swap content while fully hidden
-      next();
-      // Phase 4: hold at hidden for one frame, then fade in
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setFadeClass(styles.fadeIn);
-        });
-      });
-    }, 300);
+  const cutTo = useCallback((next: () => void) => {
+    next();
   }, []);
 
   /* ---------------------------------------------------------------
@@ -263,14 +249,14 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
         // Already submitted — show friendly message, don't enter survey
         if (data.hasSurvey) {
-          crossfadeTo(() => setPhase('alreadyDone'));
+          cutTo(() => setPhase('alreadyDone'));
           return;
         }
 
-        crossfadeTo(() => setPhase('greeting'));
+        cutTo(() => setPhase('greeting'));
         // Auto-advance from greeting to first question after a pause
         setTimeout(() => {
-          crossfadeTo(() => { setPhase('questions'); setQuestionIndex(0); });
+          cutTo(() => { setPhase('questions'); setQuestionIndex(0); });
         }, GREETING_DURATION);
         return;
       }
@@ -299,13 +285,13 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     if (isLastQuestion) {
       handleSubmit();
     } else {
-      crossfadeTo(() => setQuestionIndex((i) => i + 1));
+      cutTo(() => setQuestionIndex((i) => i + 1));
     }
   };
 
   const handleBack = () => {
     if (questionIndex > 0) {
-      crossfadeTo(() => setQuestionIndex((i) => i - 1));
+      cutTo(() => setQuestionIndex((i) => i - 1));
     }
   };
 
@@ -315,7 +301,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const handleSubmit = async () => {
     setSurveyLoading(true);
     setSurveyError('');
-    crossfadeTo(async () => {
+    cutTo(async () => {
       setPhase('submitting');
 
       const minHold = new Promise((r) => setTimeout(r, 1200));
@@ -344,21 +330,21 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         const [res] = await Promise.all([apiCall, minHold]);
 
         if (res.ok) {
-          crossfadeTo(() => setPhase('success'));
+          cutTo(() => setPhase('success'));
           return;
         }
 
         if (res.status === 409) {
-          crossfadeTo(() => setPhase('alreadyDone'));
+          cutTo(() => setPhase('alreadyDone'));
           return;
         }
         if (res.status === 404) setSurveyError('We couldn\u2019t find your signup. Please close and try again.');
         else setSurveyError('Something went wrong. Please try again.');
-        crossfadeTo(() => setPhase('questions'));
+        cutTo(() => setPhase('questions'));
       } catch {
         await minHold;
         setSurveyError('Something went wrong. Please try again.');
-        crossfadeTo(() => setPhase('questions'));
+        cutTo(() => setPhase('questions'));
       } finally {
         setSurveyLoading(false);
       }
@@ -411,7 +397,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
           ×
         </button>
 
-        <div className={`${styles.content} ${fadeClass}`}>
+        <div className={styles.content}>
 
           {/* --- Lookup --- */}
           {phase === 'lookup' && (

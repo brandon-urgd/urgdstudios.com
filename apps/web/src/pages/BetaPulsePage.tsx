@@ -254,7 +254,7 @@ export default function BetaPulsePage() {
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.pulseLine} aria-hidden="true" />
-        <p>pulse — Quietly Powerful, by ur/gd Studios</p>
+        <p>pulse — Quietly Powerful, by <a href="https://urgdstudios.com/">ur/gd Studios</a></p>
         <p>Seattle, WA</p>
         <nav>
           <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a>

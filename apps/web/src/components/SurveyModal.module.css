@@ -78,27 +78,10 @@
 }
 
 /* ----------------------------------------------------------------
-   Content wrapper — crossfade transitions
+   Content wrapper
    ---------------------------------------------------------------- */
 
-.content {
-  transition: opacity 300ms var(--easing-default);
-}
-
-.fadeIn {
-  opacity: 1;
-  visibility: visible;
-}
-
-.fadeOut {
-  opacity: 0;
-  visibility: visible;
-}
-
-.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
+.content {}
 
 /* ----------------------------------------------------------------
    Phase content — shared vertical layout
@@ -527,7 +510,6 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay { animation: none; }
   .panel { animation: none; }
-  .content { transition: none; }
   .progressFill { transition: none; }
   .greetingDots span { animation: none; opacity: 0.6; }
   .navButton, .backButton, .closeButton, .input, .textarea { transition: none; }
