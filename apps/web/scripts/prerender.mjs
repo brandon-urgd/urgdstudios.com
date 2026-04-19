@@ -15,6 +15,9 @@
  *   - dist/privacy/index.html          (Privacy)
  *   - dist/terms/index.html            (Terms)
  *   - dist/legal/index.html            (Legal)
+ *   - dist/beta/pulse/index.html       (Beta Pulse)
+ *   - dist/403.html                    (Error — empty root for clean createRoot)
+ *   - dist/404.html                    (Error — empty root for clean createRoot)
  */
 
 import fs from 'node:fs';
@@ -158,7 +161,39 @@ async function prerender() {
     }
   }
 
-  console.log(`\n  Pre-rendering complete: ${successCount}/${ROUTES.length} routes.`);
+  // --- Generate 404.html and 403.html ---
+  // CloudFront serves /404.html and /403.html for unknown paths. S3 returns 403
+  // (not 404) for missing keys when accessed via OAI, so both are needed.
+  // These files keep the same <head> (CSS, JS, fonts) but leave <div id="root">
+  // empty so main.tsx takes the createRoot path and React renders NotFoundPage
+  // with no flash.
+  for (const errorFile of ['404.html', '403.html']) {
+    try {
+      let htmlError = template;
+
+      htmlError = htmlError.replace(
+        /<title>.*?<\/title>/,
+        '<title>Page Not Found — ur/gd Studios</title>'
+      );
+
+      htmlError = htmlError.replace(
+        /<meta name="description" content="[^"]*"[^>]*>/,
+        '<meta name="description" content="The page you are looking for does not exist.">'
+      );
+
+      // Keep <div id="root"></div> empty — no pre-rendered HTML.
+      // main.tsx will see no child nodes and use createRoot.
+
+      const errorPath = path.join(distDir, errorFile);
+      fs.writeFileSync(errorPath, htmlError, 'utf-8');
+      console.log(`  ✓ Generated ${errorFile}`);
+    } catch (err) {
+      console.error(`  ✗ Failed to generate ${errorFile}:`, err.message);
+      throw err;
+    }
+  }
+
+  console.log(`\n  Pre-rendering complete: ${successCount}/${ROUTES.length} routes + error pages.`);
 }
 
 prerender().catch((err) => {

@@ -8,6 +8,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import LegalPage from './pages/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
+import BetaPulsePage from './pages/BetaPulsePage';
 import ProtectedRoute from './providers/ProtectedRoute';
 
 // Command Center pages — lazy loaded (not part of the public site SSG build)
@@ -15,13 +16,6 @@ const LoginPage = lazy(() => import('./pages/command/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/command/ForgotPasswordPage'));
 const MessageDashboard = lazy(() => import('./pages/command/MessageDashboard'));
 const CommandLayout = lazy(() => import('./layouts/CommandLayout'));
-const BetaPulsePage = lazy(() => import('./pages/BetaPulsePage'));
-
-// Preload the beta page chunk immediately if we're on that route —
-// prevents flash between SSG HTML and React hydration.
-if (typeof window !== 'undefined' && window.location.pathname.startsWith('/beta/pulse')) {
-  import('./pages/BetaPulsePage');
-}
 const BetaDashboard = lazy(() => import('./pages/command/BetaDashboard'));
 
 // Shown while any Command Center chunk is loading — prevents a blank flash
@@ -138,15 +132,8 @@ export default function App() {
           }
         />
 
-        {/* Beta page — no layout shell, preloaded to prevent flash */}
-        <Route
-          path="/beta/pulse"
-          element={
-            <Suspense fallback={<CommandFallback />}>
-              <BetaPulsePage />
-            </Suspense>
-          }
-        />
+        {/* Beta page — no layout shell, statically imported for clean hydration */}
+        <Route path="/beta/pulse" element={<BetaPulsePage />} />
 
         {/* /command → redirect to dashboard */}
         <Route path="/command" element={<Navigate to="/command/dashboard" replace />} />
