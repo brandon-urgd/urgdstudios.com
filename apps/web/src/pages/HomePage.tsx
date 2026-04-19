@@ -68,7 +68,7 @@ export default function HomePage() {
                 <h3 className={styles.studioName}>Orbit</h3>
                 <p className={styles.studioDescription}>
                   Orbit is where we build our own applications — Pulse,
-                  Gather, Stitch, and more.
+                  Gather, and more.
                 </p>
               </GlassPanel>
             </div>
@@ -158,10 +158,6 @@ export default function HomePage() {
                 experience. You're good.
               </p>
               <p className={styles.appHighlights}>
-                <span className={styles.appName}>
-                  Stitch
-                  <span className={styles.badgeLive}>Live</span>
-                </span>
                 <span className={styles.appName}>
                   Pulse
                   <span className={styles.badgeBeta}>Beta</span>

@@ -193,8 +193,8 @@
   --badge-live-text: var(--color-success);
   --badge-soon-bg: rgba(255, 255, 255, 0.08);
   --badge-soon-text: var(--color-text-secondary);
-  --badge-beta-bg: var(--beta-accent-border);
-  --badge-beta-text: var(--beta-accent);
+  --badge-beta-bg: rgba(251, 146, 60, 0.15);
+  --badge-beta-text: #fb923c;
   --badge-radius: var(--radius-full);
   --badge-padding: var(--space-2xs) var(--space-sm);
 
