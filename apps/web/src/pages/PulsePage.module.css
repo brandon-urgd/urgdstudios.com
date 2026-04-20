@@ -66,7 +66,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120px var(--space-2xl);
+  padding: 80px var(--space-2xl);
 }
 
 /* ----------------------------------------------------------------
@@ -173,7 +173,7 @@
    ---------------------------------------------------------------- */
 
 .hero {
-  min-height: 100vh;
+  min-height: 70vh;
 }
 
 .pulseIconWrap {
@@ -235,13 +235,13 @@
 }
 
 .problemGlass {
-  padding: var(--space-2xl) var(--space-xl);
+  padding: var(--space-3xl) var(--space-xl) var(--space-2xl);
 }
 
 .problemTitle {
   text-align: left;
   font-size: clamp(1.3rem, 2.5vw, 2rem);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
 }
 
 .problemSub {
@@ -301,6 +301,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  text-align: left;
 }
 
 .deviceNotch {
@@ -363,6 +364,53 @@
   overflow: hidden;
 }
 
+/* Chat auto-scroll */
+.chatScrollContainer {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.chatFadeTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: linear-gradient(180deg, #0e1318, transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chatFadeBottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: linear-gradient(0deg, #0e1318, transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chatScrollContent {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+:global(.visible) .chatScrollContent {
+  animation: chatScroll 24s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes chatScroll {
+  0%, 20% { transform: translateY(0); }
+  50%, 60% { transform: translateY(-45%); }
+  90%, 100% { transform: translateY(0); }
+}
+
 /* Chat bubbles */
 .cb {
   max-width: 82%;
@@ -371,6 +419,7 @@
   font-size: 9.5px;
   line-height: 1.5;
   margin-bottom: var(--space-xs);
+  text-align: left;
 }
 
 .cbAssistant {
@@ -530,6 +579,7 @@
   flex-direction: column;
   font-size: 10px;
   color: var(--text);
+  text-align: left;
 }
 
 .ipadTopBar {
@@ -970,6 +1020,10 @@
   }
 
   .pcScrollContent {
+    animation: none !important;
+  }
+
+  .chatScrollContent {
     animation: none !important;
   }
 

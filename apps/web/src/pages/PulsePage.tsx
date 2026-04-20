@@ -51,11 +51,6 @@ export default function PulsePage() {
         <p className={`${styles.subtitle} ${styles.reveal} ${styles.d2}`} data-reveal>
           Stop guessing what people think about your work. Start a conversation that actually tells you.
         </p>
-        <div className={`${styles.heroLogo} ${styles.reveal} ${styles.d3}`} data-reveal>
-          <a href="https://urgdstudios.com">
-            <img src="/assets/logo-studios.png" alt="ur/gd Studios" />
-          </a>
-        </div>
       </section>
 
       {/* ===== SECTION 2: THE PROBLEM + HOW IT WORKS ===== */}
@@ -87,40 +82,52 @@ export default function PulsePage() {
                   {/* Top bar */}
                   <div className={styles.scrNav}>
                     <span className={styles.scrNavWm}>pulse</span>
-                    <span className={styles.scrNavMeta}>Section 2 of 4</span>
+                    <span className={styles.scrNavMeta}>Section 2 of 5</span>
                   </div>
                   {/* Progress line */}
                   <div className={styles.progressBar}>
                     <div className={styles.progressFill} />
                   </div>
-                  {/* Chat area */}
-                  <div className={styles.chatArea}>
+                  {/* Chat area — auto-scrolling */}
+                  <div className={styles.chatScrollContainer}>
+                    <div className={styles.chatFadeTop} />
+                    <div className={styles.chatFadeBottom} />
+                    <div className={styles.chatScrollContent}>
                     <div className={`${styles.cb} ${styles.cbAssistant}`}>
-                      I&rsquo;ve read through your launch brief. Let&rsquo;s start with the market opportunity — what part of this section felt strongest to you as you were writing it?
+                      I&rsquo;ve read through your essay. The opening section — &ldquo;The Oldest Question&rdquo; — sets a big frame. What were you trying to make the reader feel in those first few paragraphs?
                     </div>
                     <div className={styles.cbUserWrap}>
                       <div className={`${styles.cb} ${styles.cbUser}`}>
-                        Honestly the TAM numbers. I spent a lot of time on those and I think they hold up.
+                        Smallness, but not in a sad way. More like awe. I wanted them to look up and feel something before I started asking harder questions.
                       </div>
                     </div>
                     <div className={`${styles.cb} ${styles.cbAssistant}`}>
-                      The TAM section is detailed. A few reviewers have had questions about the jump from TAM to serviceable market though — the 15% penetration assumption in year one. What was your thinking there?
+                      That comes through. The line about yearning for a place we&rsquo;ve never been landed — it sounds almost romantic but it carries real weight. Let&rsquo;s talk about &ldquo;The Silence.&rdquo; That section shifts tone pretty sharply. Was that intentional?
                     </div>
                     <div className={styles.cbUserWrap}>
                       <div className={`${styles.cb} ${styles.cbUser}`}>
-                        That&rsquo;s fair. I based it on a competitor&rsquo;s Series A deck but their product was more established at launch.
+                        Sort of. I wanted to introduce the Fermi paradox but I wasn&rsquo;t sure how to bridge from the personal tone to something more abstract.
                       </div>
                     </div>
                     <div className={`${styles.cb} ${styles.cbAssistant}`}>
-                      That&rsquo;s helpful context. Would you say the competitive landscape section accounts for that difference?
+                      That tension is worth noting. The reader has just settled into something emotional and then the register changes. It might not be the content — it might be the placement. What about &ldquo;The Weight of Going&rdquo;? That section felt very grounded.
                     </div>
                     <div className={styles.cbUserWrap}>
                       <div className={`${styles.cb} ${styles.cbUser}`}>
-                        Not really. I only covered two direct competitors. There are probably two more I should address.
+                        That one came easiest. The family metaphor just kind of wrote itself. Leaving home but on a cosmic scale.
                       </div>
                     </div>
                     <div className={`${styles.cb} ${styles.cbAssistant}`}>
-                      Good call. Let&rsquo;s move on to the revenue model.
+                      It shows. The family metaphor reframes the whole Fermi paradox as something personal — a loss you didn&rsquo;t know you were carrying. That&rsquo;s the emotional core of the essay. The closing section, &ldquo;Still Looking&rdquo; — did you feel like you landed it?
+                    </div>
+                    <div className={styles.cbUserWrap}>
+                      <div className={`${styles.cb} ${styles.cbUser}`}>
+                        Honestly, no. I knew I wanted to end on hope but I think I rushed it. It doesn&rsquo;t have the same weight as the middle sections.
+                      </div>
+                    </div>
+                    <div className={`${styles.cb} ${styles.cbAssistant}`}>
+                      That&rsquo;s really helpful to know. The honesty about what felt rushed versus what came naturally — that&rsquo;s exactly the kind of thing that makes this feedback useful. I&rsquo;ll note all of this in the summary.
+                    </div>
                     </div>
                   </div>
                   {/* Input bar */}
