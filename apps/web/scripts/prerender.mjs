@@ -16,6 +16,7 @@
  *   - dist/terms/index.html            (Terms)
  *   - dist/legal/index.html            (Legal)
  *   - dist/beta/pulse/index.html       (Beta Pulse)
+ *   - dist/pulse/index.html             (Pulse marketing)
  *   - dist/403.html                    (Error — empty root for clean createRoot)
  *   - dist/404.html                    (Error — empty root for clean createRoot)
  */
@@ -83,15 +84,27 @@ const ROUTES = [
     description:
       'Join the Pulse closed beta. Two sessions, one survey, about 30 minutes of your time.',
     ogUrl: 'https://urgdstudios.com/beta/pulse/',
+    ogImage: 'https://urgdstudios.com/assets/pulse-og-image.png',
+  },
+  {
+    url: '/pulse/',
+    outDir: path.join(distDir, 'pulse'),
+    title: 'Pulse — Feedback That Tells You Something | ur/gd Studios',
+    description:
+      'Stop guessing what people think about your work. Pulse gives you structured, AI-guided feedback that helps you make decisions.',
+    ogUrl: 'https://urgdstudios.com/pulse/',
+    ogImage: 'https://urgdstudios.com/assets/pulse-og-image.png',
   },
 ];
 
 function buildHeadMeta(route) {
-  return `    <meta property="og:title" content="${route.title}">
-    <meta property="og:description" content="${route.description}">
-    <meta property="og:url" content="${route.ogUrl}">
-    <meta name="twitter:title" content="${route.title}">
-    <meta name="twitter:description" content="${route.description}">`;
+  return [
+    `    <meta property="og:title" content="${route.title}">`,
+    `    <meta property="og:description" content="${route.description}">`,
+    `    <meta property="og:url" content="${route.ogUrl}">`,
+    `    <meta name="twitter:title" content="${route.title}">`,
+    `    <meta name="twitter:description" content="${route.description}">`,
+  ].join('\n');
 }
 
 async function prerender() {
@@ -141,6 +154,14 @@ async function prerender() {
         /(<meta name="description" content="[^"]*"[^>]*>)/,
         `$1\n${headMeta}`
       );
+
+      // Replace default og:image if route specifies its own
+      if (route.ogImage) {
+        html = html.replace(
+          /<meta property="og:image" content="[^"]*">/,
+          `<meta property="og:image" content="${route.ogImage}">`
+        );
+      }
 
       // Inject pre-rendered HTML into #root
       html = html.replace(

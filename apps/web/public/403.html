@@ -35,7 +35,7 @@
       font-size: 1rem;
       line-height: 1.6;
       color: rgba(255, 255, 255, 0.92);
-      background-color: #0a0a14;
+      background-color: #0a0a0a;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -48,6 +48,28 @@
     main {
       text-align: center;
       max-width: 520px;
+      width: 100%;
+    }
+
+    .logo {
+      display: block;
+      width: 88px;
+      height: auto;
+      margin: 0 auto 2rem;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      margin-bottom: 2rem;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(129, 140, 248, 0.4) 30%,
+        rgba(129, 140, 248, 0.6) 50%,
+        rgba(129, 140, 248, 0.4) 70%,
+        transparent 100%
+      );
     }
 
     .card {
@@ -115,6 +137,26 @@
       color: #a5b4fc;
     }
 
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.32);
+      line-height: 1.5;
+    }
+
+    .footer .brand {
+      font-family: 'Archivo', system-ui, sans-serif;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.40);
+      letter-spacing: -0.02em;
+    }
+
+    .footer .tagline {
+      display: block;
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+
     @supports not (backdrop-filter: blur(16px)) {
       .card {
         background: rgba(255, 255, 255, 0.08);
@@ -132,7 +174,7 @@
 
     @media (prefers-reduced-transparency: reduce) {
       .card {
-        background: rgba(20, 20, 35, 0.95);
+        background: rgba(10, 10, 10, 0.95);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         border-color: rgba(255, 255, 255, 0.15);
@@ -142,12 +184,18 @@
 </head>
 <body>
   <main>
+    <img src="/assets/logo-studios.png" alt="ur/gd Studios" class="logo" width="88" height="88">
+    <div class="divider" role="presentation"></div>
     <div class="card">
-      <h1>Restricted</h1>
-      <p class="message">You don't have access to this page.</p>
+      <h1>You don't have access to this page</h1>
+      <p class="message">This page is restricted. If you think this is a mistake, let us know.</p>
       <a href="/" class="back-link">Back to Home</a>
       <p class="contact">Need help? Email us at <a href="mailto:admin@urgdstudios.com">admin@urgdstudios.com</a></p>
     </div>
+    <p class="footer">
+      <span class="brand">ur/gd Studios</span>
+      <span class="tagline">Quietly Powerful</span>
+    </p>
   </main>
 </body>
 </html>

@@ -9,6 +9,7 @@ import TermsPage from './pages/TermsPage';
 import LegalPage from './pages/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
 import BetaPulsePage from './pages/BetaPulsePage';
+import PulsePage from './pages/PulsePage';
 import ProtectedRoute from './providers/ProtectedRoute';
 
 // Command Center pages — lazy loaded (not part of the public site SSG build)
@@ -36,6 +37,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/command/dashboard/beta': 'Beta — Command Center',
   '/command/forgot-password': 'Reset Password — Command Center',
   '/beta/pulse': 'Pulse Beta — ur/gd Studios',
+  '/pulse': 'Pulse — Feedback That Tells You Something | ur/gd Studios',
 };
 
 const ROUTE_DESCRIPTIONS: Record<string, string> = {
@@ -46,6 +48,7 @@ const ROUTE_DESCRIPTIONS: Record<string, string> = {
   '/terms/': 'Terms of service for ur/gd Studios and its applications.',
   '/legal/': 'Legal information for ur/gd Studios LLC.',
   '/beta/pulse': 'Join the Pulse closed beta. Two sessions, one survey, about 30 minutes of your time.',
+  '/pulse': 'Stop guessing what people think about your work. Pulse gives you structured, AI-guided feedback that helps you make decisions.',
 };
 
 function RouteChangeManager() {
@@ -134,6 +137,9 @@ export default function App() {
 
         {/* Beta page — no layout shell, statically imported for clean hydration */}
         <Route path="/beta/pulse" element={<BetaPulsePage />} />
+
+        {/* Pulse marketing page — no layout shell, statically imported */}
+        <Route path="/pulse" element={<PulsePage />} />
 
         {/* /command → redirect to dashboard */}
         <Route path="/command" element={<Navigate to="/command/dashboard" replace />} />

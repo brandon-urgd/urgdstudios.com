@@ -1,3 +1,10 @@
+.logo {
+  display: block;
+  width: 88px;
+  height: auto;
+  margin: 0 auto var(--space-lg);
+}
+
 .backLink {
   display: inline-flex;
   align-items: center;
