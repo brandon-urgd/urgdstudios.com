@@ -590,7 +590,12 @@
 
 .pcScrollContent {
   padding: 12px 16px;
+}
+
+/* Only animate when the parent has been revealed */
+:global(.visible) .pcScrollContent {
   animation: pcScroll 28s ease-in-out infinite;
+  animation-delay: 2s;
 }
 
 @keyframes pcScroll {
