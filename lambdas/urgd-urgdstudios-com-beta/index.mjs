@@ -160,7 +160,6 @@ async function handleSignup(event, requestId) {
         status: 'active',
         ipHash,
         ttl,
-        sessionsSent: false
       }
     }));
 
