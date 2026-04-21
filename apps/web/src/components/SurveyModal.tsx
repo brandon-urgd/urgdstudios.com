@@ -443,7 +443,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
             <div className={styles.greetingContent}>
               <h2 id={headingId} className={styles.greetingHeading}>
                 Welcome back,
-                <span className={styles.greetingName}>{userName}.</span>
+                <span className={styles.greetingName}>{userName.split(/\s+/)[0]}.</span>
               </h2>
               <p className={styles.greetingSubtitle}>Fetching your survey.</p>
               <div className={styles.greetingDots} aria-hidden="true">
@@ -573,7 +573,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
               <h2 id={headingId} className={styles.successHeading}>
                 You're all set,
-                <span className={styles.successName}>{userName}!</span>
+                <span className={styles.successName}>{userName.split(/\s+/)[0]}!</span>
               </h2>
               <p className={styles.successMessage}>
                 We already have your survey responses. Thanks for checking in.
@@ -605,7 +605,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
               <h2 id={headingId} className={styles.successHeading}>
                 Thank you,
-                <span className={styles.successName}>{userName}!</span>
+                <span className={styles.successName}>{userName.split(/\s+/)[0]}!</span>
               </h2>
               <p className={styles.successMessage}>
                 Your feedback means a lot. It's going directly into making Pulse better.
