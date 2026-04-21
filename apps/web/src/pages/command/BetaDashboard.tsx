@@ -14,11 +14,12 @@ interface BetaSignup {
   app: string;
   signupTimestamp: string;
   sessionsSent: boolean;
+  betaEmailSentAt: string | null;
   hasSurvey: boolean;
   surveyTimestamp?: string;
 }
 
-type SortKey = 'name' | 'email' | 'app' | 'signupTimestamp' | 'sessionsSent' | 'hasSurvey';
+type SortKey = 'name' | 'email' | 'app' | 'signupTimestamp' | 'betaEmailSentAt' | 'hasSurvey';
 type SortDir = 'asc' | 'desc';
 
 export default function BetaDashboard() {
@@ -78,8 +79,8 @@ export default function BetaDashboard() {
         return dir * a[sortKey].localeCompare(b[sortKey]);
       case 'signupTimestamp':
         return dir * (new Date(a.signupTimestamp).getTime() - new Date(b.signupTimestamp).getTime());
-      case 'sessionsSent':
-        return dir * (Number(a.sessionsSent) - Number(b.sessionsSent));
+      case 'betaEmailSentAt':
+        return dir * ((a.betaEmailSentAt || '').localeCompare(b.betaEmailSentAt || ''));
       case 'hasSurvey':
         return dir * (Number(a.hasSurvey) - Number(b.hasSurvey));
       default:
@@ -102,28 +103,30 @@ export default function BetaDashboard() {
   }
 
   const surveyCount = signups.filter((s) => s.hasSurvey).length;
-  const sentCount = signups.filter((s) => s.sessionsSent).length;
+  const sentCount = signups.filter((s) => !!s.betaEmailSentAt).length;
 
-  async function handleToggleSent(signupId: string, current: boolean) {
+  async function handleToggleSent(signupId: string, currentSentAt: string | null) {
     setTogglingIds((prev) => new Set(prev).add(signupId));
+
+    const newValue = currentSentAt ? null : new Date().toISOString();
 
     // Optimistic update
     setSignups((prev) =>
-      prev.map((s) => (s.signupId === signupId ? { ...s, sessionsSent: !current } : s)),
+      prev.map((s) => (s.signupId === signupId ? { ...s, betaEmailSentAt: newValue } : s)),
     );
 
     try {
       const res = await authedFetch(`/v1/admin/beta/signups/${signupId}`, {
         method: 'PATCH',
-        body: JSON.stringify({ sessionsSent: !current }),
+        body: JSON.stringify({ betaEmailSentAt: newValue }),
       });
       if (!res.ok) throw new Error('Failed to update');
     } catch {
       // Rollback
       setSignups((prev) =>
-        prev.map((s) => (s.signupId === signupId ? { ...s, sessionsSent: current } : s)),
+        prev.map((s) => (s.signupId === signupId ? { ...s, betaEmailSentAt: currentSentAt } : s)),
       );
-      addToast('Failed to update sessions sent. Try again.', 'error');
+      addToast('Failed to update beta email status. Try again.', 'error');
     } finally {
       setTogglingIds((prev) => {
         const next = new Set(prev);
@@ -214,14 +217,14 @@ export default function BetaDashboard() {
                   <th className={styles.sortable} onClick={() => handleSort('email')}>Email{sortIndicator('email')}</th>
                   <th className={styles.sortable} onClick={() => handleSort('app')}>App{sortIndicator('app')}</th>
                   <th className={styles.sortable} onClick={() => handleSort('signupTimestamp')}>Signed Up{sortIndicator('signupTimestamp')}</th>
-                  <th className={styles.sortable} onClick={() => handleSort('sessionsSent')}>Sessions Sent{sortIndicator('sessionsSent')}</th>
+                  <th className={styles.sortable} onClick={() => handleSort('betaEmailSentAt')}>Beta Email Sent{sortIndicator('betaEmailSentAt')}</th>
                   <th className={styles.sortable} onClick={() => handleSort('hasSurvey')}>Survey{sortIndicator('hasSurvey')}</th>
                 </tr>
               </thead>
               <tbody>
                 {sorted.map((signup) => (
                   <tr key={signup.signupId}>
-                    <td className={styles.nameCell}>{signup.name}</td>
+                    <td className={styles.nameCell}>{signup.name.split(/\s+/)[0]}</td>
                     <td className={styles.emailCell}>{signup.email}</td>
                     <td className={styles.appCell}>{signup.app}</td>
                     <td className={styles.dateCell}>
@@ -232,15 +235,18 @@ export default function BetaDashboard() {
                         <input
                           type="checkbox"
                           className={styles.toggleInput}
-                          checked={signup.sessionsSent}
+                          checked={!!signup.betaEmailSentAt}
                           disabled={togglingIds.has(signup.signupId)}
                           onChange={() =>
-                            void handleToggleSent(signup.signupId, signup.sessionsSent)
+                            void handleToggleSent(signup.signupId, signup.betaEmailSentAt)
                           }
-                          aria-label={`Sessions sent to ${signup.name}`}
+                          aria-label={`Beta email sent to ${signup.name.split(/\s+/)[0]}`}
                         />
                         <span className={styles.toggleTrack} />
                       </label>
+                      {signup.betaEmailSentAt && (
+                        <span className={styles.sentDate}>{formatDateShort(signup.betaEmailSentAt)}</span>
+                      )}
                     </td>
                     <td>
                       {signup.hasSurvey ? (

@@ -240,7 +240,7 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
 
             <h2 id={headingId} className={styles.successHeading}>You're in!</h2>
             <p className={styles.successMessage}>
-              Thanks, {name.trim()}. Here's what happens next:
+              Thanks, {name.trim().split(/\s+/)[0]}. Here's what happens next:
             </p>
 
             <ol className={styles.instructionsList}>
@@ -331,7 +331,7 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
               }}
               onBlur={() => handleBlur('name')}
               disabled={isProcessing}
-              placeholder="Jane Doe"
+              placeholder="First name"
             />
             {errors.name && (
               <span role="alert" id="signup-name-error" className={styles.error}>

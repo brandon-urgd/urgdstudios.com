@@ -536,6 +536,7 @@ async function listBetaSignups(event, requestId) {
         app: item.app,
         signupTimestamp: item.signupTimestamp,
         sessionsSent: item.sessionsSent || false,
+        betaEmailSentAt: item.betaEmailSentAt || null,
         hasSurvey: !!item.surveyResponses,
         surveyTimestamp: item.surveyTimestamp || null,
       }))
@@ -590,8 +591,58 @@ async function updateBetaSignup(event, requestId, signupId) {
     throw createAdminError(400, 'Invalid request format');
   }
 
+  // Support both betaEmailSentAt (new) and sessionsSent (legacy)
+  if (body.betaEmailSentAt !== undefined) {
+    if (body.betaEmailSentAt !== null && typeof body.betaEmailSentAt !== 'string') {
+      throw createAdminError(400, 'betaEmailSentAt must be an ISO 8601 string or null');
+    }
+
+    try {
+      const updateExpr = body.betaEmailSentAt
+        ? 'SET betaEmailSentAt = :val'
+        : 'REMOVE betaEmailSentAt';
+      const exprValues = body.betaEmailSentAt
+        ? { ':val': body.betaEmailSentAt }
+        : undefined;
+
+      await docClient.send(new UpdateCommand({
+        TableName: BETA_TABLE,
+        Key: { signupId },
+        UpdateExpression: updateExpr,
+        ConditionExpression: 'attribute_exists(signupId)',
+        ...(exprValues ? { ExpressionAttributeValues: exprValues } : {}),
+      }));
+
+      log('info', 'Beta signup updated (betaEmailSentAt)', {
+        requestId,
+        action: 'updateBetaSignup',
+        outcome: 'success',
+        signupId,
+        betaEmailSentAt: body.betaEmailSentAt,
+        duration: Date.now() - start,
+        statusCode: 200,
+      });
+
+      return createResponse(200, { signupId, betaEmailSentAt: body.betaEmailSentAt }, event);
+    } catch (error) {
+      if (isAdminHttpError(error)) throw error;
+      if (error.name === 'ConditionalCheckFailedException') {
+        throw createAdminError(404, 'Signup not found');
+      }
+      log('error', 'updateBetaSignup failed', {
+        requestId,
+        action: 'updateBetaSignup',
+        outcome: 'failure',
+        error: error.message,
+        duration: Date.now() - start,
+      });
+      throw createAdminError(500, 'Failed to update beta signup');
+    }
+  }
+
+  // Legacy: sessionsSent boolean
   if (typeof body.sessionsSent !== 'boolean') {
-    throw createAdminError(400, 'sessionsSent must be a boolean');
+    throw createAdminError(400, 'betaEmailSentAt (string|null) or sessionsSent (boolean) is required');
   }
 
   try {
