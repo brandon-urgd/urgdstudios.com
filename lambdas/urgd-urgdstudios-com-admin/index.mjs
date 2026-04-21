@@ -535,7 +535,6 @@ async function listBetaSignups(event, requestId) {
         email: item.email,
         app: item.app,
         signupTimestamp: item.signupTimestamp,
-        sessionsSent: item.sessionsSent || false,
         betaEmailSentAt: item.betaEmailSentAt || null,
         hasSurvey: !!item.surveyResponses,
         surveyTimestamp: item.surveyTimestamp || null,

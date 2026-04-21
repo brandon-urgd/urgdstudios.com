@@ -157,7 +157,6 @@ async function handleSignup(event, requestId) {
         name: sanitizedName,
         consentGiven: true,
         signupTimestamp,
-        status: 'active',
         ipHash,
         ttl,
       }
