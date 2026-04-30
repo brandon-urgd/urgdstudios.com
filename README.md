@@ -100,6 +100,24 @@ All routes are pre-rendered to static HTML at build time. React hydrates on the 
 
 ---
 
+## Version History
+
+### v1.0.1 — 30APR2026
+
+Security/dependency updates.
+
+- HTML-escaped user input in email templates (admin reply, auto-ack, command notification)
+- Sanitized health check error messages on unauthenticated endpoint
+- Upgraded IP hashing from MD5 to SHA-256 with salt
+- Updated fast-xml-parser to ≥5.7.0 (CVE-2026-41650)
+- Updated postcss to ≥8.5.10 (GHSA-qx2v-qp2m-jg93)
+
+### v1.0.0 — 30APR2026
+
+Version tracking established. Aligned all version strings (package.json, CloudFormation metadata, Lambda VERSION env vars) to 1.0.0.
+
+---
+
 ## Contact
 
 **ur/gd Studios**

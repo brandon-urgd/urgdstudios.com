@@ -1,7 +1,7 @@
 import { DynamoDBClient, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand, GetCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { SESClient, SendEmailCommand, GetSendQuotaCommand } from '@aws-sdk/client-ses';
-import { createResponse, errorResponse, getCorsHeaders, log, createAdminError, isAdminHttpError } from './shared/utils.mjs';
+import { createResponse, errorResponse, getCorsHeaders, log, createAdminError, isAdminHttpError, escapeHtml } from './shared/utils.mjs';
 
 // ── Environment validation (fail-fast at cold start) ──────────────────────────
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
@@ -706,8 +706,8 @@ Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstu
 <body style="margin:0;padding:0;background-color:#ffffff;">
   <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
     <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">Re: Your ${categoryLabel}</h2>
-    <p style="font-size:16px;margin-top:0;">Hi ${name},</p>
-    <p style="font-size:16px;">${replyText.replace(/\n/g, '<br>')}</p>
+    <p style="font-size:16px;margin-top:0;">Hi ${escapeHtml(name)},</p>
+    <p style="font-size:16px;">${escapeHtml(replyText).replace(/\n/g, '<br>')}</p>
     <p style="font-size:14px;color:#4b5563;">In response to your ${categoryLabel} submitted on ${formattedDate}.</p>
 
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 16px;">

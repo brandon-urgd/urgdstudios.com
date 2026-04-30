@@ -1,6 +1,6 @@
 {
   "name": "urgd-urgdstudios-com-beta",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Beta signup and survey backend for urgdstudios.com",
   "type": "module",
   "main": "index.mjs",

@@ -32,7 +32,7 @@ export async function performHealthCheck({ tableName, requiredEnvVars = [] }) {
       };
     }
   } catch (error) {
-    checks.dynamodb = { status: 'unhealthy', message: error.message };
+    checks.dynamodb = { status: 'unhealthy', message: 'Connection failed' };
   }
 
   // Check SES availability
@@ -40,7 +40,7 @@ export async function performHealthCheck({ tableName, requiredEnvVars = [] }) {
     await sesClient.send(new GetSendQuotaCommand({}));
     checks.ses = { status: 'healthy', message: 'Available' };
   } catch (error) {
-    checks.ses = { status: 'unhealthy', message: error.message };
+    checks.ses = { status: 'unhealthy', message: 'Service unavailable' };
   }
 
   // Check environment variables

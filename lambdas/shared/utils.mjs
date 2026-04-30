@@ -76,19 +76,34 @@ export function validateEmail(email) {
 }
 
 /**
- * Hashes an IP address using MD5
- * Raw IP is never stored or logged
+ * Escapes HTML special characters to prevent injection in email templates.
+ * @param {string} str - String to escape
+ * @returns {string} HTML-safe string
+ */
+export function escapeHtml(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Hashes an IP address using SHA-256 with a salt.
+ * Raw IP is never stored or logged.
  * @param {string} ip - IP address to hash
- * @returns {string} MD5 hash of the IP address
+ * @returns {string} SHA-256 hash of the salted IP address
  */
 export function hashIp(ip) {
   if (!ip) {
     return 'unknown';
   }
   
+  const salt = process.env.IP_HASH_SALT || 'urgd-default-salt';
   return crypto
-    .createHash('md5')
-    .update(ip)
+    .createHash('sha256')
+    .update(salt + ip)
     .digest('hex');
 }
 

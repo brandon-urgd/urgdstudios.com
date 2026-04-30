@@ -3,7 +3,7 @@ Description: 'ur/gd urgdstudios.com - Corporate website static site infrastructu
 
 Metadata:
   urgd:
-    version: '2.0.0'
+    version: '1.0.1'
     environment: 'prod'
     lastUpdated: '2026-02-20'
     owner: 'ur/gd Studios'
@@ -704,9 +704,10 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '3.0.0'
+          VERSION: '1.0.1'
           POW_DIFFICULTY: !Ref PowDifficulty
           COMMAND_CENTER_AUTO_RESPONSE: !Ref CommandCenterAutoResponse
+          IP_HASH_SALT: !Sub 'urgd-${AWS::AccountId}-${Environment}'
           SES_FROM_ADDRESS: 'command@urgdstudios.com'
           SES_FROM_DISPLAY_NAME: 'ur/gd Command'
           SES_REPLY_TO: 'admin@urgdstudios.com'
@@ -971,6 +972,7 @@ Resources:
           ADMIN_EMAIL: 'admin@urgdstudios.com'
           ENVIRONMENT: !Ref Environment
           KMS_KEY_ID: !Ref IntakeKmsKey
+          IP_HASH_SALT: !Sub 'urgd-${AWS::AccountId}-${Environment}'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -1247,7 +1249,7 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '3.0.0'
+          VERSION: '1.0.1'
           COMMAND_CENTER_REPLY: !Ref CommandCenterReply
           SES_FROM_ADDRESS: 'command@urgdstudios.com'
           SES_FROM_DISPLAY_NAME: 'ur/gd Command'

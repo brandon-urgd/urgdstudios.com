@@ -4,7 +4,7 @@ import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { randomUUID } from 'crypto';
 import crypto from 'crypto';
 import sanitizeHtml from 'sanitize-html';
-import { createResponse, errorResponse, getCorsHeaders, validateEmail, hashIp, log } from './shared/utils.mjs';
+import { createResponse, errorResponse, getCorsHeaders, validateEmail, hashIp, log, escapeHtml } from './shared/utils.mjs';
 import { handleHealthCheck } from './shared/healthCheck.mjs';
 
 // Initialize AWS SDK clients
@@ -631,7 +631,7 @@ Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstu
 <body style="margin:0;padding:0;background-color:#ffffff;">
   <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
     <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">We got your message.</h2>
-    <p style="font-size:16px;margin-top:0;">Hi ${name},</p>
+    <p style="font-size:16px;margin-top:0;">Hi ${escapeHtml(name)},</p>
     <p style="font-size:16px;">We received your message. Someone from our team will follow up with you directly.</p>
     <p style="font-size:16px;">Thanks for reaching out.</p>
     <p style="font-size:16px;">— ur/gd Studios</p>
@@ -702,7 +702,7 @@ Privacy Policy: https://www.urgdstudios.com/privacy | Terms: https://www.urgdstu
 </head>
 <body style="margin:0;padding:0;background-color:#ffffff;">
   <div style="max-width:600px;margin:0 auto;padding:24px;color:#111827;font-family:'Rubik',sans-serif;">
-    <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">${appName}: ${categoryLabel}</h2>
+    <h2 style="color:#111827;margin-bottom:8px;font-family:'Archivo',sans-serif;">${escapeHtml(appName)}: ${escapeHtml(categoryLabel)}</h2>
     <p style="font-size:16px;margin-top:0;">A new submission has been received.</p>
     <p style="font-size:14px;color:#4b5563;margin-top:0;">Submitted: ${formattedDate}</p>
 
