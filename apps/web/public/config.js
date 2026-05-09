@@ -3,5 +3,5 @@ window.URGD_CONFIG = {
   apiBaseUrl: 'https://urgdstudios.com',
   betaSignupEnabled: true,
   betaSurveyEnabled: true,
-  betaPhase: 'survey'
+  betaPhase: 'concluded'
 };
