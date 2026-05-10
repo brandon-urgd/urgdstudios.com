@@ -1,0 +1,64 @@
+/* Pulse AuroraBackground — three drifting sage blobs + vignette.
+ * Custom properties --sage, --sage-glow, --sage-dim are inherited from
+ * the PulsePage scope (.page) and do not need redeclaration here.
+ */
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.45;
+  will-change: transform;
+  width: 60vw;
+  height: 60vw;
+  max-width: 800px;
+  max-height: 800px;
+}
+
+.blob1 {
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(circle, var(--sage-dim) 0%, transparent 70%);
+}
+
+.blob2 {
+  top: 30%;
+  right: -15%;
+  width: 50vw;
+  height: 50vw;
+  max-width: 700px;
+  max-height: 700px;
+  background: radial-gradient(circle, var(--sage) 0%, transparent 70%);
+}
+
+.blob3 {
+  bottom: -10%;
+  left: 30%;
+  width: 45vw;
+  height: 45vw;
+  max-width: 600px;
+  max-height: 600px;
+  background: radial-gradient(circle, var(--sage-glow) 0%, transparent 70%);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, #0a0a0a 75%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none !important;
+    transform: none !important;
+  }
+}

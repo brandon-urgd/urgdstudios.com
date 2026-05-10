@@ -1,0 +1,58 @@
+.ipadWrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.ipadGlow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 40px;
+  background: radial-gradient(ellipse, rgba(122, 158, 135, 0.15), transparent 70%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ipadFrame {
+  width: 340px;
+  height: 472px;
+  border-radius: 24px;
+  padding: 10px;
+  position: relative;
+  background: linear-gradient(145deg, rgba(240, 241, 243, 0.1), rgba(240, 241, 243, 0.03));
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(240, 241, 243, 0.06),
+    inset 0 1px 0 rgba(240, 241, 243, 0.1);
+}
+
+.ipadCamera {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(240, 241, 243, 0.08);
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ipadScreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1a1b1e;
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .ipadFrame {
+    width: 300px;
+    height: 416px;
+  }
+}

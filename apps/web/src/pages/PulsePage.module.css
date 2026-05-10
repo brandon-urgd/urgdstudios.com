@@ -1,6 +1,11 @@
-/* PulsePage — Pulse marketing / deck page
+/* PulsePage — Pulse marketing / product page (reimagined)
  * Standalone page (no Layout shell). Dark canvas with sage accent.
- * Converts pulse-deck-v2.html to CSS modules with design tokens.
+ * Framer Motion drives reveals and hero parallax; prefers-reduced-motion
+ * collapses everything to a static elegant composition.
+ *
+ * Page-local custom properties (--sage, --sage-glow, --sage-dim, --amber,
+ * --sky) are scoped here so sub-components in components/pulse/* can
+ * inherit them without depending on global token names.
  */
 
 /* ----------------------------------------------------------------
@@ -10,100 +15,135 @@
 .page {
   --sage: #7a9e87;
   --sage-glow: #a3c4af;
-  --sage-bright: #4ade80;
   --sage-dim: #4a6b54;
-  --sage-sub: rgba(122, 158, 135, 0.12);
-  --text: #f0f1f3;
-  --text-dim: rgba(240, 241, 243, 0.6);
-  --text-muted: rgba(240, 241, 243, 0.35);
-  --blue: #3a5a8c;
   --amber: #ffa94d;
   --sky: #74c0fc;
-  --surface: rgba(240, 241, 243, 0.04);
-  --surface-border: rgba(240, 241, 243, 0.08);
 
   position: relative;
   min-height: 100dvh;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: clamp(16px, 1.4vw, 22px);
   overflow-x: hidden;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  background-color: #0a0a0a;
 }
 
 /* ----------------------------------------------------------------
-   Background canvas — fixed with radial gradients + noise
+   Hero
    ---------------------------------------------------------------- */
 
-.bgCanvas {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse at 20% 40%, #0f1a15 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, #0d1218 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, #0e1510 0%, transparent 50%),
-    #0a0f14;
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #0a0a0a;
+  padding: 80px var(--width-content-padding) var(--width-content-padding);
 }
 
-.bgCanvas::after {
-  content: '';
-  position: fixed;
+.layer {
+  position: absolute;
   inset: 0;
-  pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-  background-size: 200px;
+  will-change: transform;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 800px;
+  gap: 1.25rem;
+}
+
+.iconWrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(122, 158, 135, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.iconWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tagline {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.2em;
+  color: var(--sage);
+  text-transform: uppercase;
+}
+
+.headline {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 4vw, 2.75rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-top: 1rem;
+  max-width: 600px;
+}
+
+.subhead {
+  font-family: var(--font-body);
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-top: 0.25rem;
+  max-width: 480px;
 }
 
 /* ----------------------------------------------------------------
-   Sections — shared layout
+   Sections (shared)
    ---------------------------------------------------------------- */
 
 .section {
   position: relative;
   z-index: 1;
+  padding: clamp(4rem, 10vh, 8rem) var(--width-content-padding);
+  max-width: var(--width-content-max);
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------
+   Two-column layout (Problem + iPhone mockup)
+   ---------------------------------------------------------------- */
+
+.twoCol {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 80px var(--space-2xl);
+  gap: 80px;
+  width: 100%;
+}
+
+.textCol {
+  flex: 1;
+  text-align: left;
+}
+
+.mockupCol {
+  flex: 0 0 auto;
 }
 
 /* ----------------------------------------------------------------
    Typography helpers
    ---------------------------------------------------------------- */
-
-.sectionTitle {
-  font-family: var(--font-heading);
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  text-align: center;
-  color: var(--text);
-}
-
-.sectionSub {
-  font-family: var(--font-body);
-  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-  color: var(--text-dim);
-  text-align: center;
-  margin-top: 10px;
-  max-width: 640px;
-  line-height: 1.65;
-}
-
-.subtitle {
-  font-family: var(--font-body);
-  font-size: clamp(1rem, 1.8vw, 1.3rem);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-dim);
-  text-align: center;
-  margin-top: var(--space-md);
-  letter-spacing: 0.02em;
-  max-width: 600px;
-  line-height: 1.6;
-}
 
 .accentGradient {
   background: linear-gradient(135deg, var(--sage), var(--sage-glow));
@@ -112,140 +152,25 @@
   background-clip: text;
 }
 
-/* ----------------------------------------------------------------
-   Scroll reveals
-   ---------------------------------------------------------------- */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal :global(.visible) {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Direct visible class on the reveal element itself */
-:global(.visible).reveal {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.d1:global(.visible) { transition-delay: 0.15s; }
-.d2:global(.visible) { transition-delay: 0.3s; }
-.d3:global(.visible) { transition-delay: 0.45s; }
-.d4:global(.visible) { transition-delay: 0.6s; }
-.d5:global(.visible) { transition-delay: 0.75s; }
-
-/* ----------------------------------------------------------------
-   Pulse line divider
-   ---------------------------------------------------------------- */
-
-.pulseDivider {
-  height: 1px;
-  width: 120px;
-  margin: 0 auto;
-  background: linear-gradient(90deg, transparent, var(--sage), transparent);
-  opacity: 0.2;
-}
-
-/* ----------------------------------------------------------------
-   Glass panel
-   ---------------------------------------------------------------- */
-
-.glass {
-  background: var(--surface);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-lg);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(240, 241, 243, 0.06);
-}
-
-/* ----------------------------------------------------------------
-   HERO
-   ---------------------------------------------------------------- */
-
-.hero {
-  min-height: 70vh;
-}
-
-.pulseIconWrap {
-  width: 120px;
-  height: 120px;
-  border-radius: 28px;
-  overflow: hidden;
-  box-shadow: 0 10px 50px rgba(122, 158, 135, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-lg);
-}
-
-.pulseIconWrap img {
-  border-radius: 28px;
-}
-
-.heroWordmark {
-  font-family: var(--font-body);
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: 0.02em;
-  text-align: center;
-  color: var(--sage);
-  text-shadow:
-    0 0 40px rgba(122, 158, 135, 0.3),
-    0 0 80px rgba(122, 158, 135, 0.1);
-}
-
-.heroLogo {
-  margin-top: 28px;
-}
-
-.heroLogo img {
-  height: 144px;
-  opacity: 0.85;
-}
-
-/* ----------------------------------------------------------------
-   PROBLEM + HOW IT WORKS — two-col layout
-   ---------------------------------------------------------------- */
-
-.twoCol {
-  display: flex;
-  align-items: center;
-  gap: 80px;
-  width: 100%;
-  max-width: 1200px;
-}
-
-.col {
-  flex: 1;
-}
-
-.colNarrow {
-  flex: 0 0 auto;
-  max-width: 380px;
-}
-
-.problemGlass {
-  padding: var(--space-3xl) var(--space-xl) var(--space-2xl);
-}
-
 .problemTitle {
-  text-align: left;
+  font-family: var(--font-heading);
   font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  text-align: left;
   margin-bottom: var(--space-lg);
 }
 
 .problemSub {
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  color: var(--color-text-secondary);
   text-align: left;
+  margin-top: 10px;
+  max-width: 480px;
+  line-height: 1.65;
 }
 
 .problemDivider {
@@ -257,66 +182,77 @@
 }
 
 .problemExplainer {
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+  color: var(--color-text-secondary);
   text-align: left;
   margin-top: var(--space-lg);
+  max-width: 480px;
+  line-height: 1.65;
 }
 
 /* ----------------------------------------------------------------
-   DEVICE FRAMES — Phone
+   Product section
    ---------------------------------------------------------------- */
 
-.deviceWrap {
-  position: relative;
-  display: flex;
-  justify-content: center;
+.productTitle {
+  font-family: var(--font-heading);
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xl);
 }
 
-.deviceGlow {
-  position: absolute;
-  inset: -20px;
-  border-radius: 50px;
-  background: radial-gradient(ellipse, rgba(122, 158, 135, 0.15), transparent 70%);
-  opacity: 0.4;
-}
-
-.deviceFrame {
-  width: 280px;
-  height: 560px;
-  border-radius: 40px;
-  padding: 10px;
-  position: relative;
-  background: linear-gradient(145deg, rgba(240, 241, 243, 0.1), rgba(240, 241, 243, 0.03));
-  box-shadow:
-    0 25px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(240, 241, 243, 0.06),
-    inset 0 1px 0 rgba(240, 241, 243, 0.1);
-}
-
-.deviceScreen {
+.diffList {
+  list-style: none;
+  margin: var(--space-xl) auto 0;
+  max-width: 640px;
   width: 100%;
-  height: 100%;
-  border-radius: 32px;
-  overflow: hidden;
-  background: linear-gradient(180deg, #0c1018 0%, #0e1318 100%);
+  text-align: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0;
+}
+
+.diffList li {
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  padding: var(--space-xs) 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+}
+
+.diffList li::before {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  box-shadow: 0 0 8px rgba(122, 158, 135, 0.4);
   position: relative;
-  text-align: left;
+  top: 1px;
 }
 
-.deviceNotch {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 26px;
-  background: #080c12;
-  border-radius: 13px;
-  z-index: 2;
+.pulseDivider {
+  height: 1px;
+  width: 120px;
+  margin: var(--space-3xl) auto;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+  opacity: 0.2;
 }
 
-/* Screen top bar */
+/* ----------------------------------------------------------------
+   Phone (iPhone) mockup content
+   ---------------------------------------------------------------- */
+
 .scrNav {
   height: 40px;
   display: flex;
@@ -337,14 +273,14 @@
 
 .scrNavMeta {
   font-size: 8px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
-/* Progress bar */
 .progressBar {
   height: 3px;
   background: rgba(255, 255, 255, 0.04);
   margin: 0 14px;
+  flex-shrink: 0;
 }
 
 .progressFill {
@@ -354,17 +290,6 @@
   border-radius: 2px;
 }
 
-/* Chat area */
-.chatArea {
-  padding: 10px 12px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
-}
-
-/* Chat auto-scroll */
 .chatScrollContainer {
   flex: 1;
   overflow: hidden;
@@ -400,18 +325,6 @@
   gap: 6px;
 }
 
-:global(.visible) .chatScrollContent {
-  animation: chatScroll 24s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-@keyframes chatScroll {
-  0%, 20% { transform: translateY(0); }
-  50%, 60% { transform: translateY(-45%); }
-  90%, 100% { transform: translateY(0); }
-}
-
-/* Chat bubbles */
 .cb {
   max-width: 82%;
   padding: 6px 9px;
@@ -438,13 +351,13 @@
   justify-content: flex-end;
 }
 
-/* Input bar */
 .inputBar {
   padding: 8px 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .inputField {
@@ -454,7 +367,7 @@
   border-radius: 20px;
   padding: 8px 12px;
   font-size: 9px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .inputSend {
@@ -466,121 +379,8 @@
 }
 
 /* ----------------------------------------------------------------
-   PRODUCT SECTION
+   iPad Pulse Check content
    ---------------------------------------------------------------- */
-
-.productSection {
-  padding: var(--space-3xl) var(--space-2xl);
-}
-
-.productTitle {
-  font-size: clamp(1.3rem, 2.5vw, 2rem);
-}
-
-/* Feature differentiators list */
-.diffList {
-  list-style: none;
-  margin: var(--space-xl) auto 0;
-  max-width: 640px;
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.diffList li {
-  font-family: var(--font-body);
-  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
-  color: var(--text-dim);
-  line-height: 1.65;
-  padding: var(--space-xs) 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-md);
-}
-
-.diffList li::before {
-  content: '';
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--sage);
-  box-shadow: 0 0 8px rgba(122, 158, 135, 0.4);
-  position: relative;
-  top: 1px;
-}
-
-.productDivider {
-  margin: var(--space-3xl) auto;
-}
-
-/* Privacy line */
-.privacyLine {
-  font-family: var(--font-body);
-  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-  color: var(--text-muted);
-  line-height: 1.65;
-  text-align: center;
-  max-width: 700px;
-  margin-top: var(--space-2xl);
-}
-
-/* ----------------------------------------------------------------
-   DEVICE FRAMES — iPad
-   ---------------------------------------------------------------- */
-
-.ipadWrap {
-  display: flex;
-  justify-content: center;
-  position: relative;
-}
-
-.ipadGlow {
-  position: absolute;
-  inset: -20px;
-  border-radius: 40px;
-  background: radial-gradient(ellipse, rgba(122, 158, 135, 0.15), transparent 70%);
-  opacity: 0.4;
-}
-
-.ipadFrame {
-  width: 340px;
-  height: 472px;
-  border-radius: 24px;
-  padding: 10px;
-  position: relative;
-  background: linear-gradient(145deg, rgba(240, 241, 243, 0.1), rgba(240, 241, 243, 0.03));
-  box-shadow:
-    0 25px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(240, 241, 243, 0.06),
-    inset 0 1px 0 rgba(240, 241, 243, 0.1);
-}
-
-.ipadCamera {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(240, 241, 243, 0.08);
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.ipadScreen {
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #1a1b1e;
-  display: flex;
-  flex-direction: column;
-  font-size: 10px;
-  color: var(--text);
-  text-align: left;
-}
 
 .ipadTopBar {
   height: 32px;
@@ -605,10 +405,6 @@
   color: #6c757d;
   margin-left: auto;
 }
-
-/* ----------------------------------------------------------------
-   Pulse Check auto-scroll
-   ---------------------------------------------------------------- */
 
 .pcScrollContainer {
   flex: 1;
@@ -642,22 +438,13 @@
   padding: 12px 16px;
 }
 
-/* Only animate when the parent has been revealed */
-:global(.visible) .pcScrollContent {
-  animation: pcScroll 28s ease-in-out infinite;
-  animation-delay: 2s;
+.pcSectionsBlock {
+  margin-bottom: 10px;
 }
 
-@keyframes pcScroll {
-  0%, 20% { transform: translateY(0); }
-  50%, 60% { transform: translateY(-55%); }
-  90%, 100% { transform: translateY(0); }
-}
-
-/* Verdict block */
 .verdict {
   border-left: 3px solid var(--sage);
-  background: var(--sage-sub);
+  background: rgba(122, 158, 135, 0.08);
   border-radius: 0 8px 8px 0;
   padding: 10px 12px;
   margin-bottom: 10px;
@@ -676,11 +463,12 @@
   font-weight: 700;
   margin-top: 3px;
   line-height: 1.35;
+  color: var(--color-text-primary);
 }
 
 .verdictBody {
   font-size: 8.5px;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin-top: 6px;
 }
@@ -694,7 +482,7 @@
 
 .verdictEnergyLabel {
   font-size: 7.5px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .verdictEnergyBadge {
@@ -708,23 +496,22 @@
 
 .verdictMeta {
   font-size: 7.5px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   margin-top: 4px;
 }
 
-/* Section coverage */
 .pcSectionLabel {
   font-size: 7px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
   font-weight: 700;
   margin-bottom: 4px;
 }
 
 .pcSectionDesc {
   font-size: 8px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   margin-bottom: 6px;
 }
 
@@ -745,32 +532,31 @@
 
 .pcSectionRowName {
   font-size: 8.5px;
+  color: var(--color-text-primary);
 }
 
 .pcSectionRowDepth {
   font-size: 7px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .pcCheck {
   color: var(--sage);
 }
 
-/* Divider inside Pulse Check */
 .pcDivider {
   height: 1px;
   background: rgba(255, 255, 255, 0.06);
   margin: 8px 0;
 }
 
-/* What Surfaced heading */
 .pcSurfacedTitle {
   font-size: 11px;
   font-weight: 700;
   margin-bottom: 8px;
+  color: var(--color-text-primary);
 }
 
-/* Signal items */
 .signalItem {
   margin-bottom: 8px;
 }
@@ -807,6 +593,7 @@
 .signalName {
   font-size: 9px;
   font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .signalQuote {
@@ -815,7 +602,7 @@
   padding: 6px 8px;
   font-size: 8px;
   font-style: italic;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
@@ -833,16 +620,16 @@
   margin-top: 3px;
 }
 
-/* Proposed Revisions */
 .pcRevisionsTitle {
   font-size: 11px;
   font-weight: 700;
   margin-bottom: 3px;
+  color: var(--color-text-primary);
 }
 
 .pcRevisionsDesc {
   font-size: 7.5px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   margin-bottom: 6px;
 }
 
@@ -850,7 +637,7 @@
   font-size: 7px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
   font-weight: 700;
   margin-bottom: 4px;
 }
@@ -867,17 +654,18 @@
   font-weight: 500;
   line-height: 1.45;
   margin-bottom: 4px;
+  color: var(--color-text-primary);
 }
 
 .revisionCardMeta {
   font-size: 7px;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   margin-bottom: 4px;
 }
 
 .revisionCardBody {
   font-size: 7.5px;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
   line-height: 1.45;
   margin-bottom: 5px;
 }
@@ -901,15 +689,30 @@
   padding: 2px 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  color: var(--text-dim);
+  color: var(--color-text-secondary);
 }
 
 /* ----------------------------------------------------------------
-   CTA SECTION
+   Privacy line
+   ---------------------------------------------------------------- */
+
+.privacyLine {
+  font-family: var(--font-body);
+  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+  color: var(--color-text-tertiary);
+  line-height: 1.65;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ----------------------------------------------------------------
+   CTA
    ---------------------------------------------------------------- */
 
 .cta {
-  min-height: 100vh;
+  min-height: auto;
+  padding-bottom: var(--space-4xl);
 }
 
 .ctaHeading {
@@ -918,7 +721,7 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;
   text-align: center;
-  color: var(--text);
+  color: var(--color-text-primary);
   line-height: 1.15;
 }
 
@@ -928,6 +731,15 @@
   letter-spacing: 0.02em;
   color: var(--sage);
   text-shadow: 0 0 30px rgba(122, 158, 135, 0.3);
+}
+
+.ctaSub {
+  font-family: var(--font-body);
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: var(--space-md) auto 0;
+  max-width: 480px;
 }
 
 .ctaBtnWrap {
@@ -944,19 +756,19 @@
   border: none;
   cursor: pointer;
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #0a0f14;
+  font-weight: var(--font-weight-bold);
+  color: #0a0a0a;
   background: linear-gradient(135deg, var(--sage), var(--sage-glow));
   box-shadow: 0 8px 30px rgba(122, 158, 135, 0.3);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;
 }
 
 .ctaBtn:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 12px 40px rgba(122, 158, 135, 0.5);
+  text-decoration: none;
+  color: #0a0a0a;
 }
 
 .ctaBtn:focus-visible {
@@ -965,16 +777,16 @@
 }
 
 /* ----------------------------------------------------------------
-   FOOTER
+   Footer
    ---------------------------------------------------------------- */
 
 .footer {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: var(--space-3xl) var(--space-2xl) var(--space-xl);
+  padding: var(--space-3xl) var(--width-content-padding) var(--space-xl);
   font-family: var(--font-body);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   font-size: 12px;
 }
 
@@ -991,7 +803,7 @@
 }
 
 .footerStudioLink {
-  color: #818cf8;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -1000,7 +812,7 @@
 }
 
 .footerLegal a {
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   text-decoration: none;
 }
 
@@ -1013,55 +825,31 @@
    ---------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    transition-duration: 0.15s !important;
-  }
-
-  .pcScrollContent {
-    animation: none !important;
-  }
-
-  .chatScrollContent {
-    animation: none !important;
-  }
-
   .ctaBtn:hover {
     transform: none;
   }
 }
 
 /* ----------------------------------------------------------------
-   Responsive — 768px and below
+   Responsive
    ---------------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  .section {
-    padding: 60px var(--space-lg);
-  }
-
   .twoCol {
     flex-direction: column;
-    gap: 30px;
+    gap: 40px;
   }
 
-  .col {
+  .textCol {
     text-align: center;
-  }
-
-  .colNarrow {
-    max-width: 100%;
   }
 
   .problemTitle,
   .problemSub,
   .problemExplainer {
-    text-align: center !important;
-  }
-
-  .problemGlass {
-    padding: var(--space-lg) !important;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .diffList {
@@ -1072,8 +860,18 @@
     justify-content: center;
   }
 
-  .ipadWrap {
-    width: 100%;
-    max-width: 340px;
+  .section {
+    padding: var(--space-2xl) var(--width-content-padding);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 80px 1rem 2rem;
+  }
+
+  .iconWrap {
+    width: 64px;
+    height: 64px;
   }
 }

@@ -1,0 +1,37 @@
+.wordmark {
+  position: relative;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  display: inline-flex;
+  perspective: 600px;
+  overflow: visible;
+  margin: 0;
+}
+
+.letter {
+  display: inline-block;
+  transform-style: preserve-3d;
+}
+
+.glowSweep {
+  position: absolute;
+  top: 50%;
+  left: -5%;
+  width: 110%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--sage-glow) 30%,
+    var(--sage) 50%,
+    var(--sage-glow) 70%,
+    transparent 100%
+  );
+  transform-origin: left center;
+  filter: blur(1px);
+  opacity: 0.6;
+}

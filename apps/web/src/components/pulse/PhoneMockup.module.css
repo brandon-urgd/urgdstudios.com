@@ -1,0 +1,58 @@
+.deviceWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.deviceGlow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50px;
+  background: radial-gradient(ellipse, rgba(122, 158, 135, 0.15), transparent 70%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.deviceFrame {
+  width: 280px;
+  height: 560px;
+  border-radius: 40px;
+  padding: 10px;
+  position: relative;
+  background: linear-gradient(145deg, rgba(240, 241, 243, 0.1), rgba(240, 241, 243, 0.03));
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(240, 241, 243, 0.06),
+    inset 0 1px 0 rgba(240, 241, 243, 0.1);
+}
+
+.deviceScreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 32px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0c1018 0%, #0e1318 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-align: left;
+}
+
+.deviceNotch {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 26px;
+  background: #080c12;
+  border-radius: 13px;
+  z-index: 2;
+}
+
+@media (max-width: 480px) {
+  .deviceFrame {
+    width: 260px;
+    height: 520px;
+  }
+}

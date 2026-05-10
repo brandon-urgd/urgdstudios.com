@@ -1,0 +1,33 @@
+.container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid;
+  width: 20vw;
+  height: 20vw;
+  will-change: transform, opacity;
+}
+
+.ringDim {
+  border-color: var(--sage-dim);
+}
+
+.ringBright {
+  border-color: var(--sage);
+}
+
+.ringStatic {
+  width: 28vw;
+  height: 28vw;
+  opacity: 0.12;
+  border-color: var(--sage-dim);
+}
