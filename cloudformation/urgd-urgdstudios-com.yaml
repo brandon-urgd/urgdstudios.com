@@ -168,7 +168,9 @@ Resources:
             Resource: !Sub '${AccessLogsBucket.Arn}/s3/*'
             Condition:
               ArnLike:
-                'aws:SourceArn': !GetAtt SiteBucket.Arn
+                'aws:SourceArn':
+                  - !GetAtt SiteBucket.Arn
+                  - !GetAtt ColdStorageBucket.Arn
               StringEquals:
                 'aws:SourceAccount': !Ref 'AWS::AccountId'
           - Sid: AllowCloudFrontLogging
@@ -180,6 +182,48 @@ Resources:
             Condition:
               StringEquals:
                 'aws:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}'
+
+  # ========================================
+  # S3 Cold Storage Bucket
+  # ========================================
+  ColdStorageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'urgd-urgdstudios-com-coldstorage-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogsBucket
+        LogFilePrefix: 's3/coldstorage/'
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionAndExpire
+            Status: Enabled
+            ExpirationInDays: 90
+            Transitions:
+              - StorageClass: INTELLIGENT_TIERING
+                TransitionInDays: 30
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: urgdstudios-com
+        - Key: Owner
+          Value: ur/gd Studios
+        - Key: Purpose
+          Value: cold-storage
 
   # ========================================
   # Origin Access Control (OAC) - Import-ready
