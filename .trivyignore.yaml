@@ -1,0 +1,16 @@
+# Trivy ignore file (YAML format — supports path-based suppression)
+# https://trivy.dev/latest/docs/configuration/filtering/#by-finding-ids
+
+vulnerabilities:
+  # scripts/beta-email/ is a local-only utility — gitignored, never deployed.
+  # Suppresses transitive vulns in dev-only XML tooling that won't reach prod.
+  - paths:
+      - "scripts/beta-email/**"
+
+misconfigurations:
+  - paths:
+      - "scripts/beta-email/**"
+
+secrets:
+  - paths:
+      - "scripts/beta-email/**"
