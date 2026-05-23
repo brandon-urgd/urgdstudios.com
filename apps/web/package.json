@@ -27,5 +27,8 @@
     "sharp": "^0.34.5",
     "typescript": "^5.7.2",
     "vite": "^6.0.3"
+  },
+  "overrides": {
+    "js-cookie": "^3.0.7"
   }
 }
