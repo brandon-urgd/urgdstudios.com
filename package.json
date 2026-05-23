@@ -1,6 +1,6 @@
 {
   "name": "urgdstudios-com",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,5 +12,8 @@
     "js-yaml": "^4.1.0",
     "sanitize-html": "^2.17.2",
     "vitest": "^3.2.1"
+  },
+  "overrides": {
+    "js-cookie": "^3.0.7"
   }
 }

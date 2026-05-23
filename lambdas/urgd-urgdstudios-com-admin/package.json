@@ -1,6 +1,6 @@
 {
   "name": "urgd-urgdstudios-com-admin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command Center admin API for urgdstudios.com \u2014 message triage, status updates, reply-via-email",
   "type": "module",
   "main": "index.mjs",

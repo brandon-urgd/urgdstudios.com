@@ -102,6 +102,14 @@ All routes are pre-rendered to static HTML at build time. React hydrates on the 
 
 ## Version History
 
+### v1.0.2 — 22MAY2026
+
+Security patch — dependency vulnerabilities.
+
+- Fixed `sanitize-html` ≤2.17.3 XSS via `xmp` raw-text passthrough (GHSA-rpr9-rxv7-x643, CVSS 9.3)
+- Fixed `js-cookie` ≤3.0.5 prototype hijack (GHSA-qjx8-664m-686j) via npm override
+- Aligned `scripts/beta-email` version (was 1.0.0, now synced)
+
 ### v1.0.1 — 30APR2026
 
 Security/dependency updates.
