@@ -102,6 +102,13 @@ All routes are pre-rendered to static HTML at build time. React hydrates on the 
 
 ## Version History
 
+### v1.0.3 — 10JUN2026
+
+Security patches.
+
+- Fixed vitest 3.2.1 → 3.2.6 (CRITICAL CVSS 9.8 — UI server arbitrary file read+exec, GHSA-5xrq-8626-4rwp)
+- Fixed react-router 7.13.0 in apps/web → 7.15.0 (6 CVEs: RCE, XSS, DoS, open redirect)
+
 ### v1.0.2 — 22MAY2026
 
 Security patch — dependency vulnerabilities.

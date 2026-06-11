@@ -3,9 +3,9 @@ Description: 'ur/gd urgdstudios.com - Corporate website static site infrastructu
 
 Metadata:
   urgd:
-    version: '1.0.2'
+    version: '1.0.3'
     environment: 'prod'
-    lastUpdated: '2026-02-20'
+    lastUpdated: '2026-06-10'
     owner: 'ur/gd Studios'
     securityLevel: 'high'
 
@@ -748,7 +748,7 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '1.0.2'
+          VERSION: '1.0.3'
           POW_DIFFICULTY: !Ref PowDifficulty
           COMMAND_CENTER_AUTO_RESPONSE: !Ref CommandCenterAutoResponse
           IP_HASH_SALT: !Sub 'urgd-${AWS::AccountId}-${Environment}'
@@ -1293,7 +1293,7 @@ Resources:
           CORS_ALLOWED_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS'
           CORS_ALLOWED_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           ENVIRONMENT: !Ref Environment
-          VERSION: '1.0.2'
+          VERSION: '1.0.3'
           COMMAND_CENTER_REPLY: !Ref CommandCenterReply
           SES_FROM_ADDRESS: 'command@urgdstudios.com'
           SES_FROM_DISPLAY_NAME: 'ur/gd Command'
